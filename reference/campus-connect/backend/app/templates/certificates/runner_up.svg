@@ -1,0 +1,16 @@
+{% extends "_base.svg" %}
+
+{% block accent %}#546274{% endblock %}
+{% block accent_soft %}#c6cfda{% endblock %}
+{% block wash %}#fafbfd{% endblock %}
+
+{% block award_title %}OF ACHIEVEMENT{% endblock %}
+{% block lead_line %}has been declared the Runner-Up of{% endblock %}
+{% block closing_line %}and has demonstrated exceptional skill, effort and sportsmanship.{% endblock %}
+
+{% block seal_mark %}
+  <text x="421" y="509" text-anchor="middle" font-family="{{ serif }}" font-size="24"
+        font-weight="bold" fill="{{ wash }}">2</text>
+  <text x="421" y="490" text-anchor="middle" font-family="{{ sans }}" font-size="7"
+        letter-spacing="1" fill="{{ wash }}">SECOND</text>
+{% endblock %}

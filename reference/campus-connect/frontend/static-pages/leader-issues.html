@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Issues : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Leader</p>
+    <nav class="sidebar-menu">
+      <a href="leader-club.html" class="sidebar-item"><i data-lucide="layout-dashboard"></i> My Club</a>
+      <a href="members.html" class="sidebar-item"><i data-lucide="users-round"></i> Members</a>
+      <a href="leader-events.html" class="sidebar-item"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="leader-announcements.html" class="sidebar-item"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leader-issues.html" class="sidebar-item active leader"><i data-lucide="triangle-alert"></i> Issues</a>
+      <a href="clubs-new.html" class="sidebar-item"><i data-lucide="plus-circle"></i> Create Club</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="#" class="user-card">
+      <div class="user-avatar leader-av">AY</div>
+      <div class="user-info">
+        <p class="user-name">Aayansh Yadav</p>
+        <p class="user-sub">Leader &middot; Robotics Club</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">Issues</h1>
+        <p class="page-sub">Member concerns raised to Robotics &amp; Automation Club</p>
+      </div>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card pink-stat">
+          <div class="stat-header">
+            <div class="stat-icon"><i data-lucide="circle-dot"></i></div>
+          </div>
+          <p class="stat-num" id="open-count">2</p>
+          <p class="stat-label">Open</p>
+        </div>
+        <div class="stat-card blue-stat">
+          <div class="stat-header">
+            <div class="stat-icon"><i data-lucide="loader"></i></div>
+          </div>
+          <p class="stat-num">1</p>
+          <p class="stat-label">In Progress</p>
+        </div>
+        <div class="stat-card green-stat">
+          <div class="stat-header">
+            <div class="stat-icon"><i data-lucide="check-circle-2"></i></div>
+          </div>
+          <p class="stat-num">3</p>
+          <p class="stat-label">Resolved</p>
+        </div>
+      </div>
+
+      <!-- Filter -->
+      <div class="filter-chips-row">
+        <button class="filter-chip active" onclick="selectChip(this, 'all')">All</button>
+        <button class="filter-chip" onclick="selectChip(this, 'open')">Open</button>
+        <button class="filter-chip" onclick="selectChip(this, 'in-progress')">In Progress</button>
+        <button class="filter-chip" onclick="selectChip(this, 'resolved')">Resolved</button>
+      </div>
+
+      <!-- Issue feed -->
+      <div id="issue-feed">
+
+        <!-- Issue 1: Open, no reply yet -->
+        <div class="issue-card" id="issue-1" data-status="open">
+          <div class="issue-top">
+            <p class="issue-title">Registration ID not received after signing up for Open Mic Night</p>
+            <span class="status-pill open">Open</span>
+          </div>
+          <p class="issue-meta">
+            <strong>Shikha Singh</strong> &middot; Music Collective &middot; Event &middot; Raised 2 days ago
+          </p>
+          <p class="issue-desc">
+            I registered for Open Mic Night on 8 July but never received a confirmation email with my Registration ID. The registration page showed success but I have no record of the ID. I need it to enter the event.
+          </p>
+          <div class="issue-footer">
+            <span class="announce-tag">Event</span>
+            <span class="announce-tag">Registration</span>
+          </div>
+          <div class="issue-action-row">
+            <button class="btn-secondary" onclick="openReply(1)">
+              <i data-lucide="message-square"></i> Reply
+            </button>
+            <button class="btn-success" onclick="resolveIssue(1)">
+              <i data-lucide="check"></i> Mark Resolved
+            </button>
+          </div>
+          <div class="issue-reply-area hidden" id="reply-area-1">
+            <textarea class="textarea-field" id="reply-text-1" rows="3" placeholder="Type your response to the member..."></textarea>
+            <div class="issue-action-row">
+              <button class="btn-primary" onclick="submitReply(1)">
+                <i data-lucide="send"></i> Send Reply
+              </button>
+              <button class="btn-secondary" onclick="closeReply(1)">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issue 2: In Progress, leader has already responded -->
+        <div class="issue-card" id="issue-2" data-status="in-progress">
+          <div class="issue-top">
+            <p class="issue-title">Event date conflict between Arduino Workshop and CS Lab mid-semester exam</p>
+            <span class="status-pill in-progress">In Progress</span>
+          </div>
+          <p class="issue-meta">
+            <strong>Shikha Singh</strong> &middot; Robotics &amp; Automation Club &middot; Event &middot; Raised 5 days ago
+          </p>
+          <p class="issue-desc">
+            The Introduction to Arduino workshop on 28 July clashes with our department's mid-semester practical exam for CS3401. Many first-year CS students will not be able to attend. Could the date be moved or an alternate slot be offered?
+          </p>
+          <div class="issue-response">
+            <p class="issue-response-label">
+              <i data-lucide="check-circle-2"></i>
+              Your response &middot; Aayansh Yadav
+            </p>
+            <p class="issue-response-text">Thanks for flagging this. I have contacted the department office to confirm the practical schedule. We will announce a revised date by 14 July. Your attendance will not be marked if the exam clashes.</p>
+          </div>
+          <div class="issue-footer">
+            <span class="announce-tag">Event</span>
+            <span class="announce-tag">Scheduling</span>
+          </div>
+          <div class="issue-action-row">
+            <button class="btn-secondary" onclick="openReply(2)">
+              <i data-lucide="message-square"></i> Follow Up
+            </button>
+            <button class="btn-success" onclick="resolveIssue(2)">
+              <i data-lucide="check"></i> Mark Resolved
+            </button>
+          </div>
+          <div class="issue-reply-area hidden" id="reply-area-2">
+            <textarea class="textarea-field" id="reply-text-2" rows="3" placeholder="Type a follow-up message..."></textarea>
+            <div class="issue-action-row">
+              <button class="btn-primary" onclick="submitReply(2)">
+                <i data-lucide="send"></i> Send Reply
+              </button>
+              <button class="btn-secondary" onclick="closeReply(2)">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issue 3: Open -->
+        <div class="issue-card" id="issue-3" data-status="open">
+          <div class="issue-top">
+            <p class="issue-title">Club WhatsApp group link is expired, cannot join the community</p>
+            <span class="status-pill open">Open</span>
+          </div>
+          <p class="issue-meta">
+            <strong>Riya Verma</strong> &middot; Robotics &amp; Automation Club &middot; General &middot; Raised 1 day ago
+          </p>
+          <p class="issue-desc">
+            I recently got approved as a club member but the WhatsApp group link shared in the welcome email has expired. I cannot join the group where meeting updates are shared. Please send a fresh invite link or add me manually.
+          </p>
+          <div class="issue-footer">
+            <span class="announce-tag">Club</span>
+            <span class="announce-tag">Communication</span>
+          </div>
+          <div class="issue-action-row">
+            <button class="btn-secondary" onclick="openReply(3)">
+              <i data-lucide="message-square"></i> Reply
+            </button>
+            <button class="btn-success" onclick="resolveIssue(3)">
+              <i data-lucide="check"></i> Mark Resolved
+            </button>
+          </div>
+          <div class="issue-reply-area hidden" id="reply-area-3">
+            <textarea class="textarea-field" id="reply-text-3" rows="3" placeholder="Type your response to the member..."></textarea>
+            <div class="issue-action-row">
+              <button class="btn-primary" onclick="submitReply(3)">
+                <i data-lucide="send"></i> Send Reply
+              </button>
+              <button class="btn-secondary" onclick="closeReply(3)">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issue 4: Resolved -->
+        <div class="issue-card resolved" id="issue-4" data-status="resolved">
+          <div class="issue-top">
+            <p class="issue-title">Cannot find meeting minutes from June club general body session</p>
+            <span class="status-pill resolved">Resolved</span>
+          </div>
+          <p class="issue-meta">
+            <strong>Dhruv Malhotra</strong> &middot; Robotics &amp; Automation Club &middot; Club &middot; Raised 12 days ago
+          </p>
+          <p class="issue-desc">
+            The minutes from the June 18 general body meeting were supposed to be shared on the club page but I cannot find them. I need them for the project proposal I am submitting.
+          </p>
+          <div class="issue-response">
+            <p class="issue-response-label">
+              <i data-lucide="check-circle-2"></i>
+              Your response &middot; Aayansh Yadav
+            </p>
+            <p class="issue-response-text">Sorry for the delay. Minutes have been uploaded to the club page under Documents. I have also emailed the PDF to all members. Issue closed.</p>
+          </div>
+          <div class="issue-footer">
+            <span class="announce-tag">Club</span>
+            <span class="announce-tag">Documents</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="empty-state hidden" id="empty-state">
+        <i data-lucide="inbox"></i>
+        <p>No issues match this filter.</p>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    var activeFilter = 'all';
+
+    function selectChip(clickedChip, filter) {
+      activeFilter = filter;
+      var allChips = document.querySelectorAll('.filter-chip');
+      for (var i = 0; i < allChips.length; i++) {
+        allChips[i].classList.remove('active');
+      }
+      clickedChip.classList.add('active');
+      applyFilter();
+    }
+
+    function applyFilter() {
+      var cards = document.querySelectorAll('.issue-card');
+      var visible = 0;
+
+      for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        var status = card.getAttribute('data-status');
+        var show = (activeFilter === 'all' || status === activeFilter);
+
+        if (show) {
+          card.classList.remove('hidden');
+          visible++;
+        } else {
+          card.classList.add('hidden');
+        }
+      }
+
+      var emptyState = document.getElementById('empty-state');
+      if (visible === 0) {
+        emptyState.classList.remove('hidden');
+        lucide.createIcons();
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+
+    function openReply(id) {
+      var area = document.getElementById('reply-area-' + id);
+      area.classList.remove('hidden');
+    }
+
+    function closeReply(id) {
+      var area = document.getElementById('reply-area-' + id);
+      area.classList.add('hidden');
+      document.getElementById('reply-text-' + id).value = '';
+    }
+
+    function submitReply(id) {
+      var text = document.getElementById('reply-text-' + id).value.trim();
+      if (!text) {
+        alert('Please type a reply before sending.');
+        return;
+      }
+
+      var card = document.getElementById('issue-' + id);
+      var statusPill = card.querySelector('.status-pill');
+      var existing = card.querySelector('.issue-response');
+
+      var responseHtml = '<div class="issue-response"><p class="issue-response-label"><i data-lucide="check-circle-2"></i> Your response &middot; Aayansh Yadav</p><p class="issue-response-text">' + text + '</p></div>';
+
+      if (existing) {
+        existing.outerHTML = responseHtml;
+      } else {
+        var footer = card.querySelector('.issue-footer');
+        footer.insertAdjacentHTML('beforebegin', responseHtml);
+      }
+
+      card.setAttribute('data-status', 'in-progress');
+      statusPill.textContent = 'In Progress';
+      statusPill.className = 'status-pill in-progress';
+
+      closeReply(id);
+      lucide.createIcons();
+    }
+
+    function resolveIssue(id) {
+      var card = document.getElementById('issue-' + id);
+      var statusPill = card.querySelector('.status-pill');
+
+      card.setAttribute('data-status', 'resolved');
+      card.classList.add('resolved');
+      statusPill.textContent = 'Resolved';
+      statusPill.className = 'status-pill resolved';
+
+      var actionRow = card.querySelector('.issue-action-row');
+      if (actionRow) { actionRow.remove(); }
+
+      var replyArea = card.querySelector('.issue-reply-area');
+      if (replyArea) { replyArea.remove(); }
+
+      var openCount = document.getElementById('open-count');
+      var current = parseInt(openCount.textContent, 10);
+      if (current > 0) { openCount.textContent = current - 1; }
+    }
+  </script>
+
+</body>
+</html>

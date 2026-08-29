@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clubs : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark">
+        <i data-lucide="graduation-cap"></i>
+      </div>
+      <span class="brand">Campus Connect</span>
+    </div>
+
+    <p class="nav-label">Menu</p>
+
+    <nav class="sidebar-menu">
+      <a href="clubs.html" class="sidebar-item active student">
+        <i data-lucide="compass"></i> Clubs
+      </a>
+      <a href="events.html" class="sidebar-item">
+        <i data-lucide="calendar-days"></i> Events
+      </a>
+      <a href="announcements.html" class="sidebar-item">
+        <i data-lucide="megaphone"></i> Announcements
+      </a>
+      <a href="leaderboard.html" class="sidebar-item">
+        <i data-lucide="trophy"></i> Leaderboard
+      </a>
+      <a href="find-clubs.html" class="sidebar-item">
+        <i data-lucide="sparkles"></i> AI Finder
+      </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <a href="profile.html" class="user-card">
+      <div class="user-avatar student-av">SK</div>
+      <div class="user-info">
+        <p class="user-name">Shikha Singh</p>
+        <p class="user-sub">CS · 1st Year</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">Discover Clubs</h1>
+        <p class="page-sub">9 active clubs at your college</p>
+      </div>
+
+      <div class="topbar-spacer"></div>
+
+      <div class="bell-btn" onclick="alert('No new notifications.')">
+        <i data-lucide="bell"></i>
+      </div>
+    </header>
+
+    <main class="content-body clubs-content custom-scrollbar">
+
+      <!-- Section 1: Recommended for You -->
+      <div>
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">Recommended for You</h2>
+        </div>
+        <div class="clubs-grid">
+
+          <div class="club-card" onclick="location.href='clubs-profile.html'">
+            <div class="club-card-banner banner-orange">
+              <div class="club-card-circle-1"></div>
+              <div class="club-card-circle-2"></div>
+              <div class="club-card-circle-3"></div>
+              <div class="club-card-recommended-badge">
+                <i data-lucide="sparkles"></i> Recommended
+              </div>
+            </div>
+            <div class="club-card-content">
+              <div>
+                <div class="club-card-header">
+                  <span class="club-card-title">Robotics & Automation Club</span>
+                  <span class="club-card-members"><i data-lucide="users"></i> 84</span>
+                </div>
+                <p class="club-card-desc">Build real robots, compete in national-level challenges, and work on automation projects with peers.</p>
+              </div>
+              <div class="club-card-tags">
+                <span class="club-card-tag">Robotics</span>
+                <span class="club-card-tag">IoT</span>
+                <span class="club-card-tag">Tech</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="club-card" onclick="location.href='clubs-profile.html'">
+            <div class="club-card-banner banner-green">
+              <div class="club-card-circle-1"></div>
+              <div class="club-card-circle-2"></div>
+              <div class="club-card-circle-3"></div>
+              <div class="club-card-recommended-badge">
+                <i data-lucide="sparkles"></i> Recommended
+              </div>
+            </div>
+            <div class="club-card-content">
+              <div>
+                <div class="club-card-header">
+                  <span class="club-card-title">Coding Society</span>
+                  <span class="club-card-members"><i data-lucide="users"></i> 203</span>
+                </div>
+                <p class="club-card-desc">Hackathons, competitive programming contests, and open-source contribution drives every semester.</p>
+              </div>
+              <div class="club-card-tags">
+                <span class="club-card-tag">Coding</span>
+                <span class="club-card-tag">Open Source</span>
+                <span class="club-card-tag">Tech</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="club-card" onclick="location.href='clubs-profile.html'">
+            <div class="club-card-banner banner-mint">
+              <div class="club-card-circle-1"></div>
+              <div class="club-card-circle-2"></div>
+              <div class="club-card-circle-3"></div>
+              <div class="club-card-recommended-badge">
+                <i data-lucide="sparkles"></i> Recommended
+              </div>
+            </div>
+            <div class="club-card-content">
+              <div>
+                <div class="club-card-header">
+                  <span class="club-card-title">Entrepreneurship Cell</span>
+                  <span class="club-card-members"><i data-lucide="users"></i> 91</span>
+                </div>
+                <p class="club-card-desc">Startup pitches, founder talks, and mentorship sessions with working entrepreneurs and investors.</p>
+              </div>
+              <div class="club-card-tags">
+                <span class="club-card-tag">Startup</span>
+                <span class="club-card-tag">Business</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Section 2: Active in These Clubs (carousel) -->
+      <div>
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">Active in These Clubs</h2>
+          <span class="clubs-section-link">View all joined clubs</span>
+        </div>
+        <div class="clubs-carousel-wrapper">
+
+          <button class="carousel-nav-btn prev" onclick="scrollCarousel(-1)">
+            <i data-lucide="chevron-left"></i>
+          </button>
+
+          <div class="clubs-carousel-track" id="carousel-track">
+
+            <div class="joined-club-card" onclick="location.href='clubs-profile.html'">
+              <div class="joined-club-dot banner-orange">&#129302;</div>
+              <div class="joined-club-info">
+                <p class="joined-club-name">Robotics & Automation</p>
+                <p class="joined-club-sub">84 members · Tech</p>
+                <span class="active-badge alert">2 new events</span>
+              </div>
+            </div>
+
+            <div class="joined-club-card" onclick="location.href='clubs-profile.html'">
+              <div class="joined-club-dot banner-green">&#128187;</div>
+              <div class="joined-club-info">
+                <p class="joined-club-name">Coding Society</p>
+                <p class="joined-club-sub">203 members · Tech</p>
+                <span class="active-badge alert">Hackathon this week</span>
+              </div>
+            </div>
+
+            <div class="joined-club-card" onclick="location.href='clubs-profile.html'">
+              <div class="joined-club-dot banner-blue">&#128247;</div>
+              <div class="joined-club-info">
+                <p class="joined-club-name">Photography Circle</p>
+                <p class="joined-club-sub">112 members · Arts</p>
+                <span class="active-badge">Member</span>
+              </div>
+            </div>
+
+            <div class="joined-club-card" onclick="location.href='clubs-profile.html'">
+              <div class="joined-club-dot banner-yellow">&#127925;</div>
+              <div class="joined-club-info">
+                <p class="joined-club-name">Music Collective</p>
+                <p class="joined-club-sub">67 members · Music</p>
+                <span class="active-badge alert">Open mic Friday</span>
+              </div>
+            </div>
+
+          </div>
+
+          <button class="carousel-nav-btn next" onclick="scrollCarousel(1)">
+            <i data-lucide="chevron-right"></i>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Section 3: All Clubs -->
+      <div>
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">All Clubs</h2>
+          <span class="clubs-count-text" id="visible-count">9 clubs</span>
+        </div>
+
+        <div class="search-pill search-pill-wide">
+          <i data-lucide="search"></i>
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search by name or category..."
+            oninput="applyFilters()"
+          >
+        </div>
+
+        <div class="filter-chips-row">
+          <button class="filter-chip active" onclick="selectChip(this, 'all')">All</button>
+          <button class="filter-chip" onclick="selectChip(this, 'Tech')">Tech</button>
+          <button class="filter-chip" onclick="selectChip(this, 'Arts')">Arts</button>
+          <button class="filter-chip" onclick="selectChip(this, 'Culture')">Culture</button>
+          <button class="filter-chip" onclick="selectChip(this, 'Sports')">Sports</button>
+          <button class="filter-chip" onclick="selectChip(this, 'Music')">Music</button>
+          <button class="filter-chip" onclick="selectChip(this, 'Business')">Business</button>
+          <button class="filter-chip" onclick="selectChip(this, 'Science')">Science</button>
+        </div>
+
+        <div class="clubs-grid" id="clubs-grid">
+
+          <div class="club-card" data-category="Tech" data-name="robotics automation club" onclick="location.href='clubs-profile.html'">
+            <div class="club-card-banner banner-orange">
+              <div class="club-card-circle-1"></div>
+              <div class="club-card-circle-2"></div>
+              <div class="club-card-circle-3"></div>
+            </div>
+            <div class="club-card-content">
+              <div>
+                <div class="club-card-header">
+                  <span class="club-card-title">Robotics & Automation Club</span>
+                  <span class="club-card-members"><i data-lucide="users"></i> 84</span>
+                </div>
+                <p class="club-card-desc">Build real robots, compete in national-level challenges, and work on automation projects with peers.</p>
+              </div>
+              <div class="club-card-tags">
+                <span class="club-card-tag">Robotics</span>
+                <span class="club-card-tag">IoT</span>
+                <span class="club-card-tag">Tech</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="club-card" data-category="Arts" data-name="photography circle" onclick="location.href='clubs-profile.html'">
+            <div class="club-card-banner banner-blue">
+              <div class="club-card-circle-1"></div>
+              <div class="club-card-circle-2"></div>
+              <div class="club-card-circle-3"></div>
+            </div>
+            <div class="club-card-content">
+              <div>
+                <div class="club-card-header">
+                  <span class="club-card-title">Photography Circle</span>
+                  <span class="club-card-members"><i data-lucide="users"></i> 112</span>
+                </div>
+                <p class="club-card-desc">Weekly photo walks, darkroom sessions, and monthly critique workshops for all skill levels.</p>
+              </div>
+              <div class="club-card-tags">
+                <span class="club-card-tag">Photography</span>
+                <span class="club-card-tag">Arts</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="club-card" data-category="Tech" data-name="coding society" onclick="location.href='clubs-profile.html'">
+            <div class="club-card-banner banner-green">
+              <div class="club-card-circle-1"></div>
+              <div class="club-card-circle-2"></div>
+              <div class="club-card-circle-3"></div>
+            </div>
+            <div class="club-card-content">
+              <div>
+                <div class="club-card-header">
+                  <span class="club-card-title">Coding Society</span>
+                  <span class="club-card-members"><i data-lucide="users"></i> 203</span>
+                </div>
+                <p class="club-card-desc">Hackathons, competitive programming contests, and open-source contribution drives every semester.</p>
+              </div>
+              <div class="club-card-tags">
+                <span class="club-card-tag">Coding</span>
+                <span class="club-card-tag">Open Source</span>
+                <span class="club-card-tag">Tech</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="club-card" data-category="Music" data-name="music collective" onclick="location.href='clubs-profile.html'">
+            <div class="club-card-banner banner-yellow">
+              <div class="club-card-circle-1"></div>
+              <div class="club-card-circle-2"></div>
+              <div class="club-card-circle-3"></div>
+            </div>
+            <div class="club-card-content">
+              <div>
+                <div class="club-card-header">
+                  <span class="club-card-title">Music Collective</span>
+                  <span class="club-card-members"><i data-lucide="users"></i> 67</span>
+                </div>
+                <p class="club-card-desc">Jam sessions, open mic nights, and collaborative song writing across all genres and instruments.</p>
+              </div>
+              <div class="club-card-tags">
+                <span class="club-card-tag">Music</span>
+                <span class="club-card-tag">Performance</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="club-card" data-category="Arts" data-name="drama society" onclick="location.href='clubs-profile.html'">
+            <div class="club-card-banner banner-pink">
+              <div class="club-card-circle-1"></div>
+              <div class="club-card-circle-2"></div>
+              <div class="club-card-circle-3"></div>
+            </div>
+            <div class="club-card-content">
+              <div>
+                <div class="club-card-header">
+                  <span class="club-card-title">Drama Society</span>
+                  <span class="club-card-members"><i data-lucide="users"></i> 45</span>
+                </div>
+                <p class="club-card-desc">Annual theatre productions, improv workshops, and script writing bootcamps through the year.</p>
+              </div>
+              <div class="club-card-tags">
+                <span class="club-card-tag">Theatre</span>
+                <span class="club-card-tag">Writing</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="club-card" data-category="Business" data-name="entrepreneurship cell" onclick="location.href='clubs-profile.html'">
+            <div class="club-card-banner banner-mint">
+              <div class="club-card-circle-1"></div>
+              <div class="club-card-circle-2"></div>
+              <div class="club-card-circle-3"></div>
+            </div>
+            <div class="club-card-content">
+              <div>
+                <div class="club-card-header">
+                  <span class="club-card-title">Entrepreneurship Cell</span>
+                  <span class="club-card-members"><i data-lucide="users"></i> 91</span>
+                </div>
+                <p class="club-card-desc">Startup pitches, founder talks, and mentorship sessions with working entrepreneurs and investors.</p>
+              </div>
+              <div class="club-card-tags">
+                <span class="club-card-tag">Startup</span>
+                <span class="club-card-tag">Business</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="club-card" data-category="Science" data-name="astronomy club" onclick="location.href='clubs-profile.html'">
+            <div class="club-card-banner banner-blue">
+              <div class="club-card-circle-1"></div>
+              <div class="club-card-circle-2"></div>
+              <div class="club-card-circle-3"></div>
+            </div>
+            <div class="club-card-content">
+              <div>
+                <div class="club-card-header">
+                  <span class="club-card-title">Astronomy Club</span>
+                  <span class="club-card-members"><i data-lucide="users"></i> 38</span>
+                </div>
+                <p class="club-card-desc">Telescope nights, space documentaries, and participation in national Astronomy Olympiads every year.</p>
+              </div>
+              <div class="club-card-tags">
+                <span class="club-card-tag">Space</span>
+                <span class="club-card-tag">Science</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="club-card" data-category="Sports" data-name="sports council" onclick="location.href='clubs-profile.html'">
+            <div class="club-card-banner banner-orange">
+              <div class="club-card-circle-1"></div>
+              <div class="club-card-circle-2"></div>
+              <div class="club-card-circle-3"></div>
+            </div>
+            <div class="club-card-content">
+              <div>
+                <div class="club-card-header">
+                  <span class="club-card-title">Sports Council</span>
+                  <span class="club-card-members"><i data-lucide="users"></i> 156</span>
+                </div>
+                <p class="club-card-desc">Coordinates inter-college tournaments, fitness events, and weekly sports leagues on campus.</p>
+              </div>
+              <div class="club-card-tags">
+                <span class="club-card-tag">Sports</span>
+                <span class="club-card-tag">Fitness</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="club-card" data-category="Culture" data-name="bharatnatyam folk dance" onclick="location.href='clubs-profile.html'">
+            <div class="club-card-banner banner-yellow">
+              <div class="club-card-circle-1"></div>
+              <div class="club-card-circle-2"></div>
+              <div class="club-card-circle-3"></div>
+            </div>
+            <div class="club-card-content">
+              <div>
+                <div class="club-card-header">
+                  <span class="club-card-title">Bharatnatyam & Folk Dance</span>
+                  <span class="club-card-members"><i data-lucide="users"></i> 72</span>
+                </div>
+                <p class="club-card-desc">Classical and folk dance training, cultural fest performances, and inter-college dance competitions.</p>
+              </div>
+              <div class="club-card-tags">
+                <span class="club-card-tag">Dance</span>
+                <span class="club-card-tag">Culture</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="empty-state hidden" id="empty-state">
+          <i data-lucide="search-x"></i>
+          <p>No clubs match your search. Try a different keyword or category.</p>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    var activeCategory = 'all';
+
+    function scrollCarousel(direction) {
+      var track = document.getElementById('carousel-track');
+      track.scrollLeft += direction * 248;
+    }
+
+    function selectChip(clickedChip, category) {
+      activeCategory = category;
+
+      var allChips = document.querySelectorAll('.filter-chip');
+      for (var i = 0; i < allChips.length; i++) {
+        allChips[i].classList.remove('active');
+      }
+      clickedChip.classList.add('active');
+
+      applyFilters();
+    }
+
+    function applyFilters() {
+      var searchText = document.getElementById('search-input').value.toLowerCase().trim();
+      var cards = document.querySelectorAll('#clubs-grid .club-card');
+      var visibleCount = 0;
+
+      for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        var cardCategory = card.getAttribute('data-category');
+        var cardName = card.getAttribute('data-name');
+
+        var categoryMatch = (activeCategory === 'all' || cardCategory === activeCategory);
+        var searchMatch = (searchText === '' || cardName.includes(searchText));
+
+        if (categoryMatch && searchMatch) {
+          card.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+        }
+      }
+
+      document.getElementById('visible-count').textContent = visibleCount + ' clubs';
+
+      var emptyState = document.getElementById('empty-state');
+      if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+        lucide.createIcons();
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Automation Hackathon 2026 : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Menu</p>
+    <nav class="sidebar-menu">
+      <a href="clubs.html" class="sidebar-item"><i data-lucide="compass"></i> Clubs</a>
+      <a href="events.html" class="sidebar-item active student"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="announcements.html" class="sidebar-item"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leaderboard.html" class="sidebar-item"><i data-lucide="trophy"></i> Leaderboard</a>
+      <a href="find-clubs.html" class="sidebar-item"><i data-lucide="sparkles"></i> AI Finder</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="profile.html" class="user-card">
+      <div class="user-avatar student-av">SK</div>
+      <div class="user-info">
+        <p class="user-name">Shikha Singh</p>
+        <p class="user-sub">CS · 1st Year</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <button class="btn-secondary" onclick="location.href='events.html'">
+        <i data-lucide="arrow-left"></i> Events
+      </button>
+      <div class="title-block">
+        <h1 class="page-title">Event Detail</h1>
+        <p class="page-sub">Robotics & Automation Club</p>
+      </div>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <!-- Hero banner -->
+      <div>
+        <div class="event-hero-banner banner-orange">
+          <div class="club-card-circle-1"></div>
+          <div class="club-card-circle-2"></div>
+          <div class="club-card-circle-3"></div>
+          <div class="event-hero-overlay"></div>
+          <div class="event-hero-text">
+            <p class="event-hero-title">Automation Hackathon 2026</p>
+            <p class="event-hero-sub">Robotics & Automation Club &middot; Jul 19, 2026</p>
+          </div>
+        </div>
+
+        <!-- Detail body -->
+        <div class="club-profile-meta">
+          <div class="event-detail-grid">
+
+            <!-- Left: event info -->
+            <div>
+              <p class="section-heading">About this Event</p>
+              <p class="body-text">Build an automation solution in 8 hours. Teams of 2 to 4 students will tackle real-world problem statements provided on the day. All experience levels welcome. Refreshments, mentorship sessions, and prizes for the top 3 teams.</p>
+
+              <div class="event-meta-list mt-20">
+                <div class="event-meta-item">
+                  <i data-lucide="calendar"></i>
+                  <span><span class="event-meta-label">Date</span> &nbsp; Saturday, 19 July 2026</span>
+                </div>
+                <div class="event-meta-item">
+                  <i data-lucide="clock"></i>
+                  <span><span class="event-meta-label">Time</span> &nbsp; 9:00 AM to 6:00 PM</span>
+                </div>
+                <div class="event-meta-item">
+                  <i data-lucide="map-pin"></i>
+                  <span><span class="event-meta-label">Venue</span> &nbsp; Seminar Hall, Block A, KNIT Sultanpur</span>
+                </div>
+                <div class="event-meta-item">
+                  <i data-lucide="users"></i>
+                  <span><span class="event-meta-label">Capacity</span> &nbsp; 80 participants (45 registered)</span>
+                </div>
+                <div class="event-meta-item">
+                  <i data-lucide="tag"></i>
+                  <span><span class="event-meta-label">Type</span> &nbsp; Hackathon</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: registration panel -->
+            <div class="reg-panel">
+
+              <!-- Default: register view -->
+              <div id="register-view">
+                <p class="reg-panel-title">Register for this Event</p>
+                <div class="reg-capacity-row">
+                  <span>Seats remaining</span>
+                  <span class="reg-capacity-num">35</span>
+                </div>
+                <p class="text-note">Registration closes 18 July at 11:59 PM.</p>
+                <button class="btn-auth-submit" onclick="registerForEvent()">
+                  <i data-lucide="check-circle-2"></i> Register Now
+                </button>
+              </div>
+
+              <!-- Confirmed: shown after registration -->
+              <div id="confirmed-view" class="hidden">
+                <p class="reg-panel-title">You are Registered!</p>
+                <div class="reg-id-box">
+                  <p class="reg-id-label">Registration ID</p>
+                  <p class="reg-id-value">CC-2026-0482</p>
+                </div>
+                <p class="text-note">Show this ID at the event gate. You will receive a confirmation on your registered email.</p>
+
+                <!-- Result (shown after event is over) -->
+                <div id="result-section" class="hidden">
+                  <p class="reg-panel-title">Your Result</p>
+                  <div class="result-badge participant">
+                    <i data-lucide="award"></i> Participant
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function registerForEvent() {
+      document.getElementById('register-view').classList.add('hidden');
+      document.getElementById('confirmed-view').classList.remove('hidden');
+      lucide.createIcons();
+    }
+  </script>
+
+</body>
+</html>

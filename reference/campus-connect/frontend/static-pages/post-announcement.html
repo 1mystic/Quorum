@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Post Announcement : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Leader</p>
+    <nav class="sidebar-menu">
+      <a href="leader-club.html" class="sidebar-item"><i data-lucide="layout-dashboard"></i> My Club</a>
+      <a href="members.html" class="sidebar-item"><i data-lucide="users-round"></i> Members</a>
+      <a href="leader-events.html" class="sidebar-item"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="leader-leader-announcements.html" class="sidebar-item active leader"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leader-issues.html" class="sidebar-item"><i data-lucide="triangle-alert"></i> Issues</a>
+      <a href="clubs-new.html" class="sidebar-item"><i data-lucide="plus-circle"></i> Create Club</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="#" class="user-card">
+      <div class="user-avatar leader-av">AY</div>
+      <div class="user-info">
+        <p class="user-name">Aayansh Yadav</p>
+        <p class="user-sub">Leader · Robotics Club</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <button class="btn-secondary" onclick="location.href='leader-announcements.html'">
+        <i data-lucide="arrow-left"></i> Feed
+      </button>
+      <div class="title-block">
+        <h1 class="page-title">Post Announcement</h1>
+        <p class="page-sub">Robotics &amp; Automation Club</p>
+      </div>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <div class="form-guide-grid">
+
+        <div class="form-card">
+          <p class="form-card-title">Announcement Details</p>
+
+          <div class="form-group">
+            <label>Club</label>
+            <input type="text" class="input-field" value="Robotics &amp; Automation Club" readonly>
+          </div>
+
+          <div class="form-group">
+            <label for="ann-title">Title</label>
+            <input type="text" id="ann-title" class="input-field" placeholder="Short, clear subject line">
+          </div>
+
+          <div class="form-group">
+            <label for="ann-category">Category</label>
+            <select id="ann-category" class="select-field">
+              <option value="">Select category</option>
+              <option value="general">General</option>
+              <option value="event">Event Update</option>
+              <option value="resource">Resource / Lab</option>
+              <option value="achievement">Achievement</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="ann-body">Message</label>
+            <textarea id="ann-body" class="textarea-field" rows="5" placeholder="Write your announcement here. Be clear and specific so members know exactly what to do or expect."></textarea>
+          </div>
+
+          <div class="toggle-row">
+            <div class="toggle-label-block">
+              <p class="toggle-label">Pin this announcement</p>
+              <p class="toggle-desc">Pinned announcements appear at the top of the feed with a highlighted border.</p>
+            </div>
+            <div class="toggle-switch" id="pin-toggle" onclick="togglePin()"></div>
+          </div>
+
+          <button class="btn-primary" onclick="postAnnouncement()">
+            <i data-lucide="send"></i> Post Announcement
+          </button>
+        </div>
+
+        <div class="guide-card">
+          <p class="guide-card-title">Writing good announcements</p>
+          <div class="guide-step">
+            <span class="guide-step-num">1</span>
+            <span>Keep the title under 10 words. Members scan titles first before reading the body.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num">2</span>
+            <span>State the who, what, when, and where in the first two sentences.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num">3</span>
+            <span>Use the correct category so students can filter by topic in their feed.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num">4</span>
+            <span>Pin only when the information is time-sensitive. Over-pinning reduces impact.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num">5</span>
+            <span>All 84 members of your club will see this in their Announcements feed immediately.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num guide-step-warn">!</span>
+            <span>Announcements cannot be edited after posting. Delete and re-post if corrections are needed.</span>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    var isPinned = false;
+
+    function togglePin() {
+      isPinned = !isPinned;
+      var toggle = document.getElementById('pin-toggle');
+      if (isPinned) {
+        toggle.classList.add('on');
+      } else {
+        toggle.classList.remove('on');
+      }
+    }
+
+    function postAnnouncement() {
+      var title    = document.getElementById('ann-title').value.trim();
+      var category = document.getElementById('ann-category').value;
+      var body     = document.getElementById('ann-body').value.trim();
+
+      if (!title || !category || !body) {
+        alert('Please fill in all fields before posting.');
+        return;
+      }
+
+      var msg = 'Announcement posted to 84 members.';
+      if (isPinned) {
+        msg += ' It is pinned at the top of the feed.';
+      }
+
+      alert(msg);
+      window.location.href = 'leader-announcements.html';
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get Started : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="onboard-body">
+
+  <div class="onboard-shell">
+
+    <!-- Top bar: logo + step counter -->
+    <header class="onboard-topbar">
+      <div class="logo-row logo-row-flat">
+        <div class="logo-mark">
+          <i data-lucide="graduation-cap"></i>
+        </div>
+        <span class="brand">Campus Connect</span>
+      </div>
+      <span class="onboard-step-counter" id="step-counter">Step 1 of 3</span>
+    </header>
+
+    <!-- Progress track -->
+    <div class="onboard-progress-track">
+      <div class="onboard-progress-fill" id="progress-fill"></div>
+    </div>
+
+    <!-- Card that holds all steps -->
+    <main class="onboard-card">
+
+      <!-- Step 1: About you -->
+      <div class="onboard-step active" id="step-1">
+        <div class="onboard-step-icon orange-icon">
+          <i data-lucide="user"></i>
+        </div>
+        <h1 class="onboard-heading">Tell us a bit<br>about yourself.</h1>
+        <p class="onboard-subtext">This helps us show the right clubs and events for you.</p>
+
+        <div class="onboard-fields">
+
+          <p class="onboard-field-label">Department / Branch</p>
+          <div class="dept-cards-grid" id="dept-grid">
+            <button class="dept-card" data-dept="cs" onclick="selectDept(this)">
+              <div class="dept-card-icon blue-icon"><i data-lucide="code-2"></i></div>
+              <span class="dept-card-label">CS</span>
+            </button>
+            <button class="dept-card" data-dept="it" onclick="selectDept(this)">
+              <div class="dept-card-icon green-icon"><i data-lucide="network"></i></div>
+              <span class="dept-card-label">IT</span>
+            </button>
+            <button class="dept-card" data-dept="ec" onclick="selectDept(this)">
+              <div class="dept-card-icon orange-icon"><i data-lucide="radio"></i></div>
+              <span class="dept-card-label">ECE</span>
+            </button>
+            <button class="dept-card" data-dept="me" onclick="selectDept(this)">
+              <div class="dept-card-icon yellow-icon"><i data-lucide="settings-2"></i></div>
+              <span class="dept-card-label">ME</span>
+            </button>
+            <button class="dept-card" data-dept="ce" onclick="selectDept(this)">
+              <div class="dept-card-icon blue-icon"><i data-lucide="building-2"></i></div>
+              <span class="dept-card-label">Civil</span>
+            </button>
+            <button class="dept-card" data-dept="ee" onclick="selectDept(this)">
+              <div class="dept-card-icon yellow-icon"><i data-lucide="zap"></i></div>
+              <span class="dept-card-label">EEE</span>
+            </button>
+            <button class="dept-card" data-dept="mba" onclick="selectDept(this)">
+              <div class="dept-card-icon green-icon"><i data-lucide="briefcase"></i></div>
+              <span class="dept-card-label">MBA</span>
+            </button>
+            <button class="dept-card dept-card-other" data-dept="other" onclick="selectDept(this)">
+              <div class="dept-card-icon dept-other-icon"><i data-lucide="pencil"></i></div>
+              <span class="dept-card-label">Other</span>
+            </button>
+          </div>
+          <input
+            type="text"
+            id="dept-other-input"
+            class="dept-other-text-input"
+            placeholder="Type your department"
+          >
+
+          <p class="onboard-field-label">Current Year</p>
+          <div class="year-pills-row" id="year-grid">
+            <button class="year-pill" data-year="1" onclick="selectYear(this)">1st Year</button>
+            <button class="year-pill" data-year="2" onclick="selectYear(this)">2nd Year</button>
+            <button class="year-pill" data-year="3" onclick="selectYear(this)">3rd Year</button>
+            <button class="year-pill" data-year="4" onclick="selectYear(this)">4th Year</button>
+            <button class="year-pill" data-year="pg" onclick="selectYear(this)">PG</button>
+            <button class="year-pill" data-year="diploma" onclick="selectYear(this)">Diploma</button>
+          </div>
+
+        </div>
+
+        <button class="onboard-next-btn" onclick="goToStep(2)">
+          Continue <i data-lucide="arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Step 2: Interests -->
+      <div class="onboard-step" id="step-2">
+        <div class="onboard-step-icon green-icon">
+          <i data-lucide="sparkles"></i>
+        </div>
+        <h1 class="onboard-heading">What gets you<br>excited?</h1>
+        <p class="onboard-subtext">Pick as many as you like. We use this to suggest clubs you will actually enjoy.</p>
+
+        <div class="interest-chips-grid" id="interests-grid">
+          <button class="interest-chip" data-interest="coding" onclick="toggleInterest(this)">
+            <i data-lucide="code-2"></i> Coding
+          </button>
+          <button class="interest-chip" data-interest="robotics" onclick="toggleInterest(this)">
+            <i data-lucide="cpu"></i> Robotics
+          </button>
+          <button class="interest-chip" data-interest="music" onclick="toggleInterest(this)">
+            <i data-lucide="music"></i> Music
+          </button>
+          <button class="interest-chip" data-interest="art" onclick="toggleInterest(this)">
+            <i data-lucide="paintbrush"></i> Art and Design
+          </button>
+          <button class="interest-chip" data-interest="sports" onclick="toggleInterest(this)">
+            <i data-lucide="dumbbell"></i> Sports
+          </button>
+          <button class="interest-chip" data-interest="literature" onclick="toggleInterest(this)">
+            <i data-lucide="book-open"></i> Literature
+          </button>
+          <button class="interest-chip" data-interest="debate" onclick="toggleInterest(this)">
+            <i data-lucide="mic-2"></i> Debate
+          </button>
+          <button class="interest-chip" data-interest="entrepreneurship" onclick="toggleInterest(this)">
+            <i data-lucide="trending-up"></i> Entrepreneurship
+          </button>
+          <button class="interest-chip" data-interest="science" onclick="toggleInterest(this)">
+            <i data-lucide="flask-conical"></i> Science
+          </button>
+          <button class="interest-chip" data-interest="gaming" onclick="toggleInterest(this)">
+            <i data-lucide="gamepad-2"></i> Gaming
+          </button>
+          <button class="interest-chip" data-interest="photography" onclick="toggleInterest(this)">
+            <i data-lucide="camera"></i> Photography
+          </button>
+          <button class="interest-chip" data-interest="social" onclick="toggleInterest(this)">
+            <i data-lucide="heart-handshake"></i> Social Work
+          </button>
+        </div>
+
+        <div class="onboard-nav-row">
+          <button class="onboard-back-btn" onclick="goToStep(1)">
+            <i data-lucide="arrow-left"></i> Back
+          </button>
+          <button class="onboard-next-btn" onclick="goToStep(3)">
+            Continue <i data-lucide="arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Goal -->
+      <div class="onboard-step" id="step-3">
+        <div class="onboard-step-icon blue-icon">
+          <i data-lucide="compass"></i>
+        </div>
+        <h1 class="onboard-heading">What are you<br>here for?</h1>
+        <p class="onboard-subtext">You can always do all of these, but what is your main reason for joining?</p>
+
+        <div class="goal-cards-grid" id="goals-grid">
+          <button class="goal-card" data-goal="discover" onclick="selectGoal(this)">
+            <div class="goal-card-icon orange-icon">
+              <i data-lucide="search"></i>
+            </div>
+            <p class="goal-card-title">Discover clubs</p>
+            <p class="goal-card-desc">Find communities that match my interests and join them.</p>
+          </button>
+
+          <button class="goal-card" data-goal="events" onclick="selectGoal(this)">
+            <div class="goal-card-icon green-icon">
+              <i data-lucide="calendar-check"></i>
+            </div>
+            <p class="goal-card-title">Attend events</p>
+            <p class="goal-card-desc">Register for hackathons, workshops, and competitions.</p>
+          </button>
+
+          <button class="goal-card" data-goal="lead" onclick="selectGoal(this)">
+            <div class="goal-card-icon blue-icon">
+              <i data-lucide="users"></i>
+            </div>
+            <p class="goal-card-title">Run a club</p>
+            <p class="goal-card-desc">Create my own club and manage events and members.</p>
+          </button>
+
+          <button class="goal-card" data-goal="certs" onclick="selectGoal(this)">
+            <div class="goal-card-icon yellow-icon">
+              <i data-lucide="award"></i>
+            </div>
+            <p class="goal-card-title">Earn certificates</p>
+            <p class="goal-card-desc">Build a verifiable record of my campus participation.</p>
+          </button>
+        </div>
+
+        <div class="onboard-nav-row">
+          <button class="onboard-back-btn" onclick="goToStep(2)">
+            <i data-lucide="arrow-left"></i> Back
+          </button>
+          <button class="onboard-next-btn" onclick="finishOnboarding()">
+            Let's go <i data-lucide="arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Done screen (shown after step 3) -->
+      <div class="onboard-step" id="step-done">
+        <div class="onboard-done-graphic">
+          <div class="done-circle-outer">
+            <div class="done-circle-inner">
+              <i data-lucide="check" class="done-check-icon"></i>
+            </div>
+          </div>
+        </div>
+        <h1 class="onboard-heading">You are all set!</h1>
+        <p class="onboard-subtext">
+          Head over to the club directory and start discovering communities that match your interests.
+        </p>
+        <button class="onboard-next-btn onboard-done-btn" onclick="location.href='clubs.html'">
+          Explore clubs <i data-lucide="compass"></i>
+        </button>
+      </div>
+
+    </main>
+
+    <!-- Decorative bottom shapes -->
+    <div class="onboard-deco-circle deco-orange"></div>
+    <div class="onboard-deco-circle deco-green"></div>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    var currentStep = 1;
+    var totalSteps = 3;
+    var selectedInterests = [];
+    var selectedGoal = null;
+    var selectedDept = null;
+    var selectedYear = null;
+
+    function updateProgressBar(stepNumber) {
+      var percentage = (stepNumber / totalSteps) * 100;
+      document.getElementById('progress-fill').style.width = percentage + '%';
+
+      if (stepNumber <= totalSteps) {
+        document.getElementById('step-counter').textContent = 'Step ' + stepNumber + ' of ' + totalSteps;
+      } else {
+        document.getElementById('step-counter').textContent = 'Done!';
+      }
+    }
+
+    function showStep(stepNumber) {
+      var allSteps = document.querySelectorAll('.onboard-step');
+      allSteps.forEach(function(step) {
+        step.classList.remove('active');
+      });
+
+      var targetId = stepNumber > totalSteps ? 'step-done' : 'step-' + stepNumber;
+      document.getElementById(targetId).classList.add('active');
+      updateProgressBar(stepNumber);
+    }
+
+    function goToStep(stepNumber) {
+      if (!validateCurrentStep()) return;
+      currentStep = stepNumber;
+      showStep(stepNumber);
+    }
+
+    function validateCurrentStep() {
+      if (currentStep === 1) {
+        if (!selectedDept) {
+          alert('Please pick your department before continuing.');
+          return false;
+        }
+        if (selectedDept === 'other') {
+          var typed = document.getElementById('dept-other-input').value.trim();
+          if (!typed) {
+            alert('Please type your department name.');
+            return false;
+          }
+        }
+        if (!selectedYear) {
+          alert('Please pick your current year before continuing.');
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function selectDept(card) {
+      var allCards = document.querySelectorAll('.dept-card');
+      allCards.forEach(function(c) { c.classList.remove('selected'); });
+
+      card.classList.add('selected');
+      selectedDept = card.getAttribute('data-dept');
+
+      var otherInput = document.getElementById('dept-other-input');
+      if (selectedDept === 'other') {
+        otherInput.classList.add('visible');
+        otherInput.focus();
+      } else {
+        otherInput.classList.remove('visible');
+      }
+    }
+
+    function selectYear(pill) {
+      var allPills = document.querySelectorAll('.year-pill');
+      allPills.forEach(function(p) { p.classList.remove('selected'); });
+
+      pill.classList.add('selected');
+      selectedYear = pill.getAttribute('data-year');
+    }
+
+    function toggleInterest(chip) {
+      var interest = chip.getAttribute('data-interest');
+      if (chip.classList.contains('selected')) {
+        chip.classList.remove('selected');
+        selectedInterests = selectedInterests.filter(function(item) {
+          return item !== interest;
+        });
+      } else {
+        chip.classList.add('selected');
+        selectedInterests.push(interest);
+      }
+    }
+
+    function selectGoal(card) {
+      var allCards = document.querySelectorAll('.goal-card');
+      allCards.forEach(function(c) { c.classList.remove('selected'); });
+      card.classList.add('selected');
+      selectedGoal = card.getAttribute('data-goal');
+    }
+
+    function finishOnboarding() {
+      currentStep = totalSteps + 1;
+      document.getElementById('progress-fill').style.width = '100%';
+      document.getElementById('step-counter').textContent = 'Done!';
+      showStep(currentStep);
+    }
+
+    updateProgressBar(1);
+  </script>
+</body>
+</html>

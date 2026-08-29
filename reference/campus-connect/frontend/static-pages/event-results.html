@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Set Results : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Leader</p>
+    <nav class="sidebar-menu">
+      <a href="leader-club.html" class="sidebar-item"><i data-lucide="layout-dashboard"></i> My Club</a>
+      <a href="members.html" class="sidebar-item"><i data-lucide="users-round"></i> Members</a>
+      <a href="leader-events.html" class="sidebar-item active leader"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="leader-announcements.html" class="sidebar-item"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leader-issues.html" class="sidebar-item"><i data-lucide="triangle-alert"></i> Issues</a>
+      <a href="clubs-new.html" class="sidebar-item"><i data-lucide="plus-circle"></i> Create Club</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="#" class="user-card">
+      <div class="user-avatar leader-av">AY</div>
+      <div class="user-info">
+        <p class="user-name">Aayansh Yadav</p>
+        <p class="user-sub">Leader · Robotics Club</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <button class="btn-secondary" onclick="location.href='event-attend.html'">
+        <i data-lucide="arrow-left"></i> Attendance
+      </button>
+      <div class="title-block">
+        <h1 class="page-title">Set Results</h1>
+        <p class="page-sub">Automation Hackathon 2026 &middot; 8 attended</p>
+      </div>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <div class="club-profile-meta">
+        <p class="section-heading">Attendees</p>
+        <p class="text-note">Assign a result to each participant. Certificates will be generated automatically after you publish.</p>
+      </div>
+
+      <div class="participant-list mt-16" id="results-list">
+
+        <div class="participant-row">
+          <div class="participant-avatar">SK</div>
+          <div class="participant-info">
+            <p class="participant-name">Shikha Singh</p>
+            <p class="participant-sub">CS &middot; 1st Year</p>
+          </div>
+          <select class="result-select-field" id="res-1">
+            <option value="participant">Participant</option>
+            <option value="runner-up">Runner-up</option>
+            <option value="winner">Winner</option>
+          </select>
+        </div>
+
+        <div class="participant-row">
+          <div class="participant-avatar">RA</div>
+          <div class="participant-info">
+            <p class="participant-name">Rishi Agarwal</p>
+            <p class="participant-sub">ECE &middot; 2nd Year</p>
+          </div>
+          <select class="result-select-field" id="res-2">
+            <option value="participant">Participant</option>
+            <option value="runner-up">Runner-up</option>
+            <option value="winner">Winner</option>
+          </select>
+        </div>
+
+        <div class="participant-row">
+          <div class="participant-avatar">NP</div>
+          <div class="participant-info">
+            <p class="participant-name">Neha Pandey</p>
+            <p class="participant-sub">IT &middot; 2nd Year</p>
+          </div>
+          <select class="result-select-field" id="res-3">
+            <option value="participant">Participant</option>
+            <option value="runner-up">Runner-up</option>
+            <option value="winner">Winner</option>
+          </select>
+        </div>
+
+        <div class="participant-row">
+          <div class="participant-avatar">AK</div>
+          <div class="participant-info">
+            <p class="participant-name">Aryan Kumar</p>
+            <p class="participant-sub">ME &middot; 3rd Year</p>
+          </div>
+          <select class="result-select-field" id="res-4">
+            <option value="participant">Participant</option>
+            <option value="runner-up">Runner-up</option>
+            <option value="winner">Winner</option>
+          </select>
+        </div>
+
+        <div class="participant-row">
+          <div class="participant-avatar">DM</div>
+          <div class="participant-info">
+            <p class="participant-name">Divya Mishra</p>
+            <p class="participant-sub">CS &middot; 1st Year</p>
+          </div>
+          <select class="result-select-field" id="res-5">
+            <option value="participant">Participant</option>
+            <option value="runner-up">Runner-up</option>
+            <option value="winner">Winner</option>
+          </select>
+        </div>
+
+        <div class="participant-row">
+          <div class="participant-avatar">PV</div>
+          <div class="participant-info">
+            <p class="participant-name">Pratham Verma</p>
+            <p class="participant-sub">ECE &middot; 1st Year</p>
+          </div>
+          <select class="result-select-field" id="res-6">
+            <option value="participant">Participant</option>
+            <option value="runner-up">Runner-up</option>
+            <option value="winner">Winner</option>
+          </select>
+        </div>
+
+        <div class="participant-row">
+          <div class="participant-avatar">SJ</div>
+          <div class="participant-info">
+            <p class="participant-name">Simran Joshi</p>
+            <p class="participant-sub">CS &middot; 3rd Year</p>
+          </div>
+          <select class="result-select-field" id="res-7">
+            <option value="participant">Participant</option>
+            <option value="runner-up">Runner-up</option>
+            <option value="winner">Winner</option>
+          </select>
+        </div>
+
+        <div class="participant-row">
+          <div class="participant-avatar">VT</div>
+          <div class="participant-info">
+            <p class="participant-name">Varun Tiwari</p>
+            <p class="participant-sub">IT &middot; 2nd Year</p>
+          </div>
+          <select class="result-select-field" id="res-8">
+            <option value="participant">Participant</option>
+            <option value="runner-up">Runner-up</option>
+            <option value="winner">Winner</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="event-action-bar">
+        <p class="text-note">Certificates are issued instantly after publishing results.</p>
+        <button class="btn-primary" onclick="publishResults()">
+          <i data-lucide="award"></i> Publish Results
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function publishResults() {
+      var selects = document.querySelectorAll('.result-select-field');
+      var winners = 0;
+      var runnerups = 0;
+
+      for (var i = 0; i < selects.length; i++) {
+        var val = selects[i].value;
+        if (val === 'winner') {
+          winners++;
+        }
+        if (val === 'runner-up') {
+          runnerups++;
+        }
+      }
+
+      if (winners > 1) {
+        alert('Only one participant can be marked as Winner.');
+        return;
+      }
+
+      if (runnerups > 2) {
+        alert('At most two participants can be marked as Runner-up.');
+        return;
+      }
+
+      alert('Results published! Certificates have been generated and are visible on each student profile.');
+      window.location.href = 'leader-events.html';
+    }
+  </script>
+
+</body>
+</html>

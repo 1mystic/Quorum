@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign Up : Campus Connect</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Central Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Lucide Icons (CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="auth-body">
+
+  <div class="auth-frame">
+
+    <!-- ── Left: Form Panel ── -->
+    <section class="auth-form-panel custom-scrollbar">
+
+      <!-- Logo -->
+      <div onclick="location.href='index.html'" class="logo-row auth-form-logo">
+        <div class="logo-mark logo-mark-orange">
+          <i data-lucide="graduation-cap"></i>
+        </div>
+        <span class="brand">Campus Connect</span>
+      </div>
+
+      <h2>Create your account</h2>
+      <p class="auth-form-subtitle">
+        Already a member? <span onclick="location.href='login.html'">Sign in</span>
+      </p>
+
+      <!-- Role Selector -->
+      <div class="form-group">
+        <label>I am registering as</label>
+        <div class="register-role-grid">
+          <button id="role-btn-student" class="btn-register-role active" onclick="selectRole('student')">
+            <i data-lucide="compass"></i> Student
+          </button>
+          <button id="role-btn-leader" class="btn-register-role" onclick="selectRole('leader')">
+            <i data-lucide="users"></i> Club Leader
+          </button>
+        </div>
+      </div>
+
+      <!-- Full Name -->
+      <div class="form-group">
+        <label for="name-input">Full Name</label>
+        <input type="text" id="name-input" placeholder="Shikha Singh" class="input-field">
+      </div>
+
+      <!-- College Email -->
+      <div class="form-group">
+        <label for="email-input">College Email Address</label>
+        <input type="email" id="email-input" placeholder="shikha@knit.ac.in" class="input-field">
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password-input">Password</label>
+        <input
+          type="password"
+          id="password-input"
+          placeholder="••••••••"
+          class="input-field"
+          oninput="updatePasswordStrength(this.value)"
+        >
+      </div>
+
+      <!-- Password Strength Indicator -->
+      <div class="password-strength-row">
+        <div id="bar-1" class="password-strength-bar"></div>
+        <div id="bar-2" class="password-strength-bar"></div>
+        <div id="bar-3" class="password-strength-bar"></div>
+        <div id="bar-4" class="password-strength-bar"></div>
+      </div>
+
+      <!-- Submit -->
+      <button onclick="handleSignup()" class="btn-auth-submit">
+        <i data-lucide="sparkles"></i> Create account
+      </button>
+
+    </section>
+
+    <!-- ── Right: Sidebar Panel ── -->
+    <aside class="auth-sidebar green-auth">
+
+      <!-- Decorative sparkle -->
+      <svg class="auth-sparkle" viewBox="0 0 24 24">
+        <path d="M12 0 C13 7 17 11 24 12 C17 13 13 17 12 24 C11 17 7 13 0 12 C7 11 11 7 12 0Z" fill="#FBF1E3"/>
+      </svg>
+
+      <!-- Copy -->
+      <div>
+        <h2 class="auth-sidebar-title">Join the<br>campus<br>community.</h2>
+        <p class="auth-sidebar-desc">
+          Discover clubs, attend events, earn certificates,
+          and build a verifiable record of your campus life.
+        </p>
+      </div>
+
+      <!-- Value checklist -->
+      <div class="auth-sidebar-list">
+        <div class="auth-sidebar-list-item">
+          <i data-lucide="check-circle-2"></i>
+          <span>Browse all active clubs at your college</span>
+        </div>
+        <div class="auth-sidebar-list-item">
+          <i data-lucide="check-circle-2"></i>
+          <span>Get verified participation certificates</span>
+        </div>
+        <div class="auth-sidebar-list-item">
+          <i data-lucide="check-circle-2"></i>
+          <span>Free platform, forever</span>
+        </div>
+      </div>
+
+      <!-- Decorative background shapes -->
+      <div class="auth-sidebar-circle-1"></div>
+
+      <!-- Character SVG (variant 4 — yellow background) -->
+      <div class="auth-sidebar-char">
+        <svg class="svg-fill" viewBox="0 0 240 240">
+          <rect x="6" y="6" width="228" height="228" rx="46" fill="#F5C13D" />
+          <path d="M58 234 Q58 176 120 176 Q182 176 182 234 Z" fill="#EFE7DA" />
+          <rect x="104" y="148" width="32" height="42" rx="14" fill="#EAC6A2" />
+          <ellipse cx="120" cy="110" rx="50" ry="54" fill="#EAC6A2" />
+          <path d="M70 110 Q68 50 120 50 Q172 50 170 110 Q150 80 120 80 Q90 80 70 110 Z" fill="#4A3526" />
+          <path d="M64 112 Q62 44 120 44 Q178 44 176 112" fill="none" stroke="#4F9D57" stroke-width="13" stroke-linecap="round" />
+          <rect x="50"  y="98" width="22" height="46" rx="11" fill="#4F9D57" />
+          <rect x="168" y="98" width="22" height="46" rx="11" fill="#4F9D57" />
+          <circle cx="104" cy="113" r="5" fill="#2E1D16" />
+          <circle cx="136" cy="113" r="5" fill="#2E1D16" />
+          <circle cx="95"  cy="129" r="7" fill="#D98A6A" opacity=".55" />
+          <circle cx="145" cy="129" r="7" fill="#D98A6A" opacity=".55" />
+          <path d="M104 134 Q120 151 136 134" fill="none" stroke="#2E1D16" stroke-width="5" stroke-linecap="round" />
+        </svg>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Track which role the user has selected
+    var selectedRole = 'student';
+
+    // Switch active role button and update selectedRole
+    function selectRole(role) {
+      selectedRole = role;
+
+      var studentBtn = document.getElementById('role-btn-student');
+      var leaderBtn  = document.getElementById('role-btn-leader');
+
+      studentBtn.classList.remove('active');
+      leaderBtn.classList.remove('active');
+
+      document.getElementById('role-btn-' + role).classList.add('active');
+    }
+
+    // Measure password strength and light up the indicator bars
+    function updatePasswordStrength(password) {
+      var strength = measurePasswordStrength(password);
+
+      for (var i = 1; i <= 4; i++) {
+        var bar = document.getElementById('bar-' + i);
+        bar.classList.toggle('active', i <= strength);
+      }
+    }
+
+    // Returns a score 0–4 based on length and character variety
+    function measurePasswordStrength(password) {
+      if (password.length === 0) return 0;
+
+      var score = 0;
+      if (password.length >= 6)  score++;
+      if (password.length >= 10) score++;
+      if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+      if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) score++;
+
+      return score;
+    }
+
+    // Validate required fields before proceeding
+    function getFormValues() {
+      return {
+        name:     document.getElementById('name-input').value.trim(),
+        email:    document.getElementById('email-input').value.trim(),
+        password: document.getElementById('password-input').value
+      };
+    }
+
+    function handleSignup() {
+      var formData = getFormValues();
+
+      if (!formData.name || !formData.email || !formData.password) {
+        alert('Please fill in all fields before continuing.');
+        return;
+      }
+
+      if (!formData.email.includes('@')) {
+        alert('Please enter a valid college email address.');
+        return;
+      }
+
+      if (formData.password.length < 6) {
+        alert('Password must be at least 6 characters.');
+        return;
+      }
+
+      // In production this calls POST /api/v1/auth/signup
+      // For now, redirect to email verification page
+      window.location.href = 'verify-email.html';
+    }
+  </script>
+</body>
+</html>

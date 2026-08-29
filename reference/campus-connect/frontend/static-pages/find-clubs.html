@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Club Finder : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark">
+        <i data-lucide="graduation-cap"></i>
+      </div>
+      <span class="brand">Campus Connect</span>
+    </div>
+
+    <p class="nav-label">Menu</p>
+
+    <nav class="sidebar-menu">
+      <a href="clubs.html" class="sidebar-item">
+        <i data-lucide="compass"></i> Clubs
+      </a>
+      <a href="events.html" class="sidebar-item">
+        <i data-lucide="calendar-days"></i> Events
+      </a>
+      <a href="announcements.html" class="sidebar-item">
+        <i data-lucide="megaphone"></i> Announcements
+      </a>
+      <a href="leaderboard.html" class="sidebar-item">
+        <i data-lucide="trophy"></i> Leaderboard
+      </a>
+      <a href="find-clubs.html" class="sidebar-item active student">
+        <i data-lucide="sparkles"></i> AI Finder
+      </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <a href="profile.html" class="user-card">
+      <div class="user-avatar student-av">SK</div>
+      <div class="user-info">
+        <p class="user-name">Shikha Singh</p>
+        <p class="user-sub">CS · 1st Year</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">AI Club Finder</h1>
+        <p class="page-sub">Describe your interests and find clubs that match</p>
+      </div>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <!-- Finder hero -->
+      <div class="finder-hero">
+        <div class="finder-hero-icon">
+          <i data-lucide="sparkles"></i>
+        </div>
+
+        <p class="finder-hero-title">What are you into?</p>
+        <p class="finder-hero-desc">
+          Describe your interests in plain language. The AI will match you with clubs at your college,
+          including niche ones that have no social media presence.
+        </p>
+
+        <textarea
+          id="interests-input"
+          class="finder-textarea"
+          placeholder="e.g. I love building things with electronics, enjoy photography on weekends, and want to meet people who care about startups..."
+        ></textarea>
+
+        <button class="btn-primary" onclick="findClubs()">
+          <i data-lucide="sparkles"></i> Find Clubs
+        </button>
+      </div>
+
+      <!-- Results (hidden until submitted) -->
+      <div class="finder-results" id="finder-results">
+
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">Clubs matched for you</h2>
+          <span class="clubs-count-text" id="results-desc">Based on your interests</span>
+        </div>
+
+        <div class="clubs-grid">
+
+          <div>
+            <div class="club-card" onclick="location.href='clubs-profile.html'">
+              <div class="club-card-banner banner-orange">
+                <div class="club-card-circle-1"></div>
+                <div class="club-card-circle-2"></div>
+                <div class="club-card-circle-3"></div>
+                <div class="club-card-recommended-badge">
+                  <i data-lucide="sparkles"></i> Top Match
+                </div>
+              </div>
+              <div class="club-card-content">
+                <div>
+                  <div class="club-card-header">
+                    <span class="club-card-title">Robotics & Automation Club</span>
+                    <span class="club-card-members"><i data-lucide="users"></i> 84</span>
+                  </div>
+                  <p class="club-card-desc">Build real robots, compete in national-level challenges, and work on automation projects with peers.</p>
+                </div>
+                <div class="club-card-tags">
+                  <span class="club-card-tag">Robotics</span>
+                  <span class="club-card-tag">IoT</span>
+                  <span class="club-card-tag">Tech</span>
+                </div>
+              </div>
+            </div>
+            <p class="finder-match-note">Matched because you mentioned building things with electronics and hands-on projects.</p>
+          </div>
+
+          <div>
+            <div class="club-card" onclick="location.href='clubs-profile.html'">
+              <div class="club-card-banner banner-blue">
+                <div class="club-card-circle-1"></div>
+                <div class="club-card-circle-2"></div>
+                <div class="club-card-circle-3"></div>
+              </div>
+              <div class="club-card-content">
+                <div>
+                  <div class="club-card-header">
+                    <span class="club-card-title">Photography Circle</span>
+                    <span class="club-card-members"><i data-lucide="users"></i> 112</span>
+                  </div>
+                  <p class="club-card-desc">Weekly photo walks, darkroom sessions, and monthly critique workshops for all skill levels.</p>
+                </div>
+                <div class="club-card-tags">
+                  <span class="club-card-tag">Photography</span>
+                  <span class="club-card-tag">Arts</span>
+                </div>
+              </div>
+            </div>
+            <p class="finder-match-note">Matched because you mentioned photography on weekends.</p>
+          </div>
+
+          <div>
+            <div class="club-card" onclick="location.href='clubs-profile.html'">
+              <div class="club-card-banner banner-mint">
+                <div class="club-card-circle-1"></div>
+                <div class="club-card-circle-2"></div>
+                <div class="club-card-circle-3"></div>
+              </div>
+              <div class="club-card-content">
+                <div>
+                  <div class="club-card-header">
+                    <span class="club-card-title">Entrepreneurship Cell</span>
+                    <span class="club-card-members"><i data-lucide="users"></i> 91</span>
+                  </div>
+                  <p class="club-card-desc">Startup pitches, founder talks, and mentorship sessions with working entrepreneurs and investors.</p>
+                </div>
+                <div class="club-card-tags">
+                  <span class="club-card-tag">Startup</span>
+                  <span class="club-card-tag">Business</span>
+                </div>
+              </div>
+            </div>
+            <p class="finder-match-note">Matched because you mentioned wanting to meet people who care about startups.</p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function findClubs() {
+      var input = document.getElementById('interests-input').value.trim();
+
+      if (!input) {
+        alert('Please describe your interests before searching.');
+        return;
+      }
+
+      showLoadingState();
+
+      setTimeout(function() {
+        showResults(input);
+      }, 1200);
+    }
+
+    function showLoadingState() {
+      var btn = document.querySelector('.finder-hero .btn-primary');
+      btn.textContent = 'Finding clubs...';
+      btn.disabled = true;
+    }
+
+    function showResults(input) {
+      var btn = document.querySelector('.finder-hero .btn-primary');
+      btn.innerHTML = '<i data-lucide="sparkles"></i> Find Clubs';
+      btn.disabled = false;
+      lucide.createIcons();
+
+      var firstWord = input.split(' ').slice(0, 4).join(' ');
+      document.getElementById('results-desc').textContent = 'Based on: "' + firstWord + '..."';
+
+      var resultsEl = document.getElementById('finder-results');
+      resultsEl.classList.add('visible');
+
+      resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  </script>
+
+</body>
+</html>

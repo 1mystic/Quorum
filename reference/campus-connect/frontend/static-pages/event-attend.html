@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mark Attendance : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Leader</p>
+    <nav class="sidebar-menu">
+      <a href="leader-club.html" class="sidebar-item"><i data-lucide="layout-dashboard"></i> My Club</a>
+      <a href="members.html" class="sidebar-item"><i data-lucide="users-round"></i> Members</a>
+      <a href="leader-events.html" class="sidebar-item active leader"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="leader-announcements.html" class="sidebar-item"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leader-issues.html" class="sidebar-item"><i data-lucide="triangle-alert"></i> Issues</a>
+      <a href="clubs-new.html" class="sidebar-item"><i data-lucide="plus-circle"></i> Create Club</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="#" class="user-card">
+      <div class="user-avatar leader-av">AY</div>
+      <div class="user-info">
+        <p class="user-name">Aayansh Yadav</p>
+        <p class="user-sub">Leader · Robotics Club</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <button class="btn-secondary" onclick="location.href='leader-events.html'">
+        <i data-lucide="arrow-left"></i> Events
+      </button>
+      <div class="title-block">
+        <h1 class="page-title">Mark Attendance</h1>
+        <p class="page-sub">Automation Hackathon 2026 &middot; 19 Jul 2026</p>
+      </div>
+      <div class="topbar-spacer"></div>
+      <button class="btn-secondary" onclick="markAllPresent()">
+        <i data-lucide="check-check"></i> Mark All Present
+      </button>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <div class="club-profile-meta">
+        <p class="section-heading">Registered Participants</p>
+        <p class="text-note">45 registered &middot; Check each student who was physically present at the event.</p>
+      </div>
+
+      <div class="participant-list mt-16" id="participant-list">
+
+        <div class="participant-row">
+          <input type="checkbox" class="attend-checkbox" id="att-1">
+          <label for="att-1" class="participant-avatar">SK</label>
+          <div class="participant-info">
+            <p class="participant-name">Shikha Singh</p>
+            <p class="participant-sub">CS &middot; 1st Year &middot; CC-2026-0482</p>
+          </div>
+        </div>
+
+        <div class="participant-row">
+          <input type="checkbox" class="attend-checkbox" id="att-2">
+          <label for="att-2" class="participant-avatar">RA</label>
+          <div class="participant-info">
+            <p class="participant-name">Rishi Agarwal</p>
+            <p class="participant-sub">ECE &middot; 2nd Year &middot; CC-2026-0491</p>
+          </div>
+        </div>
+
+        <div class="participant-row">
+          <input type="checkbox" class="attend-checkbox" id="att-3">
+          <label for="att-3" class="participant-avatar">NP</label>
+          <div class="participant-info">
+            <p class="participant-name">Neha Pandey</p>
+            <p class="participant-sub">IT &middot; 2nd Year &middot; CC-2026-0503</p>
+          </div>
+        </div>
+
+        <div class="participant-row">
+          <input type="checkbox" class="attend-checkbox" id="att-4">
+          <label for="att-4" class="participant-avatar">AK</label>
+          <div class="participant-info">
+            <p class="participant-name">Aryan Kumar</p>
+            <p class="participant-sub">ME &middot; 3rd Year &middot; CC-2026-0517</p>
+          </div>
+        </div>
+
+        <div class="participant-row">
+          <input type="checkbox" class="attend-checkbox" id="att-5">
+          <label for="att-5" class="participant-avatar">DM</label>
+          <div class="participant-info">
+            <p class="participant-name">Divya Mishra</p>
+            <p class="participant-sub">CS &middot; 1st Year &middot; CC-2026-0528</p>
+          </div>
+        </div>
+
+        <div class="participant-row">
+          <input type="checkbox" class="attend-checkbox" id="att-6">
+          <label for="att-6" class="participant-avatar">PV</label>
+          <div class="participant-info">
+            <p class="participant-name">Pratham Verma</p>
+            <p class="participant-sub">ECE &middot; 1st Year &middot; CC-2026-0534</p>
+          </div>
+        </div>
+
+        <div class="participant-row">
+          <input type="checkbox" class="attend-checkbox" id="att-7">
+          <label for="att-7" class="participant-avatar">SJ</label>
+          <div class="participant-info">
+            <p class="participant-name">Simran Joshi</p>
+            <p class="participant-sub">CS &middot; 3rd Year &middot; CC-2026-0541</p>
+          </div>
+        </div>
+
+        <div class="participant-row">
+          <input type="checkbox" class="attend-checkbox" id="att-8">
+          <label for="att-8" class="participant-avatar">VT</label>
+          <div class="participant-info">
+            <p class="participant-name">Varun Tiwari</p>
+            <p class="participant-sub">IT &middot; 2nd Year &middot; CC-2026-0556</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="event-action-bar">
+        <p class="text-note" id="checked-count">0 of 8 marked present</p>
+        <button class="btn-primary" onclick="submitAttendance()">
+          <i data-lucide="save"></i> Save Attendance
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function updateCount() {
+      var all = document.querySelectorAll('.attend-checkbox');
+      var checked = 0;
+      for (var i = 0; i < all.length; i++) {
+        if (all[i].checked) {
+          checked++;
+        }
+      }
+      document.getElementById('checked-count').textContent = checked + ' of ' + all.length + ' marked present';
+    }
+
+    function markAllPresent() {
+      var all = document.querySelectorAll('.attend-checkbox');
+      for (var i = 0; i < all.length; i++) {
+        all[i].checked = true;
+      }
+      updateCount();
+    }
+
+    function submitAttendance() {
+      var all = document.querySelectorAll('.attend-checkbox');
+      var checked = 0;
+      for (var i = 0; i < all.length; i++) {
+        if (all[i].checked) {
+          checked++;
+        }
+      }
+      if (checked === 0) {
+        alert('Please mark at least one participant as present.');
+        return;
+      }
+      alert('Attendance saved for ' + checked + ' participants. Now set results on the Results page.');
+      window.location.href = 'event-results.html';
+    }
+
+    var checkboxes = document.querySelectorAll('.attend-checkbox');
+    for (var i = 0; i < checkboxes.length; i++) {
+      checkboxes[i].addEventListener('change', updateCount);
+    }
+  </script>
+
+</body>
+</html>

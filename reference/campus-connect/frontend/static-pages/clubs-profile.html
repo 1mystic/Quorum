@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robotics & Automation Club : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark">
+        <i data-lucide="graduation-cap"></i>
+      </div>
+      <span class="brand">Campus Connect</span>
+    </div>
+
+    <p class="nav-label">Menu</p>
+
+    <nav class="sidebar-menu">
+      <a href="clubs.html" class="sidebar-item active student">
+        <i data-lucide="compass"></i> Clubs
+      </a>
+      <a href="events.html" class="sidebar-item">
+        <i data-lucide="calendar-days"></i> Events
+      </a>
+      <a href="announcements.html" class="sidebar-item">
+        <i data-lucide="megaphone"></i> Announcements
+      </a>
+      <a href="leaderboard.html" class="sidebar-item">
+        <i data-lucide="trophy"></i> Leaderboard
+      </a>
+      <a href="find-clubs.html" class="sidebar-item">
+        <i data-lucide="sparkles"></i> AI Finder
+      </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <a href="profile.html" class="user-card">
+      <div class="user-avatar student-av">SK</div>
+      <div class="user-info">
+        <p class="user-name">Shikha Singh</p>
+        <p class="user-sub">CS · 1st Year</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <button class="btn-secondary" onclick="location.href='clubs.html'">
+        <i data-lucide="arrow-left"></i> Back to Clubs
+      </button>
+
+      <div class="title-block">
+        <h1 class="page-title">Robotics & Automation Club</h1>
+        <p class="page-sub">Tech · KNIT Sultanpur</p>
+      </div>
+
+      <div class="topbar-spacer"></div>
+
+      <button class="btn-join" id="join-btn" onclick="handleJoinRequest()">
+        <i data-lucide="user-plus"></i> Request to Join
+      </button>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <!-- Club header card -->
+      <div>
+        <div class="club-profile-banner banner-orange">
+          <div class="club-card-circle-1"></div>
+          <div class="club-card-circle-2"></div>
+          <div class="club-card-circle-3"></div>
+          <div class="club-profile-icon">&#129302;</div>
+        </div>
+        <div class="club-profile-meta">
+          <p class="club-profile-name">Robotics & Automation Club</p>
+          <div class="club-profile-sub">
+            <span class="cat-chip">Tech</span>
+            <span><i data-lucide="map-pin"></i> KNIT Sultanpur</span>
+            <span><i data-lucide="users"></i> 84 members</span>
+          </div>
+          <p id="join-status-text" class="join-status-text hidden"></p>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="club-stats-row">
+        <div class="club-stat-card">
+          <p class="club-stat-num">84</p>
+          <p class="club-stat-label">Members</p>
+        </div>
+        <div class="club-stat-card">
+          <p class="club-stat-num">12</p>
+          <p class="club-stat-label">Events Run</p>
+        </div>
+        <div class="club-stat-card">
+          <p class="club-stat-num">2019</p>
+          <p class="club-stat-label">Founded</p>
+        </div>
+      </div>
+
+      <!-- About -->
+      <div class="card">
+        <p class="section-heading">About</p>
+        <p>We are a student-run community focused on robotics, embedded systems, and automation. Our members participate in national-level robotics competitions, build IoT projects, and run weekly hands-on workshops. Whether you have zero experience or are already building things, you will find a project to contribute to.</p>
+      </div>
+
+      <!-- Upcoming events -->
+      <div>
+        <p class="section-heading">Upcoming Events</p>
+        <div class="club-event-list">
+
+        <div class="club-event-row">
+          <div class="club-event-date-box">
+            <span class="club-event-date-day">12</span>
+            <span class="club-event-date-month">Jul</span>
+          </div>
+          <div class="club-event-info">
+            <p class="club-event-title">Line Follower Robot Build</p>
+            <p class="club-event-sub">Workshop · Main Lab · 3:00 PM</p>
+          </div>
+          <button class="btn-secondary-sm" onclick="alert('Register for this event from the Events page.')">
+            Register
+          </button>
+        </div>
+
+        <div class="club-event-row">
+          <div class="club-event-date-box">
+            <span class="club-event-date-day">19</span>
+            <span class="club-event-date-month">Jul</span>
+          </div>
+          <div class="club-event-info">
+            <p class="club-event-title">Automation Hackathon 2026</p>
+            <p class="club-event-sub">Hackathon · Seminar Hall · 9:00 AM</p>
+          </div>
+          <button class="btn-secondary-sm" onclick="alert('Register for this event from the Events page.')">
+            Register
+          </button>
+        </div>
+
+        <div class="club-event-row">
+          <div class="club-event-date-box">
+            <span class="club-event-date-day">28</span>
+            <span class="club-event-date-month">Jul</span>
+          </div>
+          <div class="club-event-info">
+            <p class="club-event-title">Introduction to Arduino</p>
+            <p class="club-event-sub">Workshop · Electronics Lab · 2:00 PM</p>
+          </div>
+          <button class="btn-secondary-sm" onclick="alert('Register for this event from the Events page.')">
+            Register
+          </button>
+        </div>
+
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    var joinState = 'none';
+
+    function handleJoinRequest() {
+      if (joinState === 'pending') return;
+
+      joinState = 'pending';
+
+      var joinBtn = document.getElementById('join-btn');
+      joinBtn.classList.add('pending');
+      joinBtn.innerHTML = '<i data-lucide="clock"></i> Request Sent';
+      lucide.createIcons();
+
+      var statusText = document.getElementById('join-status-text');
+      statusText.textContent = 'Your join request is pending approval from the club leader.';
+      statusText.classList.remove('hidden');
+    }
+  </script>
+
+</body>
+</html>

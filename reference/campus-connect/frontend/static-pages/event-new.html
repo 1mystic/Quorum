@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create Event : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Leader</p>
+    <nav class="sidebar-menu">
+      <a href="leader-club.html" class="sidebar-item"><i data-lucide="layout-dashboard"></i> My Club</a>
+      <a href="members.html" class="sidebar-item"><i data-lucide="users-round"></i> Members</a>
+      <a href="leader-events.html" class="sidebar-item active leader"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="leader-announcements.html" class="sidebar-item"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leader-issues.html" class="sidebar-item"><i data-lucide="triangle-alert"></i> Issues</a>
+      <a href="clubs-new.html" class="sidebar-item"><i data-lucide="plus-circle"></i> Create Club</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="#" class="user-card">
+      <div class="user-avatar leader-av">AY</div>
+      <div class="user-info">
+        <p class="user-name">Aayansh Yadav</p>
+        <p class="user-sub">Leader · Robotics Club</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <button class="btn-secondary" onclick="location.href='leader-events.html'">
+        <i data-lucide="arrow-left"></i> Events
+      </button>
+      <div class="title-block">
+        <h1 class="page-title">Create a New Event</h1>
+        <p class="page-sub">Robotics & Automation Club</p>
+      </div>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <div class="form-guide-grid">
+
+        <div class="form-card">
+          <p class="form-card-title">Event Details</p>
+
+          <div class="form-group">
+            <label for="event-title">Event Title</label>
+            <input type="text" id="event-title" class="input-field" placeholder="e.g. Automation Hackathon 2026">
+          </div>
+
+          <div class="form-group">
+            <label for="event-type">Event Type</label>
+            <select id="event-type" class="select-field">
+              <option value="">Select type</option>
+              <option value="Workshop">Workshop</option>
+              <option value="Hackathon">Hackathon</option>
+              <option value="Competition">Competition</option>
+              <option value="Social">Social / Open Mic</option>
+              <option value="Talk">Talk / Seminar</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="event-desc">Description</label>
+            <textarea id="event-desc" class="textarea-field" rows="4" placeholder="What will happen at this event? What should attendees bring or prepare?"></textarea>
+          </div>
+
+          <div class="grid-2-tight">
+            <div class="form-group">
+              <label for="event-date">Date</label>
+              <input type="date" id="event-date" class="input-field">
+            </div>
+            <div class="form-group">
+              <label for="event-capacity">Max Participants</label>
+              <input type="number" id="event-capacity" class="input-field" placeholder="80" min="1">
+            </div>
+          </div>
+
+          <div class="grid-2-tight">
+            <div class="form-group">
+              <label for="event-start">Start Time</label>
+              <input type="time" id="event-start" class="input-field">
+            </div>
+            <div class="form-group">
+              <label for="event-end">End Time</label>
+              <input type="time" id="event-end" class="input-field">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="event-venue">Venue</label>
+            <input type="text" id="event-venue" class="input-field" placeholder="e.g. Seminar Hall, Block A">
+          </div>
+
+          <button class="btn-primary" onclick="publishEvent()">
+            <i data-lucide="send"></i> Publish Event
+          </button>
+        </div>
+
+        <div class="guide-card">
+          <p class="guide-card-title">Publishing checklist</p>
+          <div class="guide-step">
+            <span class="guide-step-num">1</span>
+            <span>Fill in all fields. A clear description gets better registrations.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num">2</span>
+            <span>Set a realistic capacity. Registered students receive a confirmation ID.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num">3</span>
+            <span>Once published, all members of your club can see and register for the event.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num">4</span>
+            <span>On the day, use the Attendance page to mark who actually showed up.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num">5</span>
+            <span>After the event, set results. Certificates are auto-generated for all attendees.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num guide-step-warn">!</span>
+            <span>You can edit or cancel the event anytime before it starts.</span>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function getFormValues() {
+      return {
+        title:    document.getElementById('event-title').value.trim(),
+        type:     document.getElementById('event-type').value,
+        desc:     document.getElementById('event-desc').value.trim(),
+        date:     document.getElementById('event-date').value,
+        capacity: document.getElementById('event-capacity').value,
+        start:    document.getElementById('event-start').value,
+        end:      document.getElementById('event-end').value,
+        venue:    document.getElementById('event-venue').value.trim()
+      };
+    }
+
+    function publishEvent() {
+      var form = getFormValues();
+
+      if (!form.title || !form.type || !form.desc || !form.date || !form.capacity || !form.venue) {
+        alert('Please fill in all required fields before publishing.');
+        return;
+      }
+
+      // In production this calls POST /api/v1/events
+      alert('Event published! Members can now register.');
+      window.location.href = 'leader-events.html';
+    }
+  </script>
+
+</body>
+</html>

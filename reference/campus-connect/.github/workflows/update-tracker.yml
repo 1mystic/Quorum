@@ -1,0 +1,43 @@
+name: Update GitHub Tracker
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+  push:
+    branches: ["dev", "main"]
+  pull_request:
+    types: [opened, closed, reopened]
+  issues:
+    types: [opened, closed, reopened, labeled]
+  create:
+  delete:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate tracker
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: python generate_tracker.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add github-tracker.md
+          git diff --staged --quiet || git commit -m "chore: auto-update github tracker [skip ci]"
+          git push

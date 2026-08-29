@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f2f1f7; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0;">{% block preview %}{% endblock %}</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+         style="background-color:#f2f1f7; padding:32px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+               style="max-width:560px; background-color:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e3e1ee;">
+          <tr>
+            <td style="background-color:#4c35b3; padding:22px 32px;">
+              <span style="color:#ffffff; font-size:18px; font-weight:bold; letter-spacing:0.5px;">{{ app_name }}</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px;">
+              {% block content %}{% endblock %}
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#faf9fd; padding:20px 32px; border-top:1px solid #e3e1ee;">
+              <p style="margin:0; color:#6b6880; font-size:12px; line-height:18px;">
+                {% block footer %}This is an automated message from {{ app_name }}. Please do not reply.{% endblock %}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Colleges : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Admin</p>
+    <nav class="sidebar-menu">
+      <a href="admin.html" class="sidebar-item"><i data-lucide="layout-dashboard"></i> Overview</a>
+      <a href="admin-approvals.html" class="sidebar-item"><i data-lucide="check-circle-2"></i> Approvals</a>
+      <a href="admin-colleges.html" class="sidebar-item active admin"><i data-lucide="building-2"></i> Colleges</a>
+      <a href="#" class="sidebar-item"><i data-lucide="settings"></i> Settings</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="#" class="user-card">
+      <div class="user-avatar admin-av">SA</div>
+      <div class="user-info">
+        <p class="user-name">Student Affairs</p>
+        <p class="user-sub">Admin &middot; KNIT Sultanpur</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">Colleges</h1>
+        <p class="page-sub">Platform configuration for KNIT Sultanpur</p>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="bell-btn" onclick="alert('No new notifications.')">
+        <i data-lucide="bell"></i>
+      </div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <!-- Platform Stats -->
+      <div class="stats-grid">
+        <div class="stat-card blue-stat">
+          <div class="stat-header">
+            <div class="stat-icon"><i data-lucide="users"></i></div>
+          </div>
+          <p class="stat-num">1,243</p>
+          <p class="stat-label">Total Students</p>
+        </div>
+        <div class="stat-card green-stat">
+          <div class="stat-header">
+            <div class="stat-icon"><i data-lucide="layers"></i></div>
+          </div>
+          <p class="stat-num">18</p>
+          <p class="stat-label">Active Clubs</p>
+        </div>
+        <div class="stat-card pink-stat">
+          <div class="stat-header">
+            <div class="stat-icon"><i data-lucide="calendar-check"></i></div>
+          </div>
+          <p class="stat-num">47</p>
+          <p class="stat-label">Events This Month</p>
+        </div>
+      </div>
+
+      <!-- Current College Card -->
+      <div>
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">Registered College</h2>
+          <span class="status-pill approved">Active</span>
+        </div>
+
+        <div class="card">
+          <div class="approval-card" style="">
+            <div class="approval-club-icon banner-blue">&#127979;</div>
+            <div class="approval-info">
+              <p class="approval-club-name">KNIT Sultanpur</p>
+              <p class="approval-meta">Kamla Nehru Institute of Technology &middot; Sultanpur, Uttar Pradesh &middot; Active since 2024 &middot; Domain: @knit.ac.in</p>
+            </div>
+            <div class="approval-actions">
+              <span class="status-pill approved">Active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- College Settings Form -->
+      <div>
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">College Settings</h2>
+        </div>
+        <div class="admin-settings-card">
+          <div class="admin-settings-grid">
+            <div class="form-group">
+              <label for="college-name">College Name</label>
+              <input type="text" id="college-name" class="input-field" value="KNIT Sultanpur">
+            </div>
+            <div class="form-group">
+              <label for="full-name">Full Official Name</label>
+              <input type="text" id="full-name" class="input-field" value="Kamla Nehru Institute of Technology">
+            </div>
+            <div class="form-group">
+              <label for="email-domain">Verified Student Email Domain</label>
+              <input type="text" id="email-domain" class="input-field" value="@knit.ac.in">
+            </div>
+            <div class="form-group">
+              <label for="admin-email">Admin Contact Email</label>
+              <input type="email" id="admin-email" class="input-field" value="studentaffairs@knit.ac.in">
+            </div>
+            <div class="form-group">
+              <label for="city">City</label>
+              <input type="text" id="city" class="input-field" value="Sultanpur">
+            </div>
+            <div class="form-group">
+              <label for="state">State</label>
+              <input type="text" id="state" class="input-field" value="Uttar Pradesh">
+            </div>
+            <div class="form-group">
+              <label for="max-clubs">Maximum Clubs Allowed</label>
+              <input type="number" id="max-clubs" class="input-field" value="30">
+            </div>
+            <div class="form-group">
+              <label for="max-members">Max Members per Club</label>
+              <input type="number" id="max-members" class="input-field" value="200">
+            </div>
+          </div>
+          <button class="btn-primary" onclick="saveSettings()">
+            <i data-lucide="save"></i> Save Settings
+          </button>
+        </div>
+      </div>
+
+      <!-- Club Category Management -->
+      <div>
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">Allowed Club Categories</h2>
+        </div>
+        <div class="card">
+          <p class="body-text" style="">Configure which club categories students can register under at your institution.</p>
+          <div class="clubs-section-header" style="margin-top: 14px; flex-wrap: wrap; gap: 8px;">
+            <span class="cat-chip">Tech</span>
+            <span class="cat-chip">Culture</span>
+            <span class="cat-chip">Sports</span>
+            <span class="cat-chip">Arts</span>
+            <span class="cat-chip">Science</span>
+            <span class="cat-chip">Social</span>
+            <span class="cat-chip">Business</span>
+            <span class="cat-chip">Literary</span>
+          </div>
+          <button class="btn-secondary" onclick="alert('Category management will be available after the backend is connected.')" style="margin-top: 16px;">
+            <i data-lucide="pencil"></i> Manage Categories
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function saveSettings() {
+      var collegeName = document.getElementById('college-name').value.trim();
+      var domain = document.getElementById('email-domain').value.trim();
+
+      if (!collegeName || !domain) {
+        alert('College name and email domain are required.');
+        return;
+      }
+
+      alert('College settings saved successfully.');
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Profile : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Menu</p>
+    <nav class="sidebar-menu">
+      <a href="clubs.html" class="sidebar-item"><i data-lucide="compass"></i> Clubs</a>
+      <a href="events.html" class="sidebar-item"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="announcements.html" class="sidebar-item"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leaderboard.html" class="sidebar-item"><i data-lucide="trophy"></i> Leaderboard</a>
+      <a href="find-clubs.html" class="sidebar-item"><i data-lucide="sparkles"></i> AI Finder</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="profile.html" class="user-card active student">
+      <div class="user-avatar student-av">SK</div>
+      <div class="user-info">
+        <p class="user-name">Shikha Singh</p>
+        <p class="user-sub">CS &middot; 1st Year</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">My Profile</h1>
+        <p class="page-sub">Certificates, results, and activity</p>
+      </div>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <!-- Hero card -->
+      <div class="profile-hero">
+        <div class="profile-avatar-lg">SK</div>
+        <div class="profile-hero-info">
+          <p class="profile-name">Shikha Singh</p>
+          <div class="profile-tags">
+            <span class="profile-tag">Computer Science</span>
+            <span class="profile-tag">1st Year</span>
+            <span class="profile-tag">KNIT Sultanpur</span>
+            <span class="profile-tag">Joined Jun 2026</span>
+          </div>
+        </div>
+        <div class="profile-hero-stats">
+          <div class="profile-stat">
+            <p class="profile-stat-num">3</p>
+            <p class="profile-stat-label">Clubs</p>
+          </div>
+          <div class="profile-stat">
+            <p class="profile-stat-num">5</p>
+            <p class="profile-stat-label">Events</p>
+          </div>
+          <div class="profile-stat">
+            <p class="profile-stat-num">2</p>
+            <p class="profile-stat-label">Certs</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificates -->
+      <div>
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">Certificates Earned</h2>
+          <a href="verify-cert.html" class="clubs-section-link">
+            <i data-lucide="external-link"></i> Verify a certificate
+          </a>
+        </div>
+
+        <div class="cert-grid">
+
+          <div class="cert-card">
+            <p class="cert-event-name">Photography Walk: Old City</p>
+            <p class="cert-club-tag">Photography Circle &middot; 8 Jul 2026</p>
+            <div class="result-badge participant">
+              <i data-lucide="award"></i> Participant
+            </div>
+            <div class="cert-footer">
+              <span class="cert-serial">CC-CERT-2026-1841</span>
+              <a href="view-cert.html?name=Shikha+Singh&event=Photography+Walk:+Old+City&club=Photography+Circle&result=participant&date=8+July+2026&serial=CC-CERT-2026-1841" target="_blank" class="cert-verify-link">
+                View <i data-lucide="external-link"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="cert-card">
+            <p class="cert-event-name">Open Mic Night &mdash; Spring Edition</p>
+            <p class="cert-club-tag">Music Collective &middot; 15 Mar 2026</p>
+            <div class="result-badge participant">
+              <i data-lucide="award"></i> Participant
+            </div>
+            <div class="cert-footer">
+              <span class="cert-serial">CC-CERT-2026-0293</span>
+              <a href="view-cert.html?name=Shikha+Singh&event=Open+Mic+Night+Spring+Edition&club=Music+Collective&result=participant&date=15+March+2026&serial=CC-CERT-2026-0293" target="_blank" class="cert-verify-link">
+                View <i data-lucide="external-link"></i>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Event history -->
+      <div>
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">Event History</h2>
+          <span class="clubs-count-text">5 events attended</span>
+        </div>
+
+        <div class="announce-feed">
+
+          <div class="event-history-row">
+            <div class="event-history-date">
+              <span class="event-history-day">8</span>
+              <span class="event-history-month">Jul</span>
+            </div>
+            <div class="event-history-info">
+              <p class="event-history-title">Photography Walk: Old City</p>
+              <p class="event-history-club">Photography Circle</p>
+            </div>
+            <div class="result-badge participant">
+              <i data-lucide="award"></i> Participant
+            </div>
+          </div>
+
+          <div class="event-history-row">
+            <div class="event-history-date">
+              <span class="event-history-day">10</span>
+              <span class="event-history-month">Jul</span>
+            </div>
+            <div class="event-history-info">
+              <p class="event-history-title">Open Mic Night</p>
+              <p class="event-history-club">Music Collective</p>
+            </div>
+            <span class="event-status registered">Registered</span>
+          </div>
+
+          <div class="event-history-row">
+            <div class="event-history-date">
+              <span class="event-history-day">15</span>
+              <span class="event-history-month">Mar</span>
+            </div>
+            <div class="event-history-info">
+              <p class="event-history-title">Open Mic Night &mdash; Spring Edition</p>
+              <p class="event-history-club">Music Collective</p>
+            </div>
+            <div class="result-badge participant">
+              <i data-lucide="award"></i> Participant
+            </div>
+          </div>
+
+          <div class="event-history-row">
+            <div class="event-history-date">
+              <span class="event-history-day">2</span>
+              <span class="event-history-month">Feb</span>
+            </div>
+            <div class="event-history-info">
+              <p class="event-history-title">Robot Line Follower Workshop</p>
+              <p class="event-history-club">Robotics &amp; Automation Club</p>
+            </div>
+            <div class="result-badge participant">
+              <i data-lucide="award"></i> Participant
+            </div>
+          </div>
+
+          <div class="event-history-row">
+            <div class="event-history-date">
+              <span class="event-history-day">20</span>
+              <span class="event-history-month">Jan</span>
+            </div>
+            <div class="event-history-info">
+              <p class="event-history-title">Freshers Welcome Hack</p>
+              <p class="event-history-club">Coding Society</p>
+            </div>
+            <div class="result-badge participant">
+              <i data-lucide="award"></i> Participant
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+
+</body>
+</html>

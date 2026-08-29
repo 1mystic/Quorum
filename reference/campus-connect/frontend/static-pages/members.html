@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Members : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Leader</p>
+    <nav class="sidebar-menu">
+      <a href="leader-club.html" class="sidebar-item"><i data-lucide="layout-dashboard"></i> My Club</a>
+      <a href="members.html" class="sidebar-item active leader"><i data-lucide="users-round"></i> Members</a>
+      <a href="leader-events.html" class="sidebar-item"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="leader-announcements.html" class="sidebar-item"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leader-issues.html" class="sidebar-item"><i data-lucide="triangle-alert"></i> Issues</a>
+      <a href="clubs-new.html" class="sidebar-item"><i data-lucide="plus-circle"></i> Create Club</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="#" class="user-card">
+      <div class="user-avatar leader-av">AY</div>
+      <div class="user-info">
+        <p class="user-name">Aayansh Yadav</p>
+        <p class="user-sub">Leader · Robotics Club</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">Members</h1>
+        <p class="page-sub">Robotics &amp; Automation Club</p>
+      </div>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card green-stat">
+          <div class="stat-header">
+            <div class="stat-icon"><i data-lucide="users"></i></div>
+          </div>
+          <p class="stat-num" id="total-count">84</p>
+          <p class="stat-label">Total Members</p>
+        </div>
+        <div class="stat-card blue-stat">
+          <div class="stat-header">
+            <div class="stat-icon"><i data-lucide="clock"></i></div>
+          </div>
+          <p class="stat-num" id="pending-count">3</p>
+          <p class="stat-label">Pending Requests</p>
+        </div>
+        <div class="stat-card pink-stat">
+          <div class="stat-header">
+            <div class="stat-icon"><i data-lucide="shield-check"></i></div>
+          </div>
+          <p class="stat-num">2</p>
+          <p class="stat-label">Officers</p>
+        </div>
+      </div>
+
+      <!-- Pending Join Requests -->
+      <div>
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">Pending Join Requests</h2>
+          <span class="status-pill pending" id="pending-badge">3 pending</span>
+        </div>
+
+        <div class="approval-list" id="requests-list">
+
+          <div class="member-request-card" id="req-1">
+            <div class="member-req-avatar">PS</div>
+            <div class="member-req-info">
+              <p class="member-req-name">Priya Sharma</p>
+              <p class="member-req-sub">Computer Science &middot; 2nd Year &middot; Requested 1 day ago</p>
+            </div>
+            <div class="member-req-actions">
+              <span class="status-pill pending" id="req-status-1">Pending</span>
+              <button class="btn-success" onclick="approveRequest(1)">
+                <i data-lucide="check"></i> Approve
+              </button>
+              <button class="btn-danger" onclick="rejectRequest(1)">
+                <i data-lucide="x"></i> Reject
+              </button>
+            </div>
+          </div>
+
+          <div class="member-request-card" id="req-2">
+            <div class="member-req-avatar">RG</div>
+            <div class="member-req-info">
+              <p class="member-req-name">Rahul Gupta</p>
+              <p class="member-req-sub">Electronics &middot; 1st Year &middot; Requested 2 days ago</p>
+            </div>
+            <div class="member-req-actions">
+              <span class="status-pill pending" id="req-status-2">Pending</span>
+              <button class="btn-success" onclick="approveRequest(2)">
+                <i data-lucide="check"></i> Approve
+              </button>
+              <button class="btn-danger" onclick="rejectRequest(2)">
+                <i data-lucide="x"></i> Reject
+              </button>
+            </div>
+          </div>
+
+          <div class="member-request-card" id="req-3">
+            <div class="member-req-avatar">AD</div>
+            <div class="member-req-info">
+              <p class="member-req-name">Ananya Das</p>
+              <p class="member-req-sub">Information Technology &middot; 3rd Year &middot; Requested 3 days ago</p>
+            </div>
+            <div class="member-req-actions">
+              <span class="status-pill pending" id="req-status-3">Pending</span>
+              <button class="btn-success" onclick="approveRequest(3)">
+                <i data-lucide="check"></i> Approve
+              </button>
+              <button class="btn-danger" onclick="rejectRequest(3)">
+                <i data-lucide="x"></i> Reject
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Active Members -->
+      <div>
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">Active Members</h2>
+          <span class="clubs-count-text">Showing 6 of 84</span>
+        </div>
+
+        <div class="member-list">
+
+          <div class="member-row">
+            <div class="member-avatar">SK</div>
+            <div class="member-info">
+              <p class="member-name">Shikha Singh</p>
+              <p class="member-sub">Computer Science &middot; 1st Year &middot; Joined Jun 2026</p>
+            </div>
+            <span class="member-role-badge member">Member</span>
+            <button class="member-remove-btn" onclick="removeMember('Shikha Singh')">Remove</button>
+          </div>
+
+          <div class="member-row">
+            <div class="member-avatar">RA</div>
+            <div class="member-info">
+              <p class="member-name">Rishi Agarwal</p>
+              <p class="member-sub">Electronics &middot; 2nd Year &middot; Joined Jan 2026</p>
+            </div>
+            <span class="member-role-badge officer">Officer</span>
+            <button class="member-remove-btn" onclick="removeMember('Rishi Agarwal')">Remove</button>
+          </div>
+
+          <div class="member-row">
+            <div class="member-avatar">NP</div>
+            <div class="member-info">
+              <p class="member-name">Neha Pandey</p>
+              <p class="member-sub">Information Technology &middot; 2nd Year &middot; Joined Feb 2026</p>
+            </div>
+            <span class="member-role-badge member">Member</span>
+            <button class="member-remove-btn" onclick="removeMember('Neha Pandey')">Remove</button>
+          </div>
+
+          <div class="member-row">
+            <div class="member-avatar">AK</div>
+            <div class="member-info">
+              <p class="member-name">Aryan Kumar</p>
+              <p class="member-sub">Mechanical Engg &middot; 3rd Year &middot; Joined Sep 2025</p>
+            </div>
+            <span class="member-role-badge officer">Officer</span>
+            <button class="member-remove-btn" onclick="removeMember('Aryan Kumar')">Remove</button>
+          </div>
+
+          <div class="member-row">
+            <div class="member-avatar">DM</div>
+            <div class="member-info">
+              <p class="member-name">Divya Mishra</p>
+              <p class="member-sub">Computer Science &middot; 1st Year &middot; Joined Jun 2026</p>
+            </div>
+            <span class="member-role-badge member">Member</span>
+            <button class="member-remove-btn" onclick="removeMember('Divya Mishra')">Remove</button>
+          </div>
+
+          <div class="member-row">
+            <div class="member-avatar">VT</div>
+            <div class="member-info">
+              <p class="member-name">Varun Tiwari</p>
+              <p class="member-sub">Information Technology &middot; 2nd Year &middot; Joined Mar 2026</p>
+            </div>
+            <span class="member-role-badge member">Member</span>
+            <button class="member-remove-btn" onclick="removeMember('Varun Tiwari')">Remove</button>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    var pendingCount = 3;
+
+    function updatePendingBadge() {
+      document.getElementById('pending-count').textContent = pendingCount;
+      document.getElementById('pending-badge').textContent = pendingCount + ' pending';
+    }
+
+    function approveRequest(id) {
+      var card = document.getElementById('req-' + id);
+      var statusEl = document.getElementById('req-status-' + id);
+      var actions = card.querySelector('.member-req-actions');
+
+      card.classList.add('approved-member');
+      actions.innerHTML = '<span class="status-pill approved">Approved</span>';
+
+      pendingCount = Math.max(0, pendingCount - 1);
+      updatePendingBadge();
+    }
+
+    function rejectRequest(id) {
+      var card = document.getElementById('req-' + id);
+      var actions = card.querySelector('.member-req-actions');
+
+      card.classList.add('rejected-member');
+      actions.innerHTML = '<span class="status-pill rejected">Rejected</span>';
+
+      pendingCount = Math.max(0, pendingCount - 1);
+      updatePendingBadge();
+    }
+
+    function removeMember(name) {
+      var confirmed = confirm('Remove ' + name + ' from the club? They will need to re-apply to rejoin.');
+      if (!confirmed) return;
+      alert(name + ' has been removed from the club.');
+    }
+  </script>
+
+</body>
+</html>

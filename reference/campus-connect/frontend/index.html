@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campus Connect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Themed boot loader shown until Vue mounts and replaces #app content -->
+      <div class="app-boot">
+        <div class="app-boot-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+            <path d="M6 12v5c3 3 9 3 12 0v-5" />
+          </svg>
+        </div>
+        <div class="app-boot-spinner"></div>
+      </div>
+      <style>
+        .app-boot {
+          position: fixed;
+          inset: 0;
+          background-color: #FCFBFA;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 22px;
+        }
+        .app-boot-mark {
+          width: 52px;
+          height: 52px;
+          border-radius: 15px;
+          background-color: #5BA869;
+          color: #10301A;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 10px 24px rgba(91, 168, 105, 0.28);
+        }
+        .app-boot-mark svg { width: 28px; height: 28px; }
+        .app-boot-spinner {
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          border: 3px solid rgba(239, 123, 69, 0.2);
+          border-top-color: #EF7B45;
+          animation: app-boot-spin 0.7s linear infinite;
+        }
+        @keyframes app-boot-spin {
+          to { transform: rotate(360deg); }
+        }
+      </style>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

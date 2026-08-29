@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Announcements : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Menu</p>
+    <nav class="sidebar-menu">
+      <a href="clubs.html" class="sidebar-item"><i data-lucide="compass"></i> Clubs</a>
+      <a href="events.html" class="sidebar-item"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="announcements.html" class="sidebar-item active student"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leaderboard.html" class="sidebar-item"><i data-lucide="trophy"></i> Leaderboard</a>
+      <a href="find-clubs.html" class="sidebar-item"><i data-lucide="sparkles"></i> AI Finder</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="profile.html" class="user-card">
+      <div class="user-avatar student-av">SK</div>
+      <div class="user-info">
+        <p class="user-name">Shikha Singh</p>
+        <p class="user-sub">CS &middot; 1st Year</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">Announcements</h1>
+        <p class="page-sub">Updates from your clubs</p>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="bell-btn" onclick="alert('No new notifications.')">
+        <i data-lucide="bell"></i>
+      </div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <div class="announce-layout">
+
+        <!-- Filter chips -->
+        <div>
+          <div class="filter-chips-row">
+            <button class="filter-chip active" onclick="selectChip(this, 'all')">All</button>
+            <button class="filter-chip" onclick="selectChip(this, 'pinned')">Pinned</button>
+            <button class="filter-chip" onclick="selectChip(this, 'tech')">Tech</button>
+            <button class="filter-chip" onclick="selectChip(this, 'culture')">Culture</button>
+            <button class="filter-chip" onclick="selectChip(this, 'event')">Events</button>
+          </div>
+
+          <!-- Feed -->
+          <div class="announce-feed" id="announce-feed">
+
+            <!-- Card 1: pinned + unread -->
+            <div class="announce-card pinned" data-category="tech">
+              <div class="announce-unread-dot"></div>
+              <div class="announce-club-row">
+                <div class="announce-dot banner-orange">&#129302;</div>
+                <div class="announce-club-info">
+                  <p class="announce-club-name">Robotics &amp; Automation Club</p>
+                  <p class="announce-time">2 hours ago</p>
+                </div>
+                <span class="announce-pin-badge">
+                  <i data-lucide="pin"></i> Pinned
+                </span>
+              </div>
+              <p class="announce-title">Hackathon preparations: what to bring on the day</p>
+              <p class="announce-body">
+                The Automation Hackathon is on 19 July. Please arrive by 8:45 AM at Seminar Hall, Block A for check-in. Bring your student ID and your Registration ID (CC-2026-XXXX). Teams of 2 to 4 are confirmed at the gate. Laptops with Arduino IDE pre-installed are strongly recommended. Power strips will be provided per table.
+              </p>
+              <div class="announce-footer">
+                <span class="announce-tag">Hackathon</span>
+                <span class="announce-tag">Important</span>
+              </div>
+            </div>
+
+            <!-- Card 2: unread, culture -->
+            <div class="announce-card" data-category="culture">
+              <div class="announce-unread-dot"></div>
+              <div class="announce-club-row">
+                <div class="announce-dot banner-yellow">&#127925;</div>
+                <div class="announce-club-info">
+                  <p class="announce-club-name">Music Collective</p>
+                  <p class="announce-time">Yesterday at 5:30 PM</p>
+                </div>
+              </div>
+              <p class="announce-title">Open Mic Night is this Friday &mdash; last call for performers</p>
+              <p class="announce-body">
+                We still have 3 open slots for performers at Open Mic Night (Jul 10, Amphitheatre, 6 PM). If you want to sing, recite, or play an instrument for 5 to 8 minutes, reply to this announcement or DM the club email before Thursday midnight. Audience registrations are open until capacity fills.
+              </p>
+              <div class="announce-footer">
+                <span class="announce-tag">Open Mic</span>
+                <span class="announce-tag">Culture</span>
+              </div>
+            </div>
+
+            <!-- Card 3: tech -->
+            <div class="announce-card" data-category="tech">
+              <div class="announce-club-row">
+                <div class="announce-dot banner-orange">&#129302;</div>
+                <div class="announce-club-info">
+                  <p class="announce-club-name">Robotics &amp; Automation Club</p>
+                  <p class="announce-time">3 days ago</p>
+                </div>
+              </div>
+              <p class="announce-title">New equipment now available in the Main Lab</p>
+              <p class="announce-body">
+                We have received 4 new Raspberry Pi 4 kits and a set of servo motor modules thanks to the department grant. These are available for club project use with booking. Use the equipment register sheet kept at the lab entrance. Return by the deadline noted in the register or your booking slot will be revoked.
+              </p>
+              <div class="announce-footer">
+                <span class="announce-tag">Lab</span>
+                <span class="announce-tag">Resources</span>
+              </div>
+            </div>
+
+            <!-- Card 4: event -->
+            <div class="announce-card" data-category="event">
+              <div class="announce-club-row">
+                <div class="announce-dot banner-blue">&#128247;</div>
+                <div class="announce-club-info">
+                  <p class="announce-club-name">Photography Circle</p>
+                  <p class="announce-time">5 days ago</p>
+                </div>
+              </div>
+              <p class="announce-title">Photo Walk recap &mdash; thank you for joining us</p>
+              <p class="announce-body">
+                A huge thank you to all 28 members who joined the Old City Photo Walk on 8 July. We covered Masjid Gully, the Old Clock Tower, and the riverside market at dawn. Selected shots from the walk will be featured in our next digital zine. Submit your best 3 photos to our club email by 15 July.
+              </p>
+              <div class="announce-footer">
+                <span class="announce-tag">Event Recap</span>
+                <span class="announce-tag">Photography</span>
+              </div>
+            </div>
+
+            <!-- Card 5: tech -->
+            <div class="announce-card" data-category="tech">
+              <div class="announce-club-row">
+                <div class="announce-dot banner-mint">&#128187;</div>
+                <div class="announce-club-info">
+                  <p class="announce-club-name">Coding Society</p>
+                  <p class="announce-time">1 week ago</p>
+                </div>
+              </div>
+              <p class="announce-title">Competitive programming series starts next Monday</p>
+              <p class="announce-body">
+                Starting 7 July, every Monday at 4 PM in CS Lab 2, we will run weekly competitive programming practice sessions on Codeforces. Problems will be rated 800 to 1400 for beginners and 1500 to 2000 for advanced. All skill levels welcome. Bring your laptop. First session will cover complexity analysis and greedy algorithms.
+              </p>
+              <div class="announce-footer">
+                <span class="announce-tag">Workshop</span>
+                <span class="announce-tag">Competitive</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="empty-state hidden" id="empty-state">
+            <i data-lucide="megaphone"></i>
+            <p>No announcements match this filter.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    var activeFilter = 'all';
+
+    function selectChip(clickedChip, filter) {
+      activeFilter = filter;
+      var allChips = document.querySelectorAll('.filter-chip');
+      for (var i = 0; i < allChips.length; i++) {
+        allChips[i].classList.remove('active');
+      }
+      clickedChip.classList.add('active');
+      applyFilter();
+    }
+
+    function applyFilter() {
+      var cards = document.querySelectorAll('.announce-card');
+      var visible = 0;
+
+      for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        var cat = card.getAttribute('data-category');
+        var isPinned = card.classList.contains('pinned');
+
+        var show = false;
+        if (activeFilter === 'all') {
+          show = true;
+        } else if (activeFilter === 'pinned') {
+          show = isPinned;
+        } else {
+          show = (cat === activeFilter);
+        }
+
+        if (show) {
+          card.classList.remove('hidden');
+          visible++;
+        } else {
+          card.classList.add('hidden');
+        }
+      }
+
+      var emptyState = document.getElementById('empty-state');
+      if (visible === 0) {
+        emptyState.classList.remove('hidden');
+        lucide.createIcons();
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+  </script>
+
+</body>
+</html>

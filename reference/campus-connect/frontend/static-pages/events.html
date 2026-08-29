@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Events : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Menu</p>
+    <nav class="sidebar-menu">
+      <a href="clubs.html" class="sidebar-item"><i data-lucide="compass"></i> Clubs</a>
+      <a href="events.html" class="sidebar-item active student"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="announcements.html" class="sidebar-item"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leaderboard.html" class="sidebar-item"><i data-lucide="trophy"></i> Leaderboard</a>
+      <a href="find-clubs.html" class="sidebar-item"><i data-lucide="sparkles"></i> AI Finder</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="profile.html" class="user-card">
+      <div class="user-avatar student-av">SK</div>
+      <div class="user-info">
+        <p class="user-name">Shikha Singh</p>
+        <p class="user-sub">CS · 1st Year</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">Events</h1>
+        <p class="page-sub">Upcoming events across all your clubs</p>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="bell-btn" onclick="alert('No new notifications.')">
+        <i data-lucide="bell"></i>
+      </div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <div class="filter-chips-row">
+        <button class="filter-chip active" onclick="selectChip(this, 'all')">All Events</button>
+        <button class="filter-chip" onclick="selectChip(this, 'upcoming')">Upcoming</button>
+        <button class="filter-chip" onclick="selectChip(this, 'registered')">My Registrations</button>
+        <button class="filter-chip" onclick="selectChip(this, 'past')">Past</button>
+      </div>
+
+      <div class="events-grid" id="events-grid">
+
+        <div class="event-card" data-status="upcoming" onclick="location.href='event-detail.html'">
+          <div class="event-card-accent banner-orange"></div>
+          <div class="event-card-date-box">
+            <span class="event-date-day">12</span>
+            <span class="event-date-month">Jul</span>
+          </div>
+          <div class="event-card-body">
+            <div>
+              <p class="event-card-title">Line Follower Robot Build</p>
+              <p class="event-card-club">Robotics & Automation Club</p>
+              <div class="event-card-meta">
+                <span><i data-lucide="clock"></i> 3:00 PM</span>
+                <span><i data-lucide="map-pin"></i> Main Lab</span>
+              </div>
+            </div>
+            <div class="event-card-footer">
+              <span class="event-status upcoming">Upcoming</span>
+              <span class="club-card-members"><i data-lucide="users"></i> 30 / 50</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-card" data-status="upcoming" onclick="location.href='event-detail.html'">
+          <div class="event-card-accent banner-orange"></div>
+          <div class="event-card-date-box">
+            <span class="event-date-day">19</span>
+            <span class="event-date-month">Jul</span>
+          </div>
+          <div class="event-card-body">
+            <div>
+              <p class="event-card-title">Automation Hackathon 2026</p>
+              <p class="event-card-club">Robotics & Automation Club</p>
+              <div class="event-card-meta">
+                <span><i data-lucide="clock"></i> 9:00 AM</span>
+                <span><i data-lucide="map-pin"></i> Seminar Hall</span>
+              </div>
+            </div>
+            <div class="event-card-footer">
+              <span class="event-status upcoming">Upcoming</span>
+              <span class="club-card-members"><i data-lucide="users"></i> 45 / 80</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-card" data-status="registered" onclick="location.href='event-detail.html'">
+          <div class="event-card-accent banner-yellow"></div>
+          <div class="event-card-date-box">
+            <span class="event-date-day">10</span>
+            <span class="event-date-month">Jul</span>
+          </div>
+          <div class="event-card-body">
+            <div>
+              <p class="event-card-title">Open Mic Night</p>
+              <p class="event-card-club">Music Collective</p>
+              <div class="event-card-meta">
+                <span><i data-lucide="clock"></i> 6:00 PM</span>
+                <span><i data-lucide="map-pin"></i> Amphitheatre</span>
+              </div>
+            </div>
+            <div class="event-card-footer">
+              <span class="event-status registered">Registered</span>
+              <span class="club-card-members"><i data-lucide="users"></i> 62 / 100</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-card" data-status="upcoming" onclick="location.href='event-detail.html'">
+          <div class="event-card-accent banner-mint"></div>
+          <div class="event-card-date-box">
+            <span class="event-date-day">22</span>
+            <span class="event-date-month">Jul</span>
+          </div>
+          <div class="event-card-body">
+            <div>
+              <p class="event-card-title">Startup Pitch Night</p>
+              <p class="event-card-club">Entrepreneurship Cell</p>
+              <div class="event-card-meta">
+                <span><i data-lucide="clock"></i> 5:00 PM</span>
+                <span><i data-lucide="map-pin"></i> Auditorium</span>
+              </div>
+            </div>
+            <div class="event-card-footer">
+              <span class="event-status upcoming">Upcoming</span>
+              <span class="club-card-members"><i data-lucide="users"></i> 18 / 30</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-card" data-status="upcoming" onclick="location.href='event-detail.html'">
+          <div class="event-card-accent banner-orange"></div>
+          <div class="event-card-date-box">
+            <span class="event-date-day">28</span>
+            <span class="event-date-month">Jul</span>
+          </div>
+          <div class="event-card-body">
+            <div>
+              <p class="event-card-title">Introduction to Arduino</p>
+              <p class="event-card-club">Robotics & Automation Club</p>
+              <div class="event-card-meta">
+                <span><i data-lucide="clock"></i> 2:00 PM</span>
+                <span><i data-lucide="map-pin"></i> Electronics Lab</span>
+              </div>
+            </div>
+            <div class="event-card-footer">
+              <span class="event-status upcoming">Upcoming</span>
+              <span class="club-card-members"><i data-lucide="users"></i> 12 / 40</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-card" data-status="past" onclick="location.href='event-detail.html'">
+          <div class="event-card-accent banner-blue"></div>
+          <div class="event-card-date-box">
+            <span class="event-date-day">8</span>
+            <span class="event-date-month">Jul</span>
+          </div>
+          <div class="event-card-body">
+            <div>
+              <p class="event-card-title">Photography Walk: Old City</p>
+              <p class="event-card-club">Photography Circle</p>
+              <div class="event-card-meta">
+                <span><i data-lucide="clock"></i> 7:00 AM</span>
+                <span><i data-lucide="map-pin"></i> Main Gate</span>
+              </div>
+            </div>
+            <div class="event-card-footer">
+              <span class="event-status past">Past</span>
+              <span class="club-card-members"><i data-lucide="users"></i> 28 / 30</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="empty-state hidden" id="empty-state">
+        <i data-lucide="calendar-x"></i>
+        <p>No events match this filter.</p>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    var activeFilter = 'all';
+
+    function selectChip(clickedChip, filter) {
+      activeFilter = filter;
+      var allChips = document.querySelectorAll('.filter-chip');
+      for (var i = 0; i < allChips.length; i++) {
+        allChips[i].classList.remove('active');
+      }
+      clickedChip.classList.add('active');
+      applyFilter();
+    }
+
+    function applyFilter() {
+      var cards = document.querySelectorAll('.event-card');
+      var visible = 0;
+
+      for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        var status = card.getAttribute('data-status');
+        var show = (activeFilter === 'all' || status === activeFilter);
+        if (show) {
+          card.classList.remove('hidden');
+          visible++;
+        } else {
+          card.classList.add('hidden');
+        }
+      }
+
+      var emptyState = document.getElementById('empty-state');
+      if (visible === 0) {
+        emptyState.classList.remove('hidden');
+        lucide.createIcons();
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+  </script>
+
+</body>
+</html>

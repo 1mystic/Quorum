@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Club : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Leader</p>
+    <nav class="sidebar-menu">
+      <a href="leader-club.html" class="sidebar-item active leader"><i data-lucide="layout-dashboard"></i> My Club</a>
+      <a href="members.html" class="sidebar-item"><i data-lucide="users-round"></i> Members</a>
+      <a href="leader-events.html" class="sidebar-item"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="leader-announcements.html" class="sidebar-item"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leader-issues.html" class="sidebar-item"><i data-lucide="triangle-alert"></i> Issues</a>
+      <a href="clubs-new.html" class="sidebar-item"><i data-lucide="plus-circle"></i> Create Club</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="#" class="user-card">
+      <div class="user-avatar leader-av">AY</div>
+      <div class="user-info">
+        <p class="user-name">Aayansh Yadav</p>
+        <p class="user-sub">Leader &middot; Robotics Club</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">My Club</h1>
+        <p class="page-sub">Robotics &amp; Automation Club</p>
+      </div>
+      <div class="topbar-spacer"></div>
+      <button class="btn-secondary" onclick="alert('Club info editing will be available after the backend is connected.')">
+        <i data-lucide="pencil"></i> Edit Club Info
+      </button>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <!-- Club header banner -->
+      <div>
+        <div class="club-profile-banner banner-orange">
+          <div class="club-card-circle-1"></div>
+          <div class="club-card-circle-2"></div>
+          <div class="club-card-circle-3"></div>
+          <div class="club-profile-icon">&#129302;</div>
+        </div>
+        <div class="club-profile-meta">
+          <p class="club-profile-name">Robotics &amp; Automation Club</p>
+          <div class="club-profile-sub">
+            <span class="cat-chip">Tech</span>
+            <span><i data-lucide="map-pin"></i> KNIT Sultanpur</span>
+            <span><i data-lucide="users"></i> 84 members</span>
+            <span><i data-lucide="calendar"></i> Founded 2019</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="club-stats-row">
+        <div class="club-stat-card">
+          <p class="club-stat-num">84</p>
+          <p class="club-stat-label">Members</p>
+        </div>
+        <div class="club-stat-card">
+          <p class="club-stat-num">12</p>
+          <p class="club-stat-label">Events Run</p>
+        </div>
+        <div class="club-stat-card">
+          <p class="club-stat-num">3</p>
+          <p class="club-stat-label">Join Requests</p>
+        </div>
+        <div class="club-stat-card">
+          <p class="club-stat-num">2019</p>
+          <p class="club-stat-label">Founded</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div>
+        <p class="section-heading">Quick Actions</p>
+        <div class="quick-actions-grid">
+
+          <a href="event-new.html" class="quick-action-card">
+            <div class="quick-action-icon green">
+              <i data-lucide="calendar-plus"></i>
+            </div>
+            <p class="quick-action-label">Create Event</p>
+            <p class="quick-action-desc">Schedule a new workshop, competition, or meet</p>
+          </a>
+
+          <a href="post-announcement.html" class="quick-action-card">
+            <div class="quick-action-icon orange">
+              <i data-lucide="megaphone"></i>
+            </div>
+            <p class="quick-action-label">Post Announcement</p>
+            <p class="quick-action-desc">Broadcast an update to all club members</p>
+          </a>
+
+          <a href="members.html" class="quick-action-card">
+            <div class="quick-action-icon blue">
+              <i data-lucide="users-round"></i>
+            </div>
+            <p class="quick-action-label">Manage Members</p>
+            <p class="quick-action-desc">Review join requests and manage your roster</p>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- About -->
+      <div class="card">
+        <p class="section-heading">About the Club</p>
+        <p>We are a student-run community focused on robotics, embedded systems, and automation. Our members participate in national-level robotics competitions, build IoT projects, and run weekly hands-on workshops. Whether you have zero experience or are already building things, you will find a project to contribute to.</p>
+      </div>
+
+      <!-- Upcoming events -->
+      <div>
+        <p class="section-heading">Upcoming Events</p>
+        <div class="club-event-list">
+
+          <div class="club-event-row">
+            <div class="club-event-date-box">
+              <span class="club-event-date-day">12</span>
+              <span class="club-event-date-month">Jul</span>
+            </div>
+            <div class="club-event-info">
+              <p class="club-event-title">Line Follower Robot Build</p>
+              <p class="club-event-sub">Workshop &middot; Main Lab &middot; 3:00 PM &middot; 30/50 registered</p>
+            </div>
+            <a href="event-attend.html" class="btn-secondary-sm">Manage</a>
+          </div>
+
+          <div class="club-event-row">
+            <div class="club-event-date-box">
+              <span class="club-event-date-day">19</span>
+              <span class="club-event-date-month">Jul</span>
+            </div>
+            <div class="club-event-info">
+              <p class="club-event-title">Automation Hackathon 2026</p>
+              <p class="club-event-sub">Hackathon &middot; Seminar Hall &middot; 9:00 AM &middot; 45/80 registered</p>
+            </div>
+            <a href="leader-events.html" class="btn-secondary-sm">Manage</a>
+          </div>
+
+          <div class="club-event-row">
+            <div class="club-event-date-box">
+              <span class="club-event-date-day">28</span>
+              <span class="club-event-date-month">Jul</span>
+            </div>
+            <div class="club-event-info">
+              <p class="club-event-title">Introduction to Arduino</p>
+              <p class="club-event-sub">Workshop &middot; Electronics Lab &middot; 2:00 PM &middot; 12/40 registered</p>
+            </div>
+            <a href="leader-events.html" class="btn-secondary-sm">Manage</a>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+
+</body>
+</html>

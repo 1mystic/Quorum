@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus Connect: Student Club Management Platform</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Central Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Lucide Icons (CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="landing-body">
+
+  <div class="landing-wrapper custom-scrollbar">
+
+    <!-- Header Navigation -->
+    <header class="landing-nav">
+      <div class="logo-row logo-row-flat">
+        <div class="logo-mark">
+          <i data-lucide="graduation-cap"></i>
+        </div>
+        <span class="brand">Campus Connect</span>
+      </div>
+
+      <div class="topbar-spacer"></div>
+
+      <nav class="landing-menu">
+        <span onclick="location.href='clubs.html'">Clubs</span>
+        <span onclick="location.href='events.html'">Events</span>
+        <span onclick="location.href='leaderboard.html'">Leaderboard</span>
+        <span onclick="location.href='signup.html'">For Leaders</span>
+      </nav>
+
+      <div class="topbar-spacer"></div>
+
+      <div class="landing-nav-btn-group">
+        <button onclick="location.href='login.html'" class="btn-pill-white">Log in</button>
+        <button onclick="location.href='signup.html'" class="btn-pill-dark">Get started</button>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+
+      <!-- Left: Copy -->
+      <div class="hero-copy">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          Discover · Join · Achieve
+        </div>
+
+        <h1 class="hero-title">
+          Find your<br>
+          club. Build<br>
+          your <span>story.</span>
+        </h1>
+
+        <p class="hero-desc">
+          One platform for discovering student clubs, registering for events,
+          tracking results, and earning verifiable participation certificates —
+          all in one place.
+        </p>
+
+        <div class="hero-actions">
+          <button onclick="location.href='signup.html'" class="btn-hero-primary">
+            <i data-lucide="compass"></i> Start exploring
+          </button>
+          <button onclick="location.href='clubs.html'" class="btn-tour">
+            <span class="btn-tour-icon">
+              <i data-lucide="arrow-right"></i>
+            </span>
+            Browse clubs
+          </button>
+        </div>
+
+        <div class="social-proof">
+          <div class="avatar-stack">
+            <div class="stack-avatar">AR</div>
+            <div class="stack-avatar">TN</div>
+            <div class="stack-avatar">MR</div>
+            <div class="stack-avatar stack-avatar-accent">+</div>
+          </div>
+          <p class="social-proof-text">
+            <span>Trusted</span> by students and club leaders across campus
+          </p>
+        </div>
+      </div>
+
+      <!-- Right: Graphic Illustration -->
+      <div class="hero-graphic">
+        <!-- Decorative background circles -->
+        <div class="graphic-bg-circle blue"></div>
+        <div class="graphic-bg-circle yellow"></div>
+        <div class="graphic-bg-circle green"></div>
+
+        <!-- Sound wave sticker -->
+        <div class="sound-wave-sticker">
+          <span class="sound-bar bar-xs"></span>
+          <span class="sound-bar bar-lg"></span>
+          <span class="sound-bar bar-sm"></span>
+          <span class="sound-bar bar-xl"></span>
+          <span class="sound-bar bar-xs"></span>
+        </div>
+
+        <!-- Floating stickers -->
+        <div class="speech-sticker">Welcome! 👋</div>
+        <div class="tag-sticker">Joined Robotics 🤖</div>
+
+        <!-- Character 1 (orange background) -->
+        <div class="char-overlay-1">
+          <svg class="svg-fill" viewBox="0 0 240 240">
+            <rect x="6" y="6" width="228" height="228" rx="46" fill="#F2802B" />
+            <path d="M58 234 Q58 176 120 176 Q182 176 182 234 Z" fill="#EFE7DA" />
+            <rect x="104" y="148" width="32" height="42" rx="14" fill="#B5764A" />
+            <ellipse cx="120" cy="110" rx="50" ry="54" fill="#B5764A" />
+            <path d="M70 110 Q68 50 120 50 Q172 50 170 110 Q150 80 120 80 Q90 80 70 110 Z" fill="#241712" />
+            <path d="M64 112 Q62 44 120 44 Q178 44 176 112" fill="none" stroke="#F5C13D" stroke-width="13" stroke-linecap="round" />
+            <rect x="50"  y="98" width="22" height="46" rx="11" fill="#F5C13D" />
+            <rect x="168" y="98" width="22" height="46" rx="11" fill="#F5C13D" />
+            <circle cx="104" cy="113" r="5" fill="#2E1D16" />
+            <circle cx="136" cy="113" r="5" fill="#2E1D16" />
+            <circle cx="95"  cy="129" r="7" fill="#C9603A" opacity=".55" />
+            <circle cx="145" cy="129" r="7" fill="#C9603A" opacity=".55" />
+            <path d="M104 134 Q120 151 136 134" fill="none" stroke="#2E1D16" stroke-width="5" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <!-- Character 2 (green background) -->
+        <div class="char-overlay-2">
+          <svg class="svg-fill" viewBox="0 0 240 240">
+            <rect x="6" y="6" width="228" height="228" rx="46" fill="#4F9D57" />
+            <path d="M58 234 Q58 176 120 176 Q182 176 182 234 Z" fill="#F2802B" />
+            <rect x="104" y="148" width="32" height="42" rx="14" fill="#D49A68" />
+            <ellipse cx="120" cy="110" rx="50" ry="54" fill="#D49A68" />
+            <path d="M70 110 Q68 50 120 50 Q172 50 170 110 Q150 80 120 80 Q90 80 70 110 Z" fill="#34241A" />
+            <path d="M64 112 Q62 44 120 44 Q178 44 176 112" fill="none" stroke="#88C3E8" stroke-width="13" stroke-linecap="round" />
+            <rect x="50"  y="98" width="22" height="46" rx="11" fill="#88C3E8" />
+            <rect x="168" y="98" width="22" height="46" rx="11" fill="#88C3E8" />
+            <circle cx="104" cy="113" r="5" fill="#2E1D16" />
+            <circle cx="136" cy="113" r="5" fill="#2E1D16" />
+            <circle cx="95"  cy="129" r="7" fill="#B5604A" opacity=".55" />
+            <circle cx="145" cy="129" r="7" fill="#B5604A" opacity=".55" />
+            <path d="M104 134 Q120 151 136 134" fill="none" stroke="#2E1D16" stroke-width="5" stroke-linecap="round" />
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Role Split Section -->
+    <section class="landing-sections">
+      <div class="sections-header">
+        <h2>Built for every role</h2>
+        <span>One unified system · tailored views</span>
+      </div>
+
+      <div class="roles-grid">
+
+        <!-- Student card -->
+        <div class="identity-card saturated-orange">
+          <svg class="identity-sparkle s1" viewBox="0 0 24 24">
+            <path d="M12 0 C13 7 17 11 24 12 C17 13 13 17 12 24 C11 17 7 13 0 12 C7 11 11 7 12 0Z" fill="rgba(255,255,255,0.4)"/>
+          </svg>
+          <div>
+            <div class="identity-icon">
+              <i data-lucide="compass"></i>
+            </div>
+            <h3>Students</h3>
+            <p>Discover clubs, attend events, track results, and download verified participation certificates.</p>
+          </div>
+          <div class="identity-tags">
+            <span class="identity-tag">Discovery</span>
+            <span class="identity-tag">Certificates</span>
+          </div>
+        </div>
+
+        <!-- Club Leader card -->
+        <div class="identity-card saturated-green">
+          <svg class="identity-sparkle s1" viewBox="0 0 24 24">
+            <path d="M12 0 C13 7 17 11 24 12 C17 13 13 17 12 24 C11 17 7 13 0 12 C7 11 11 7 12 0Z" fill="rgba(255,255,255,0.3)"/>
+          </svg>
+          <div>
+            <div class="identity-icon identity-icon-green">
+              <i data-lucide="users"></i>
+            </div>
+            <h3>Club Leaders</h3>
+            <p>Create events, manage membership, mark attendance, post announcements, and issue certificates.</p>
+          </div>
+          <div class="identity-tags">
+            <span class="identity-tag">Events</span>
+            <span class="identity-tag">Members</span>
+          </div>
+        </div>
+
+        <!-- Administrator card -->
+        <div class="identity-card saturated-navy">
+          <svg class="identity-sparkle s1" viewBox="0 0 24 24">
+            <path d="M12 0 C13 7 17 11 24 12 C17 13 13 17 12 24 C11 17 7 13 0 12 C7 11 11 7 12 0Z" fill="rgba(110,151,201,0.3)"/>
+          </svg>
+          <div>
+            <div class="identity-icon identity-icon-blue">
+              <i data-lucide="shield-check"></i>
+            </div>
+            <h3>Administrators</h3>
+            <p>Register your college, review club applications, and monitor campus-wide activity at a glance.</p>
+          </div>
+          <div class="identity-tags">
+            <span class="identity-tag">Governance</span>
+            <span class="identity-tag">Leaderboard</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer CTA Banner -->
+    <footer class="cta-banner">
+      <div class="cta-circle-orange"></div>
+      <div class="cta-circle-blue"></div>
+      <div class="cta-content">
+        <h2 class="cta-title">Your community is waiting.</h2>
+        <p class="cta-desc">Sign up in under a minute — free forever, no credit card needed.</p>
+      </div>
+      <button onclick="location.href='signup.html'" class="btn-cta">
+        <i data-lucide="arrow-right"></i> Create account
+      </button>
+    </footer>
+
+  </div>
+
+  <script>
+    // Initialise Lucide icon library
+    lucide.createIcons();
+  </script>
+</body>
+</html>

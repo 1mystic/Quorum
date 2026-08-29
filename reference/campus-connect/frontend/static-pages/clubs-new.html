@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create a Club : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark">
+        <i data-lucide="graduation-cap"></i>
+      </div>
+      <span class="brand">Campus Connect</span>
+    </div>
+
+    <p class="nav-label">Leader</p>
+
+    <nav class="sidebar-menu">
+      <a href="leader-club.html" class="sidebar-item">
+        <i data-lucide="layout-dashboard"></i> My Club
+      </a>
+      <a href="members.html" class="sidebar-item">
+        <i data-lucide="users-round"></i> Members
+      </a>
+      <a href="leader-events.html" class="sidebar-item">
+        <i data-lucide="calendar-days"></i> Events
+      </a>
+      <a href="leader-announcements.html" class="sidebar-item">
+        <i data-lucide="megaphone"></i> Announcements
+      </a>
+      <a href="leader-issues.html" class="sidebar-item">
+        <i data-lucide="triangle-alert"></i> Issues
+      </a>
+      <a href="clubs-new.html" class="sidebar-item active leader">
+        <i data-lucide="plus-circle"></i> Create Club
+      </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <a href="#" class="user-card">
+      <div class="user-avatar leader-av">AY</div>
+      <div class="user-info">
+        <p class="user-name">Aayansh Yadav</p>
+        <p class="user-sub">Leader · Apply to create</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <button class="btn-secondary" onclick="history.back()">
+        <i data-lucide="arrow-left"></i> Back
+      </button>
+      <div class="title-block">
+        <h1 class="page-title">Create a New Club</h1>
+        <p class="page-sub">Submit your request for admin approval</p>
+      </div>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <div class="form-guide-grid">
+
+        <!-- Form -->
+        <div class="form-card">
+          <p class="form-card-title">Club Details</p>
+
+          <div class="form-group">
+            <label for="club-name">Club Name</label>
+            <input type="text" id="club-name" class="input-field" placeholder="e.g. Campus Gaming Club">
+          </div>
+
+          <div class="form-group">
+            <label for="club-category">Category</label>
+            <select id="club-category" class="select-field">
+              <option value="">Select a category</option>
+              <option value="Tech">Tech</option>
+              <option value="Arts">Arts</option>
+              <option value="Culture">Culture</option>
+              <option value="Sports">Sports</option>
+              <option value="Music">Music</option>
+              <option value="Business">Business</option>
+              <option value="Science">Science</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="club-tagline">Tagline</label>
+            <input type="text" id="club-tagline" class="input-field" placeholder="One sentence about your club (shown on the directory card)">
+          </div>
+
+          <div class="form-group">
+            <label for="club-about">About the Club</label>
+            <textarea id="club-about" class="textarea-field" rows="5" placeholder="Describe your club's mission, activities, and what members can expect..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="club-email">Leader Contact Email</label>
+            <input type="email" id="club-email" class="input-field" placeholder="aayansh@knit.ac.in">
+          </div>
+
+          <button class="btn-primary" onclick="handleSubmit()">
+            <i data-lucide="send"></i> Submit for Approval
+          </button>
+        </div>
+
+        <!-- Guide -->
+        <div class="guide-card">
+          <p class="guide-card-title">What happens next</p>
+
+          <div class="guide-step">
+            <span class="guide-step-num">1</span>
+            <span>Fill in your club details and submit this form.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num">2</span>
+            <span>Your request goes to the Campus Council Admin for review.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num">3</span>
+            <span>Admin approves or rejects within 2 to 3 working days and provides a written reason.</span>
+          </div>
+          <div class="guide-step">
+            <span class="guide-step-num">4</span>
+            <span>Once approved, your club appears in the directory and students can request to join.</span>
+          </div>
+
+          <div class="guide-step">
+            <span class="guide-step-num guide-step-warn">!</span>
+            <span>Make sure your college email address is verified before submitting.</span>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function getFormValues() {
+      return {
+        name:     document.getElementById('club-name').value.trim(),
+        category: document.getElementById('club-category').value,
+        tagline:  document.getElementById('club-tagline').value.trim(),
+        about:    document.getElementById('club-about').value.trim(),
+        email:    document.getElementById('club-email').value.trim()
+      };
+    }
+
+    function handleSubmit() {
+      var form = getFormValues();
+
+      if (!form.name || !form.category || !form.tagline || !form.about || !form.email) {
+        alert('Please fill in all fields before submitting.');
+        return;
+      }
+
+      if (!form.email.includes('@')) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+
+      // In production this calls POST /api/v1/clubs with the form data.
+      alert('Your club request has been submitted! The admin will review it within 2 to 3 working days.');
+      window.location.href = 'clubs.html';
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Certificate : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="cert-viewer-body">
+
+  <!-- Toolbar -->
+  <div class="cert-toolbar">
+    <button class="btn-secondary" onclick="history.back()">
+      <i data-lucide="arrow-left"></i> Back
+    </button>
+    <div class="cert-toolbar-spacer"></div>
+    <button class="btn-secondary" onclick="window.print()">
+      <i data-lucide="printer"></i> Print / Save PDF
+    </button>
+  </div>
+
+  <!-- Certificate -->
+  <div class="cert-page" id="cert-page">
+
+    <!-- Gradient accent strips top and bottom -->
+    <div class="cert-top-strip"></div>
+    <div class="cert-bot-strip"></div>
+
+    <!-- Double border frame -->
+    <div class="cert-border-outer"></div>
+    <div class="cert-border-inner"></div>
+
+    <!-- Corner ornaments — same SVG, rotated via CSS on .tl .tr .bl .br -->
+    <svg class="corner-ornament tl" width="74" height="74" viewBox="0 0 74 74">
+      <path d="M6 54 L6 6 L54 6" fill="none" stroke="#C79A2B" stroke-width="2.2"/>
+      <path d="M13 46 L13 13 L46 13" fill="none" stroke="#C79A2B" stroke-width="0.8" opacity="0.4"/>
+      <circle cx="6" cy="6" r="3.5" fill="#C79A2B"/>
+      <circle cx="30" cy="6" r="1.6" fill="#C79A2B" opacity="0.5"/>
+      <circle cx="6" cy="30" r="1.6" fill="#C79A2B" opacity="0.5"/>
+      <rect x="17" y="3" width="5" height="5" fill="none" stroke="#C79A2B" stroke-width="1" transform="rotate(45 19.5 5.5)" opacity="0.6"/>
+      <rect x="3" y="17" width="5" height="5" fill="none" stroke="#C79A2B" stroke-width="1" transform="rotate(45 5.5 19.5)" opacity="0.6"/>
+      <circle cx="48" cy="6" r="1" fill="#C79A2B" opacity="0.35"/>
+      <circle cx="6" cy="48" r="1" fill="#C79A2B" opacity="0.35"/>
+    </svg>
+
+    <svg class="corner-ornament tr" width="74" height="74" viewBox="0 0 74 74">
+      <path d="M6 54 L6 6 L54 6" fill="none" stroke="#C79A2B" stroke-width="2.2"/>
+      <path d="M13 46 L13 13 L46 13" fill="none" stroke="#C79A2B" stroke-width="0.8" opacity="0.4"/>
+      <circle cx="6" cy="6" r="3.5" fill="#C79A2B"/>
+      <circle cx="30" cy="6" r="1.6" fill="#C79A2B" opacity="0.5"/>
+      <circle cx="6" cy="30" r="1.6" fill="#C79A2B" opacity="0.5"/>
+      <rect x="17" y="3" width="5" height="5" fill="none" stroke="#C79A2B" stroke-width="1" transform="rotate(45 19.5 5.5)" opacity="0.6"/>
+      <rect x="3" y="17" width="5" height="5" fill="none" stroke="#C79A2B" stroke-width="1" transform="rotate(45 5.5 19.5)" opacity="0.6"/>
+      <circle cx="48" cy="6" r="1" fill="#C79A2B" opacity="0.35"/>
+      <circle cx="6" cy="48" r="1" fill="#C79A2B" opacity="0.35"/>
+    </svg>
+
+    <svg class="corner-ornament bl" width="74" height="74" viewBox="0 0 74 74">
+      <path d="M6 54 L6 6 L54 6" fill="none" stroke="#C79A2B" stroke-width="2.2"/>
+      <path d="M13 46 L13 13 L46 13" fill="none" stroke="#C79A2B" stroke-width="0.8" opacity="0.4"/>
+      <circle cx="6" cy="6" r="3.5" fill="#C79A2B"/>
+      <circle cx="30" cy="6" r="1.6" fill="#C79A2B" opacity="0.5"/>
+      <circle cx="6" cy="30" r="1.6" fill="#C79A2B" opacity="0.5"/>
+      <rect x="17" y="3" width="5" height="5" fill="none" stroke="#C79A2B" stroke-width="1" transform="rotate(45 19.5 5.5)" opacity="0.6"/>
+      <rect x="3" y="17" width="5" height="5" fill="none" stroke="#C79A2B" stroke-width="1" transform="rotate(45 5.5 19.5)" opacity="0.6"/>
+      <circle cx="48" cy="6" r="1" fill="#C79A2B" opacity="0.35"/>
+      <circle cx="6" cy="48" r="1" fill="#C79A2B" opacity="0.35"/>
+    </svg>
+
+    <svg class="corner-ornament br" width="74" height="74" viewBox="0 0 74 74">
+      <path d="M6 54 L6 6 L54 6" fill="none" stroke="#C79A2B" stroke-width="2.2"/>
+      <path d="M13 46 L13 13 L46 13" fill="none" stroke="#C79A2B" stroke-width="0.8" opacity="0.4"/>
+      <circle cx="6" cy="6" r="3.5" fill="#C79A2B"/>
+      <circle cx="30" cy="6" r="1.6" fill="#C79A2B" opacity="0.5"/>
+      <circle cx="6" cy="30" r="1.6" fill="#C79A2B" opacity="0.5"/>
+      <rect x="17" y="3" width="5" height="5" fill="none" stroke="#C79A2B" stroke-width="1" transform="rotate(45 19.5 5.5)" opacity="0.6"/>
+      <rect x="3" y="17" width="5" height="5" fill="none" stroke="#C79A2B" stroke-width="1" transform="rotate(45 5.5 19.5)" opacity="0.6"/>
+      <circle cx="48" cy="6" r="1" fill="#C79A2B" opacity="0.35"/>
+      <circle cx="6" cy="48" r="1" fill="#C79A2B" opacity="0.35"/>
+    </svg>
+
+    <!-- ── CONTENT (3 groups spaced evenly via justify-content: space-between) ── -->
+    <div class="cert-content">
+
+      <!-- GROUP 1: branding + certificate type -->
+      <div class="cert-top-group">
+
+        <div class="cert-header-row">
+          <div class="cert-logo-circle">
+            <i data-lucide="graduation-cap"></i>
+          </div>
+          <div class="cert-org-block">
+            <p class="cert-org-name">Campus Connect</p>
+            <p class="cert-org-college" id="cert-college">KNIT Sultanpur</p>
+          </div>
+        </div>
+
+        <div class="cert-divider">
+          <div class="cert-divider-line"></div>
+          <div class="cert-divider-diamond"></div>
+
+          <!-- Laurel left -->
+          <svg width="44" height="24" viewBox="0 0 44 24">
+            <path d="M22 12 C17 7 10 5 6 7 C3 9 3 14 7 16 C11 18 17 16 20 13" fill="none" stroke="#C79A2B" stroke-width="1.3" opacity="0.75"/>
+            <path d="M22 12 C19 8 14 6 10 8 C7 9 7 13 10 15 C13 17 17 15 19 13" fill="none" stroke="#C79A2B" stroke-width="0.8" opacity="0.35"/>
+            <circle cx="5"  cy="11" r="1.5" fill="#C79A2B" opacity="0.5"/>
+            <circle cx="9"  cy="5"  r="1.5" fill="#C79A2B" opacity="0.5"/>
+            <circle cx="15" cy="4"  r="1.5" fill="#C79A2B" opacity="0.5"/>
+            <circle cx="20" cy="7"  r="1.5" fill="#C79A2B" opacity="0.5"/>
+          </svg>
+
+          <p class="cert-type-heading" id="cert-type-heading">Certificate of Participation</p>
+
+          <!-- Laurel right -->
+          <svg width="44" height="24" viewBox="0 0 44 24" style="transform:scaleX(-1)">
+            <path d="M22 12 C17 7 10 5 6 7 C3 9 3 14 7 16 C11 18 17 16 20 13" fill="none" stroke="#C79A2B" stroke-width="1.3" opacity="0.75"/>
+            <path d="M22 12 C19 8 14 6 10 8 C7 9 7 13 10 15 C13 17 17 15 19 13" fill="none" stroke="#C79A2B" stroke-width="0.8" opacity="0.35"/>
+            <circle cx="5"  cy="11" r="1.5" fill="#C79A2B" opacity="0.5"/>
+            <circle cx="9"  cy="5"  r="1.5" fill="#C79A2B" opacity="0.5"/>
+            <circle cx="15" cy="4"  r="1.5" fill="#C79A2B" opacity="0.5"/>
+            <circle cx="20" cy="7"  r="1.5" fill="#C79A2B" opacity="0.5"/>
+          </svg>
+
+          <div class="cert-divider-diamond"></div>
+          <div class="cert-divider-line"></div>
+        </div>
+
+      </div>
+
+      <!-- GROUP 2: recipient + event + result + authority -->
+      <div class="cert-body-group">
+
+        <p class="cert-intro-text">This is to certify that</p>
+
+        <p class="cert-recipient-name" id="cert-name">Shikha Singh</p>
+        <div class="cert-name-bar"></div>
+
+        <p class="cert-action-text" id="cert-action-text">has successfully participated in</p>
+
+        <p class="cert-event-title" id="cert-event">Photography Walk: Old City</p>
+        <p class="cert-event-sub" id="cert-event-sub">Photography Circle &middot; 8 July 2026</p>
+
+        <div class="cert-result-pill participant" id="cert-result-pill">
+          &#11088; Participant
+        </div>
+
+        <!-- Ornamental divider row -->
+        <div class="cert-ornament-row">
+          <div class="cert-ornament-thin-line"></div>
+          <span class="cert-ornament-dot">&#10022;</span>
+          <span class="cert-ornament-dot-sm">&#10022;</span>
+          <span class="cert-ornament-dot">&#10022;</span>
+          <div class="cert-ornament-thin-line"></div>
+        </div>
+
+        <p class="cert-authority-text" id="cert-authority-text">Issued under the authority of KNIT Sultanpur</p>
+        <p class="cert-authority-sub">Accredited by Campus Connect &middot; India</p>
+
+      </div>
+
+      <!-- GROUP 3: signatures + seal -->
+      <div class="cert-bottom-group">
+
+        <div class="cert-sig-divider"></div>
+
+        <div class="cert-footer-row">
+
+          <div class="cert-sig-block">
+            <div class="cert-sig-line"></div>
+            <p class="cert-sig-name" id="cert-leader-name">Aayansh Yadav</p>
+            <p class="cert-sig-role">Club Leader</p>
+          </div>
+
+          <div class="cert-seal">
+            <svg width="96" height="96" viewBox="0 0 96 96">
+              <defs>
+                <path id="top-arc" d="M 11,48 A 37,37 0 0,1 85,48"/>
+                <path id="bot-arc" d="M 13,50 A 35,35 0 0,0 83,50"/>
+              </defs>
+              <circle cx="48" cy="48" r="44" fill="#FFFBF2" stroke="#C79A2B" stroke-width="1.5"/>
+              <circle cx="48" cy="48" r="38" fill="none" stroke="#C79A2B" stroke-width="0.6" opacity="0.5"/>
+              <circle cx="48" cy="48" r="30" fill="rgba(199,154,43,0.07)" stroke="none"/>
+              <text font-family="Outfit, sans-serif" font-size="7.5" font-weight="700" fill="#C79A2B" letter-spacing="2.5">
+                <textPath href="#top-arc" startOffset="50%" text-anchor="middle">CAMPUS CONNECT</textPath>
+              </text>
+              <text font-family="Outfit, sans-serif" font-size="7" font-weight="700" fill="#C79A2B" letter-spacing="2">
+                <textPath href="#bot-arc" startOffset="50%" text-anchor="middle">CERTIFIED</textPath>
+              </text>
+              <text x="48" y="44" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="800" font-size="17" fill="#C79A2B">CC</text>
+              <text x="48" y="57" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="600" font-size="7" fill="#9A8978" letter-spacing="0.5">INDIA</text>
+              <text x="22" y="51" text-anchor="middle" font-size="8" fill="#C79A2B" opacity="0.7">&#9733;</text>
+              <text x="74" y="51" text-anchor="middle" font-size="8" fill="#C79A2B" opacity="0.7">&#9733;</text>
+            </svg>
+            <p class="cert-serial-mono" id="cert-serial">CC-CERT-2026-1841</p>
+          </div>
+
+          <div class="cert-sig-block">
+            <div class="cert-sig-line"></div>
+            <p class="cert-sig-name">Student Affairs</p>
+            <p class="cert-sig-role">College Administrator</p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    var actionTextMap = {
+      'winner':      'has been awarded the title of Winner in',
+      'runner-up':   'has been awarded Runner-up in',
+      'participant': 'has successfully participated in'
+    };
+
+    var certTitleMap = {
+      'winner':      'Certificate of Excellence',
+      'runner-up':   'Certificate of Merit',
+      'participant': 'Certificate of Participation'
+    };
+
+    var resultLabelMap = {
+      'winner':      '&#129351; Winner',
+      'runner-up':   '&#129352; Runner-up',
+      'participant': '&#11088; Participant'
+    };
+
+    function getParam(name, fallback) {
+      var params = new URLSearchParams(window.location.search);
+      return params.get(name) || fallback;
+    }
+
+    function loadCert() {
+      var name    = getParam('name',    'Shikha Singh');
+      var event   = getParam('event',   'Photography Walk: Old City');
+      var club    = getParam('club',    'Photography Circle');
+      var result  = getParam('result',  'participant');
+      var date    = getParam('date',    '8 July 2026');
+      var serial  = getParam('serial',  'CC-CERT-2026-1841');
+      var college = getParam('college', 'KNIT Sultanpur');
+      var leader  = getParam('leader',  'Aayansh Yadav');
+
+      document.getElementById('cert-name').textContent        = name;
+      document.getElementById('cert-event').textContent       = event;
+      document.getElementById('cert-event-sub').textContent   = club + ' · ' + date;
+      document.getElementById('cert-college').textContent     = college;
+      document.getElementById('cert-serial').textContent      = serial;
+      document.getElementById('cert-leader-name').textContent = leader;
+      document.getElementById('cert-authority-text').textContent = 'Issued under the authority of ' + college;
+
+      var typeEl = document.getElementById('cert-type-heading');
+      typeEl.textContent = certTitleMap[result] || certTitleMap['participant'];
+
+      var actionEl = document.getElementById('cert-action-text');
+      actionEl.textContent = actionTextMap[result] || actionTextMap['participant'];
+
+      var pillEl = document.getElementById('cert-result-pill');
+      pillEl.className = 'cert-result-pill ' + result;
+      pillEl.innerHTML = resultLabelMap[result] || resultLabelMap['participant'];
+
+      document.title = 'Certificate – ' + name + ' – Campus Connect';
+    }
+
+    loadCert();
+
+    document.getElementById('cert-page').addEventListener('keydown', function(e) {
+      if (e.key === 'p' && (e.ctrlKey || e.metaKey)) {
+        window.print();
+      }
+    });
+  </script>
+
+</body>
+</html>

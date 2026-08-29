@@ -1,0 +1,32 @@
+# Version control
+.git
+.gitignore
+
+# Python bytecode / caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+.env.*
+
+# Editor / OS junk
+.vscode/
+.idea/
+.DS_Store
+
+# Docs / misc
+README.md
+
+# Local dev artifacts
+*.log

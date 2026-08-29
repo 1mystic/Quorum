@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify Certificate : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="verify-body">
+
+  <!-- Logo -->
+  <div class="verify-logo-row">
+    <div class="verify-logo-mark">
+      <i data-lucide="graduation-cap"></i>
+    </div>
+    <span class="verify-brand">Campus Connect</span>
+  </div>
+
+  <!-- Verify card -->
+  <div class="verify-card">
+    <p class="verify-card-title">Certificate Verification</p>
+    <p class="verify-card-sub">Enter the serial number printed on the certificate to confirm its authenticity.</p>
+
+    <div class="verify-serial-row">
+      <input
+        type="text"
+        id="serial-input"
+        class="verify-serial-input"
+        placeholder="CC-CERT-2026-XXXX"
+        maxlength="20"
+        autocomplete="off"
+        spellcheck="false"
+        oninput="clearResult()"
+      >
+      <button class="btn-primary" onclick="verifyCert()">
+        <i data-lucide="search"></i> Verify
+      </button>
+    </div>
+
+    <!-- Valid certificate result -->
+    <div id="result-valid" class="cert-display hidden">
+      <div class="cert-display-header">
+        <div class="cert-display-icon">
+          <i data-lucide="shield-check"></i>
+        </div>
+        <div>
+          <p class="cert-display-valid">Certificate is Valid</p>
+          <p class="cert-display-serial" id="result-serial"></p>
+        </div>
+      </div>
+      <div class="cert-display-rows">
+        <div class="cert-display-item">
+          <span class="cert-display-label">Issued to</span>
+          <span class="cert-display-value" id="result-name"></span>
+        </div>
+        <div class="cert-display-divider"></div>
+        <div class="cert-display-item">
+          <span class="cert-display-label">Event</span>
+          <span class="cert-display-value" id="result-event"></span>
+        </div>
+        <div class="cert-display-item">
+          <span class="cert-display-label">Club</span>
+          <span class="cert-display-value" id="result-club"></span>
+        </div>
+        <div class="cert-display-divider"></div>
+        <div class="cert-display-item">
+          <span class="cert-display-label">Result</span>
+          <span class="cert-display-value" id="result-result"></span>
+        </div>
+        <div class="cert-display-item">
+          <span class="cert-display-label">Date issued</span>
+          <span class="cert-display-value" id="result-date"></span>
+        </div>
+        <div class="cert-display-item">
+          <span class="cert-display-label">College</span>
+          <span class="cert-display-value">KNIT Sultanpur</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invalid result -->
+    <div id="result-invalid" class="verify-invalid hidden">
+      <div class="verify-invalid-icon">
+        <i data-lucide="x-circle"></i>
+      </div>
+      <p class="verify-invalid-text">No certificate found for this serial number. Please check the code and try again.</p>
+    </div>
+
+  </div>
+
+  <p class="verify-footer-note">
+    This page is publicly accessible. Certificates are issued by Campus Connect on behalf of registered clubs at participating colleges.
+  </p>
+
+  <script>
+    lucide.createIcons();
+
+    var certDatabase = {
+      'CC-CERT-2026-1841': {
+        name:   'Shikha Singh',
+        event:  'Photography Walk: Old City',
+        club:   'Photography Circle',
+        result: 'Participant',
+        date:   '8 July 2026'
+      },
+      'CC-CERT-2026-0293': {
+        name:   'Shikha Singh',
+        event:  'Open Mic Night — Spring Edition',
+        club:   'Music Collective',
+        result: 'Participant',
+        date:   '15 March 2026'
+      },
+      'CC-CERT-2026-0512': {
+        name:   'Rishi Agarwal',
+        event:  'Automation Hackathon 2026',
+        club:   'Robotics & Automation Club',
+        result: 'Winner',
+        date:   '19 July 2026'
+      },
+      'CC-CERT-2026-0513': {
+        name:   'Neha Pandey',
+        event:  'Automation Hackathon 2026',
+        club:   'Robotics & Automation Club',
+        result: 'Runner-up',
+        date:   '19 July 2026'
+      }
+    };
+
+    function clearResult() {
+      document.getElementById('result-valid').classList.add('hidden');
+      document.getElementById('result-invalid').classList.add('hidden');
+    }
+
+    function verifyCert() {
+      var raw    = document.getElementById('serial-input').value.trim().toUpperCase();
+      var valid  = document.getElementById('result-valid');
+      var invalid = document.getElementById('result-invalid');
+
+      if (!raw) {
+        alert('Please enter a serial number.');
+        return;
+      }
+
+      var cert = certDatabase[raw];
+
+      if (cert) {
+        document.getElementById('result-serial').textContent  = raw;
+        document.getElementById('result-name').textContent    = cert.name;
+        document.getElementById('result-event').textContent   = cert.event;
+        document.getElementById('result-club').textContent    = cert.club;
+        document.getElementById('result-result').textContent  = cert.result;
+        document.getElementById('result-date').textContent    = cert.date;
+
+        valid.classList.remove('hidden');
+        invalid.classList.add('hidden');
+      } else {
+        valid.classList.add('hidden');
+        invalid.classList.remove('hidden');
+      }
+
+      lucide.createIcons();
+    }
+
+    document.getElementById('serial-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        verifyCert();
+      }
+    });
+  </script>
+
+</body>
+</html>

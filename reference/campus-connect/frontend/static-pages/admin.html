@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark">
+        <i data-lucide="graduation-cap"></i>
+      </div>
+      <span class="brand">Campus Connect</span>
+    </div>
+
+    <p class="nav-label">Admin</p>
+
+    <nav class="sidebar-menu">
+      <a href="admin.html" class="sidebar-item active admin">
+        <i data-lucide="layout-dashboard"></i> Overview
+      </a>
+      <a href="admin-approvals.html" class="sidebar-item">
+        <i data-lucide="check-circle-2"></i> Approvals
+      </a>
+      <a href="admin-colleges.html" class="sidebar-item">
+        <i data-lucide="building-2"></i> Colleges
+      </a>
+      <a href="#" class="sidebar-item">
+        <i data-lucide="settings"></i> Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <a href="#" class="user-card">
+      <div class="user-avatar admin-av">SA</div>
+      <div class="user-info">
+        <p class="user-name">Student Affairs</p>
+        <p class="user-sub">Admin · KNIT Sultanpur</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">Admin Dashboard</h1>
+        <p class="page-sub">KNIT Sultanpur · Campus Connect</p>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="bell-btn" onclick="alert('No new notifications.')">
+        <i data-lucide="bell"></i>
+      </div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <!-- Stats row -->
+      <div class="stats-grid">
+        <div class="stat-card blue-stat">
+          <div class="stat-header">
+            <div class="stat-icon"><i data-lucide="clock"></i></div>
+          </div>
+          <p class="stat-num">3</p>
+          <p class="stat-label">Pending Approvals</p>
+        </div>
+        <div class="stat-card green-stat">
+          <div class="stat-header">
+            <div class="stat-icon"><i data-lucide="check-circle-2"></i></div>
+          </div>
+          <p class="stat-num">18</p>
+          <p class="stat-label">Clubs Approved</p>
+        </div>
+        <div class="stat-card pink-stat">
+          <div class="stat-header">
+            <div class="stat-icon"><i data-lucide="x-circle"></i></div>
+          </div>
+          <p class="stat-num">2</p>
+          <p class="stat-label">Clubs Rejected</p>
+        </div>
+      </div>
+
+      <!-- Pending Club Approvals -->
+      <div>
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">Pending Club Approvals</h2>
+          <span class="status-pill pending">3 pending</span>
+        </div>
+
+        <div class="approval-list">
+
+          <div class="approval-card" id="approval-1">
+            <div class="approval-club-icon banner-blue">&#9881;&#65039;</div>
+            <div class="approval-info">
+              <p class="approval-club-name">Astronomy Club</p>
+              <p class="approval-meta">Submitted by Dr. Priya Nair &middot; Science &middot; 2 days ago</p>
+            </div>
+            <div class="approval-actions">
+              <span class="status-pill pending" id="status-1">Pending</span>
+              <button class="btn-success" onclick="approveClub(1)">
+                <i data-lucide="check"></i> Approve
+              </button>
+              <button class="btn-danger" onclick="rejectClub(1)">
+                <i data-lucide="x"></i> Reject
+              </button>
+            </div>
+          </div>
+
+          <div class="approval-card" id="approval-2">
+            <div class="approval-club-icon banner-yellow">&#9822;&#65039;</div>
+            <div class="approval-info">
+              <p class="approval-club-name">Chess Club</p>
+              <p class="approval-meta">Submitted by Arjun Mehra &middot; Culture &middot; 4 days ago</p>
+            </div>
+            <div class="approval-actions">
+              <span class="status-pill pending" id="status-2">Pending</span>
+              <button class="btn-success" onclick="approveClub(2)">
+                <i data-lucide="check"></i> Approve
+              </button>
+              <button class="btn-danger" onclick="rejectClub(2)">
+                <i data-lucide="x"></i> Reject
+              </button>
+            </div>
+          </div>
+
+          <div class="approval-card" id="approval-3">
+            <div class="approval-club-icon banner-pink">&#128131;</div>
+            <div class="approval-info">
+              <p class="approval-club-name">Dance Fusion Club</p>
+              <p class="approval-meta">Submitted by Priyanka Das &middot; Culture &middot; 1 day ago</p>
+            </div>
+            <div class="approval-actions">
+              <span class="status-pill pending" id="status-3">Pending</span>
+              <button class="btn-success" onclick="approveClub(3)">
+                <i data-lucide="check"></i> Approve
+              </button>
+              <button class="btn-danger" onclick="rejectClub(3)">
+                <i data-lucide="x"></i> Reject
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- College Settings -->
+      <div>
+        <div class="clubs-section-header">
+          <h2 class="clubs-section-title">College Settings</h2>
+        </div>
+        <div class="admin-settings-card">
+          <div class="admin-settings-grid">
+            <div class="form-group">
+              <label for="college-name">College Name</label>
+              <input type="text" id="college-name" class="input-field" value="KNIT Sultanpur">
+            </div>
+            <div class="form-group">
+              <label for="email-domain">Verified Student Email Domain</label>
+              <input type="text" id="email-domain" class="input-field" value="@knit.ac.in">
+            </div>
+            <div class="form-group">
+              <label for="city">City</label>
+              <input type="text" id="city" class="input-field" value="Sultanpur">
+            </div>
+            <div class="form-group">
+              <label for="state">State</label>
+              <input type="text" id="state" class="input-field" value="Uttar Pradesh">
+            </div>
+          </div>
+          <button class="btn-primary" onclick="saveSettings()">
+            <i data-lucide="save"></i> Save Settings
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function approveClub(id) {
+      var card = document.getElementById('approval-' + id);
+      var statusEl = document.getElementById('status-' + id);
+
+      statusEl.textContent = 'Approved';
+      statusEl.className = 'status-pill approved';
+      card.classList.add('approved');
+
+      var actions = card.querySelector('.approval-actions');
+      actions.innerHTML = '<span class="status-pill approved">Approved</span>';
+    }
+
+    function rejectClub(id) {
+      var reason = prompt('Enter a short reason for rejection (shown to the club leader):');
+      if (reason === null) return;
+
+      var card = document.getElementById('approval-' + id);
+      var actions = card.querySelector('.approval-actions');
+
+      card.classList.add('rejected');
+      actions.innerHTML = '<span class="status-pill rejected">Rejected</span>';
+    }
+
+    function saveSettings() {
+      alert('College settings saved successfully.');
+    }
+  </script>
+
+</body>
+</html>

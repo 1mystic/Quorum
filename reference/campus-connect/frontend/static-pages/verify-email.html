@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify Email : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="auth-body">
+
+  <div class="auth-frame">
+
+    <!-- Left: Sidebar -->
+    <aside class="auth-sidebar orange-auth">
+
+      <div onclick="location.href='index.html'" class="auth-sidebar-logo">
+        <div class="auth-sidebar-logo-mark">
+          <i data-lucide="graduation-cap"></i>
+        </div>
+        <span class="brand">Campus Connect</span>
+      </div>
+
+      <div>
+        <h2 class="auth-sidebar-title">Almost<br>there.</h2>
+        <p class="auth-sidebar-desc">
+          One quick step to confirm you are a verified student of your institution.
+        </p>
+      </div>
+
+      <div class="auth-sidebar-circle-1"></div>
+
+      <!-- Character SVG (variant 3 - teal background) -->
+      <div class="auth-sidebar-char">
+        <svg class="svg-fill" viewBox="0 0 240 240">
+          <rect x="6" y="6" width="228" height="228" rx="46" fill="#88C3E8" />
+          <path d="M58 234 Q58 176 120 176 Q182 176 182 234 Z" fill="#C8E8F7" />
+          <rect x="104" y="148" width="32" height="42" rx="14" fill="#F4C9A0" />
+          <ellipse cx="120" cy="110" rx="50" ry="54" fill="#F4C9A0" />
+          <path d="M70 110 Q68 50 120 50 Q172 50 170 110 Q150 80 120 80 Q90 80 70 110 Z" fill="#1A2635" />
+          <path d="M64 112 Q62 44 120 44 Q178 44 176 112" fill="none" stroke="#F2802B" stroke-width="13" stroke-linecap="round" />
+          <rect x="50"  y="98" width="22" height="46" rx="11" fill="#F2802B" />
+          <rect x="168" y="98" width="22" height="46" rx="11" fill="#F2802B" />
+          <circle cx="104" cy="113" r="5" fill="#2E1D16" />
+          <circle cx="136" cy="113" r="5" fill="#2E1D16" />
+          <circle cx="95"  cy="129" r="7" fill="#C9603A" opacity=".55" />
+          <circle cx="145" cy="129" r="7" fill="#C9603A" opacity=".55" />
+          <path d="M104 134 Q120 151 136 134" fill="none" stroke="#2E1D16" stroke-width="5" stroke-linecap="round" />
+        </svg>
+      </div>
+
+      <div class="auth-sidebar-sticker">OTP sent!</div>
+
+    </aside>
+
+    <!-- Right: Form -->
+    <section class="auth-form-panel custom-scrollbar">
+
+      <h2>Verify your email</h2>
+      <p class="auth-form-subtitle">
+        We sent a 6-digit code to <span id="email-display">your college email</span>.
+        Enter it below to confirm your account.
+      </p>
+
+      <!-- OTP input boxes -->
+      <div class="form-group">
+        <label>Enter the 6-digit code</label>
+        <div class="otp-row">
+          <input type="text" class="otp-box" id="otp-0" maxlength="1" inputmode="numeric" autocomplete="off">
+          <input type="text" class="otp-box" id="otp-1" maxlength="1" inputmode="numeric" autocomplete="off">
+          <input type="text" class="otp-box" id="otp-2" maxlength="1" inputmode="numeric" autocomplete="off">
+          <input type="text" class="otp-box" id="otp-3" maxlength="1" inputmode="numeric" autocomplete="off">
+          <input type="text" class="otp-box" id="otp-4" maxlength="1" inputmode="numeric" autocomplete="off">
+          <input type="text" class="otp-box" id="otp-5" maxlength="1" inputmode="numeric" autocomplete="off">
+        </div>
+      </div>
+
+      <button onclick="handleVerify()" class="btn-auth-submit">
+        <i data-lucide="check-circle-2"></i> Verify
+      </button>
+
+      <p class="otp-resend-row">
+        Did not receive a code?
+        <span id="resend-link" onclick="handleResend()">Resend</span>
+      </p>
+
+      <p class="otp-back-link">
+        <span onclick="location.href='signup.html'">Back to sign up</span>
+      </p>
+
+    </section>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Show the email address the OTP was sent to
+    function showEmailHint() {
+      var saved = sessionStorage.getItem('signupEmail');
+      if (saved) {
+        document.getElementById('email-display').textContent = saved;
+      }
+    }
+
+    // Wire up each OTP box to auto-advance and backspace-navigate
+    function setupOtpBoxes() {
+      var boxes = document.querySelectorAll('.otp-box');
+
+      for (var i = 0; i < boxes.length; i++) {
+        boxes[i].addEventListener('input', function(event) {
+          var box = event.target;
+          var index = parseInt(box.id.replace('otp-', ''));
+
+          // Only keep the last character typed
+          if (box.value.length > 1) {
+            box.value = box.value.slice(-1);
+          }
+
+          if (box.value.length === 1 && index < 5) {
+            document.getElementById('otp-' + (index + 1)).focus();
+          }
+        });
+
+        boxes[i].addEventListener('keydown', function(event) {
+          var box = event.target;
+          var index = parseInt(box.id.replace('otp-', ''));
+
+          if (event.key === 'Backspace' && box.value === '' && index > 0) {
+            document.getElementById('otp-' + (index - 1)).focus();
+          }
+        });
+      }
+    }
+
+    // Collect all 6 box values into one string
+    function getOtpValue() {
+      var code = '';
+      for (var i = 0; i < 6; i++) {
+        code += document.getElementById('otp-' + i).value;
+      }
+      return code;
+    }
+
+    // Clear all boxes and refocus the first one
+    function clearOtpBoxes() {
+      for (var i = 0; i < 6; i++) {
+        document.getElementById('otp-' + i).value = '';
+      }
+      document.getElementById('otp-0').focus();
+    }
+
+    function handleVerify() {
+      var otp = getOtpValue();
+
+      if (otp.length < 6) {
+        alert('Please enter all 6 digits of the OTP.');
+        return;
+      }
+
+      // In production this calls POST /api/v1/auth/verify-email with the code.
+      // For the prototype we go straight to onboarding.
+      window.location.href = 'onboard.html';
+    }
+
+    function handleResend() {
+      var link = document.getElementById('resend-link');
+      link.textContent = 'Sent!';
+      link.style.pointerEvents = 'none';
+      clearOtpBoxes();
+
+      setTimeout(function() {
+        link.textContent = 'Resend';
+        link.style.pointerEvents = '';
+      }, 5000);
+    }
+
+    showEmailHint();
+    setupOtpBoxes();
+    document.getElementById('otp-0').focus();
+  </script>
+</body>
+</html>

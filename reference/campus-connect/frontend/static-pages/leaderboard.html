@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leaderboard : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Menu</p>
+    <nav class="sidebar-menu">
+      <a href="clubs.html" class="sidebar-item"><i data-lucide="compass"></i> Clubs</a>
+      <a href="events.html" class="sidebar-item"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="announcements.html" class="sidebar-item"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leaderboard.html" class="sidebar-item active student"><i data-lucide="trophy"></i> Leaderboard</a>
+      <a href="find-clubs.html" class="sidebar-item"><i data-lucide="sparkles"></i> AI Finder</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="profile.html" class="user-card">
+      <div class="user-avatar student-av">SK</div>
+      <div class="user-info">
+        <p class="user-name">Shikha Singh</p>
+        <p class="user-sub">CS &middot; 1st Year</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">Leaderboard</h1>
+        <p class="page-sub">Clubs ranked by activity score &middot; June 2026</p>
+      </div>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <div class="leaderboard-section">
+
+        <!-- Filter chips -->
+        <div class="filter-chips-row">
+          <button class="filter-chip active" onclick="selectChip(this, 'all')">All Categories</button>
+          <button class="filter-chip" onclick="selectChip(this, 'tech')">Tech</button>
+          <button class="filter-chip" onclick="selectChip(this, 'culture')">Culture</button>
+          <button class="filter-chip" onclick="selectChip(this, 'arts')">Arts</button>
+          <button class="filter-chip" onclick="selectChip(this, 'business')">Business</button>
+          <button class="filter-chip" onclick="selectChip(this, 'sports')">Sports</button>
+        </div>
+
+        <!-- Top 3 podium -->
+        <div>
+          <h2 class="clubs-section-title">Top Clubs This Month</h2>
+          <div class="podium-container" id="podium">
+
+            <!-- 2nd place (left) -->
+            <div class="podium-card silver" data-category="tech">
+              <p class="podium-rank">2nd</p>
+              <div class="podium-avatar">&#128187;</div>
+              <p class="podium-name">Coding Society</p>
+              <p class="podium-score">1,090</p>
+              <p class="text-note">pts</p>
+            </div>
+
+            <!-- 1st place (center, elevated) -->
+            <div class="podium-card gold" data-category="tech">
+              <div class="podium-crown">
+                <i data-lucide="crown"></i>
+              </div>
+              <p class="podium-rank">1st</p>
+              <div class="podium-avatar">&#129302;</div>
+              <p class="podium-name">Robotics &amp; Automation</p>
+              <p class="podium-score">1,240</p>
+              <p class="text-note">pts</p>
+            </div>
+
+            <!-- 3rd place (right) -->
+            <div class="podium-card bronze" data-category="culture">
+              <p class="podium-rank">3rd</p>
+              <div class="podium-avatar">&#127925;</div>
+              <p class="podium-name">Music Collective</p>
+              <p class="podium-score">920</p>
+              <p class="text-note">pts</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Ranked list 4 to 10 -->
+        <div>
+          <div class="clubs-section-header">
+            <h2 class="clubs-section-title">Full Rankings</h2>
+            <span class="text-note" id="rank-count">7 clubs ranked</span>
+          </div>
+
+          <div class="lb-list" id="lb-list">
+
+            <div class="lb-row" data-category="arts">
+              <span class="lb-rank">4</span>
+              <div class="lb-club-dot banner-blue">&#128247;</div>
+              <div class="lb-info">
+                <p class="lb-club-name">Photography Circle</p>
+                <p class="lb-club-cat">Arts &middot; 38 members</p>
+              </div>
+              <div class="lb-score-col">
+                <p class="lb-score">780</p>
+                <p class="lb-score-label">pts</p>
+              </div>
+            </div>
+
+            <div class="lb-row" data-category="business">
+              <span class="lb-rank">5</span>
+              <div class="lb-club-dot banner-mint">&#128188;</div>
+              <div class="lb-info">
+                <p class="lb-club-name">Entrepreneurship Cell</p>
+                <p class="lb-club-cat">Business &middot; 54 members</p>
+              </div>
+              <div class="lb-score-col">
+                <p class="lb-score">640</p>
+                <p class="lb-score-label">pts</p>
+              </div>
+            </div>
+
+            <div class="lb-row" data-category="culture">
+              <span class="lb-rank">6</span>
+              <div class="lb-club-dot banner-pink">&#127914;</div>
+              <div class="lb-info">
+                <p class="lb-club-name">Drama &amp; Theatre Club</p>
+                <p class="lb-club-cat">Culture &middot; 29 members</p>
+              </div>
+              <div class="lb-score-col">
+                <p class="lb-score">520</p>
+                <p class="lb-score-label">pts</p>
+              </div>
+            </div>
+
+            <div class="lb-row" data-category="sports">
+              <span class="lb-rank">7</span>
+              <div class="lb-club-dot banner-yellow">&#9822;&#65039;</div>
+              <div class="lb-info">
+                <p class="lb-club-name">Chess Club</p>
+                <p class="lb-club-cat">Sports &middot; 22 members</p>
+              </div>
+              <div class="lb-score-col">
+                <p class="lb-score">380</p>
+                <p class="lb-score-label">pts</p>
+              </div>
+            </div>
+
+            <div class="lb-row" data-category="tech">
+              <span class="lb-rank">8</span>
+              <div class="lb-club-dot banner-orange">&#128300;</div>
+              <div class="lb-info">
+                <p class="lb-club-name">Astronomy Club</p>
+                <p class="lb-club-cat">Tech &middot; 17 members</p>
+              </div>
+              <div class="lb-score-col">
+                <p class="lb-score">290</p>
+                <p class="lb-score-label">pts</p>
+              </div>
+            </div>
+
+            <div class="lb-row" data-category="arts">
+              <span class="lb-rank">9</span>
+              <div class="lb-club-dot banner-mint">&#127912;</div>
+              <div class="lb-info">
+                <p class="lb-club-name">Fine Arts Society</p>
+                <p class="lb-club-cat">Arts &middot; 19 members</p>
+              </div>
+              <div class="lb-score-col">
+                <p class="lb-score">210</p>
+                <p class="lb-score-label">pts</p>
+              </div>
+            </div>
+
+            <div class="lb-row" data-category="culture">
+              <span class="lb-rank">10</span>
+              <div class="lb-club-dot banner-yellow">&#128378;</div>
+              <div class="lb-info">
+                <p class="lb-club-name">Literary Circle</p>
+                <p class="lb-club-cat">Culture &middot; 14 members</p>
+              </div>
+              <div class="lb-score-col">
+                <p class="lb-score">160</p>
+                <p class="lb-score-label">pts</p>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="empty-state hidden" id="empty-state">
+            <i data-lucide="trophy"></i>
+            <p>No clubs in this category yet.</p>
+          </div>
+        </div>
+
+        <!-- Score explanation -->
+        <div class="club-profile-meta">
+          <p class="section-heading">How is the score calculated?</p>
+          <p class="body-text">Activity score is calculated from the total number of events held (40 pts each), member count growth (5 pts per new member), average attendance rate (up to 200 pts bonus), and issues resolved (10 pts each). Scores reset on the first of each month.</p>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    var activeFilter = 'all';
+
+    function selectChip(clickedChip, filter) {
+      activeFilter = filter;
+      var allChips = document.querySelectorAll('.filter-chip');
+      for (var i = 0; i < allChips.length; i++) {
+        allChips[i].classList.remove('active');
+      }
+      clickedChip.classList.add('active');
+      applyFilter();
+    }
+
+    function applyFilter() {
+      var podiumCards = document.querySelectorAll('.podium-card');
+      for (var i = 0; i < podiumCards.length; i++) {
+        var cat = podiumCards[i].getAttribute('data-category');
+        var show = (activeFilter === 'all' || cat === activeFilter);
+        if (show) {
+          podiumCards[i].classList.remove('hidden');
+        } else {
+          podiumCards[i].classList.add('hidden');
+        }
+      }
+
+      var rows = document.querySelectorAll('.lb-row');
+      var visible = 0;
+      for (var j = 0; j < rows.length; j++) {
+        var rcat = rows[j].getAttribute('data-category');
+        var rshow = (activeFilter === 'all' || rcat === activeFilter);
+        if (rshow) {
+          rows[j].classList.remove('hidden');
+          visible++;
+        } else {
+          rows[j].classList.add('hidden');
+        }
+      }
+
+      var countEl = document.getElementById('rank-count');
+      countEl.textContent = visible + ' clubs ranked';
+
+      var emptyState = document.getElementById('empty-state');
+      if (visible === 0) {
+        emptyState.classList.remove('hidden');
+        lucide.createIcons();
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+  </script>
+
+</body>
+</html>

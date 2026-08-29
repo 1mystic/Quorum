@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Issues : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Menu</p>
+    <nav class="sidebar-menu">
+      <a href="clubs.html" class="sidebar-item"><i data-lucide="compass"></i> Clubs</a>
+      <a href="events.html" class="sidebar-item"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="announcements.html" class="sidebar-item"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leaderboard.html" class="sidebar-item"><i data-lucide="trophy"></i> Leaderboard</a>
+      <a href="find-clubs.html" class="sidebar-item"><i data-lucide="sparkles"></i> AI Finder</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="profile.html" class="user-card">
+      <div class="user-avatar student-av">SK</div>
+      <div class="user-info">
+        <p class="user-name">Shikha Singh</p>
+        <p class="user-sub">CS &middot; 1st Year</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">Issues</h1>
+        <p class="page-sub">Raise a concern or track your open issues</p>
+      </div>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <div class="issues-layout">
+
+        <!-- Left: raise issue form -->
+        <div class="issue-form-card">
+          <p class="issue-form-title">
+            <i data-lucide="message-square-warning"></i>
+            Raise a New Issue
+          </p>
+
+          <div class="form-group">
+            <label for="issue-title">Issue Title</label>
+            <input type="text" id="issue-title" class="input-field" placeholder="Short summary of the problem">
+          </div>
+
+          <div class="form-group">
+            <label for="issue-category">Category</label>
+            <select id="issue-category" class="select-field">
+              <option value="">Select category</option>
+              <option value="event">Event</option>
+              <option value="club">Club</option>
+              <option value="certificate">Certificate</option>
+              <option value="technical">Technical</option>
+              <option value="general">General</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="issue-club">Related Club</label>
+            <select id="issue-club" class="select-field">
+              <option value="">Select club</option>
+              <option value="robotics">Robotics &amp; Automation Club</option>
+              <option value="music">Music Collective</option>
+              <option value="photo">Photography Circle</option>
+              <option value="coding">Coding Society</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="issue-desc">Description</label>
+            <textarea id="issue-desc" class="textarea-field" rows="4" placeholder="Describe the issue in detail so the club leader can help you."></textarea>
+          </div>
+
+          <button class="btn-primary" onclick="submitIssue()">
+            <i data-lucide="send"></i> Submit Issue
+          </button>
+
+          <p class="text-note">Issues are sent directly to the club leader. Most are resolved within 48 hours.</p>
+        </div>
+
+        <!-- Right: existing issues -->
+        <div>
+          <div class="issue-feed-header">
+            <h2 class="clubs-section-title">Your Issues</h2>
+            <span class="status-pill open">2 open</span>
+          </div>
+
+          <div class="issue-feed" id="issue-feed">
+
+            <!-- Issue 1: Open, no response yet -->
+            <div class="issue-card" id="issue-1">
+              <div class="issue-top">
+                <p class="issue-title">Registration ID not received after signing up for Open Mic Night</p>
+                <span class="status-pill open">Open</span>
+              </div>
+              <p class="issue-meta">Music Collective &middot; Event &middot; Raised 2 days ago</p>
+              <p class="issue-desc">
+                I registered for Open Mic Night on 8 July but never received a confirmation email with my Registration ID. The registration page showed success but I have no record of the ID. I need it to enter the event.
+              </p>
+              <div class="issue-footer">
+                <span class="announce-tag">Event</span>
+                <span class="announce-tag">Registration</span>
+              </div>
+            </div>
+
+            <!-- Issue 2: In Progress, leader responded -->
+            <div class="issue-card" id="issue-2">
+              <div class="issue-top">
+                <p class="issue-title">Event date conflict between Arduino Workshop and CS Lab mid-semester exam</p>
+                <span class="status-pill in-progress">In Progress</span>
+              </div>
+              <p class="issue-meta">Robotics &amp; Automation Club &middot; Event &middot; Raised 5 days ago</p>
+              <p class="issue-desc">
+                The Introduction to Arduino workshop on 28 July clashes with our department's mid-semester practical exam for CS3401. Many first-year CS students will not be able to attend. Could the date be moved or an alternate slot be offered?
+              </p>
+              <div class="issue-response">
+                <p class="issue-response-label">
+                  <i data-lucide="check-circle-2"></i>
+                  Leader responded &middot; Aayansh Yadav
+                </p>
+                <p class="issue-response-text">Thanks for flagging this. I have contacted the department office to confirm the practical schedule. We will announce a revised date by 14 July. Your attendance will not be marked if the exam clashes.</p>
+              </div>
+              <div class="issue-footer">
+                <span class="announce-tag">Event</span>
+                <span class="announce-tag">Scheduling</span>
+              </div>
+            </div>
+
+            <!-- Issue 3: Resolved -->
+            <div class="issue-card resolved" id="issue-3">
+              <div class="issue-top">
+                <p class="issue-title">Cannot find meeting minutes from June club general body session</p>
+                <span class="status-pill resolved">Resolved</span>
+              </div>
+              <p class="issue-meta">Robotics &amp; Automation Club &middot; Club &middot; Raised 12 days ago</p>
+              <p class="issue-desc">
+                The minutes from the June 18 general body meeting were supposed to be shared on the club page but I cannot find them. I need them for the project proposal I am submitting.
+              </p>
+              <div class="issue-response">
+                <p class="issue-response-label">
+                  <i data-lucide="check-circle-2"></i>
+                  Leader responded &middot; Aayansh Yadav
+                </p>
+                <p class="issue-response-text">Sorry for the delay. Minutes have been uploaded to the club page under Documents. I have also emailed the PDF to all members. Issue closed.</p>
+              </div>
+              <div class="issue-footer">
+                <span class="announce-tag">Club</span>
+                <span class="announce-tag">Documents</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function submitIssue() {
+      var title    = document.getElementById('issue-title').value.trim();
+      var category = document.getElementById('issue-category').value;
+      var club     = document.getElementById('issue-club').value;
+      var desc     = document.getElementById('issue-desc').value.trim();
+
+      if (!title || !category || !club || !desc) {
+        alert('Please fill in all fields before submitting.');
+        return;
+      }
+
+      alert('Issue submitted. The club leader has been notified and will respond within 48 hours.');
+
+      document.getElementById('issue-title').value = '';
+      document.getElementById('issue-category').value = '';
+      document.getElementById('issue-club').value = '';
+      document.getElementById('issue-desc').value = '';
+    }
+  </script>
+
+</body>
+</html>

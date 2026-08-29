@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Announcements : Campus Connect</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="portal-body">
+
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><i data-lucide="graduation-cap"></i></div>
+      <span class="brand">Campus Connect</span>
+    </div>
+    <p class="nav-label">Leader</p>
+    <nav class="sidebar-menu">
+      <a href="leader-club.html" class="sidebar-item"><i data-lucide="layout-dashboard"></i> My Club</a>
+      <a href="members.html" class="sidebar-item"><i data-lucide="users-round"></i> Members</a>
+      <a href="leader-events.html" class="sidebar-item"><i data-lucide="calendar-days"></i> Events</a>
+      <a href="leader-announcements.html" class="sidebar-item active leader"><i data-lucide="megaphone"></i> Announcements</a>
+      <a href="leader-issues.html" class="sidebar-item"><i data-lucide="triangle-alert"></i> Issues</a>
+      <a href="clubs-new.html" class="sidebar-item"><i data-lucide="plus-circle"></i> Create Club</a>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <a href="#" class="user-card">
+      <div class="user-avatar leader-av">AY</div>
+      <div class="user-info">
+        <p class="user-name">Aayansh Yadav</p>
+        <p class="user-sub">Leader &middot; Robotics Club</p>
+      </div>
+    </a>
+  </aside>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h1 class="page-title">Announcements</h1>
+        <p class="page-sub">Posted by Robotics &amp; Automation Club</p>
+      </div>
+      <div class="topbar-spacer"></div>
+      <button class="btn-primary" onclick="location.href='post-announcement.html'">
+        <i data-lucide="plus"></i> Post Announcement
+      </button>
+    </header>
+
+    <main class="content-body custom-scrollbar">
+
+      <div class="announce-layout">
+        <div>
+
+          <div class="filter-chips-row">
+            <button class="filter-chip active" onclick="selectChip(this, 'all')">All</button>
+            <button class="filter-chip" onclick="selectChip(this, 'pinned')">Pinned</button>
+            <button class="filter-chip" onclick="selectChip(this, 'tech')">Tech</button>
+            <button class="filter-chip" onclick="selectChip(this, 'culture')">Culture</button>
+            <button class="filter-chip" onclick="selectChip(this, 'event')">Events</button>
+          </div>
+
+          <div class="announce-feed" id="announce-feed">
+
+            <!-- Card 1: pinned -->
+            <div class="announce-card pinned" id="post-1" data-category="tech" data-pinned="true">
+              <div class="announce-club-row">
+                <div class="announce-dot banner-orange">&#129302;</div>
+                <div class="announce-club-info">
+                  <p class="announce-club-name">Robotics &amp; Automation Club</p>
+                  <p class="announce-time">2 hours ago</p>
+                </div>
+                <span class="announce-pin-badge">
+                  <i data-lucide="pin"></i> Pinned
+                </span>
+              </div>
+              <p class="announce-title">Hackathon preparations: what to bring on the day</p>
+              <p class="announce-body">
+                The Automation Hackathon is on 19 July. Please arrive by 8:45 AM at Seminar Hall, Block A for check-in. Bring your student ID and your Registration ID. Teams of 2 to 4 are confirmed at the gate. Laptops with Arduino IDE pre-installed are strongly recommended.
+              </p>
+              <div class="announce-footer">
+                <span class="announce-tag">Hackathon</span>
+                <span class="announce-tag">Important</span>
+              </div>
+              <div class="announce-manage-row">
+                <button class="announce-action-btn" onclick="unpinPost(1)">
+                  <i data-lucide="pin-off"></i> Unpin
+                </button>
+                <button class="announce-action-btn delete" onclick="deletePost(1)">
+                  <i data-lucide="trash-2"></i> Delete
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 2: tech -->
+            <div class="announce-card" id="post-2" data-category="tech" data-pinned="false">
+              <div class="announce-club-row">
+                <div class="announce-dot banner-orange">&#129302;</div>
+                <div class="announce-club-info">
+                  <p class="announce-club-name">Robotics &amp; Automation Club</p>
+                  <p class="announce-time">3 days ago</p>
+                </div>
+              </div>
+              <p class="announce-title">New equipment now available in the Main Lab</p>
+              <p class="announce-body">
+                We have received 4 new Raspberry Pi 4 kits and a set of servo motor modules thanks to the department grant. These are available for club project use with booking. Use the equipment register sheet kept at the lab entrance.
+              </p>
+              <div class="announce-footer">
+                <span class="announce-tag">Lab</span>
+                <span class="announce-tag">Resources</span>
+              </div>
+              <div class="announce-manage-row">
+                <button class="announce-action-btn" onclick="pinPost(2)">
+                  <i data-lucide="pin"></i> Pin
+                </button>
+                <button class="announce-action-btn delete" onclick="deletePost(2)">
+                  <i data-lucide="trash-2"></i> Delete
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 3: event -->
+            <div class="announce-card" id="post-3" data-category="event" data-pinned="false">
+              <div class="announce-club-row">
+                <div class="announce-dot banner-orange">&#129302;</div>
+                <div class="announce-club-info">
+                  <p class="announce-club-name">Robotics &amp; Automation Club</p>
+                  <p class="announce-time">5 days ago</p>
+                </div>
+              </div>
+              <p class="announce-title">Registrations open for Line Follower Robot Build</p>
+              <p class="announce-body">
+                We are running our next hands-on workshop on 12 July in the Main Lab. All experience levels are welcome. Slots are limited to 50 participants. Register on the Events page and carry your student ID on the day. Materials will be provided.
+              </p>
+              <div class="announce-footer">
+                <span class="announce-tag">Workshop</span>
+                <span class="announce-tag">Registration</span>
+              </div>
+              <div class="announce-manage-row">
+                <button class="announce-action-btn" onclick="pinPost(3)">
+                  <i data-lucide="pin"></i> Pin
+                </button>
+                <button class="announce-action-btn delete" onclick="deletePost(3)">
+                  <i data-lucide="trash-2"></i> Delete
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 4: tech -->
+            <div class="announce-card" id="post-4" data-category="tech" data-pinned="false">
+              <div class="announce-club-row">
+                <div class="announce-dot banner-orange">&#129302;</div>
+                <div class="announce-club-info">
+                  <p class="announce-club-name">Robotics &amp; Automation Club</p>
+                  <p class="announce-time">1 week ago</p>
+                </div>
+              </div>
+              <p class="announce-title">Project submission deadline extended to 20 July</p>
+              <p class="announce-body">
+                Due to requests from several teams, the final project submission deadline for the semester mini-project has been extended by one week to 20 July. Please upload your project report and working demo video to the shared drive link sent to members.
+              </p>
+              <div class="announce-footer">
+                <span class="announce-tag">Projects</span>
+                <span class="announce-tag">Deadline</span>
+              </div>
+              <div class="announce-manage-row">
+                <button class="announce-action-btn" onclick="pinPost(4)">
+                  <i data-lucide="pin"></i> Pin
+                </button>
+                <button class="announce-action-btn delete" onclick="deletePost(4)">
+                  <i data-lucide="trash-2"></i> Delete
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 5: culture -->
+            <div class="announce-card" id="post-5" data-category="culture" data-pinned="false">
+              <div class="announce-club-row">
+                <div class="announce-dot banner-orange">&#129302;</div>
+                <div class="announce-club-info">
+                  <p class="announce-club-name">Robotics &amp; Automation Club</p>
+                  <p class="announce-time">2 weeks ago</p>
+                </div>
+              </div>
+              <p class="announce-title">Club anniversary celebration recap and photo gallery link</p>
+              <p class="announce-body">
+                Thank you to everyone who joined our 7th anniversary celebration last week. It was a wonderful evening. Photos from the event have been compiled into a gallery linked in the club bio. Please share and tag your fellow members.
+              </p>
+              <div class="announce-footer">
+                <span class="announce-tag">Anniversary</span>
+                <span class="announce-tag">Community</span>
+              </div>
+              <div class="announce-manage-row">
+                <button class="announce-action-btn" onclick="pinPost(5)">
+                  <i data-lucide="pin"></i> Pin
+                </button>
+                <button class="announce-action-btn delete" onclick="deletePost(5)">
+                  <i data-lucide="trash-2"></i> Delete
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="empty-state hidden" id="empty-state">
+            <i data-lucide="megaphone"></i>
+            <p>No announcements match this filter.</p>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    var activeFilter = 'all';
+
+    function selectChip(clickedChip, filter) {
+      activeFilter = filter;
+      var allChips = document.querySelectorAll('.filter-chip');
+      for (var i = 0; i < allChips.length; i++) {
+        allChips[i].classList.remove('active');
+      }
+      clickedChip.classList.add('active');
+      applyFilter();
+    }
+
+    function applyFilter() {
+      var cards = document.querySelectorAll('.announce-card');
+      var visible = 0;
+
+      for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        var cat = card.getAttribute('data-category');
+        var isPinned = card.getAttribute('data-pinned') === 'true';
+        var show = false;
+
+        if (activeFilter === 'all') {
+          show = true;
+        } else if (activeFilter === 'pinned') {
+          show = isPinned;
+        } else {
+          show = (cat === activeFilter);
+        }
+
+        if (show) {
+          card.classList.remove('hidden');
+          visible++;
+        } else {
+          card.classList.add('hidden');
+        }
+      }
+
+      var emptyState = document.getElementById('empty-state');
+      if (visible === 0) {
+        emptyState.classList.remove('hidden');
+        lucide.createIcons();
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+
+    function pinPost(id) {
+      var card = document.getElementById('post-' + id);
+      card.setAttribute('data-pinned', 'true');
+      card.classList.add('pinned');
+
+      var manageRow = card.querySelector('.announce-manage-row');
+      manageRow.innerHTML = '<button class="announce-action-btn" onclick="unpinPost(' + id + ')"><i data-lucide="pin-off"></i> Unpin</button><button class="announce-action-btn delete" onclick="deletePost(' + id + ')"><i data-lucide="trash-2"></i> Delete</button>';
+      lucide.createIcons();
+
+      var clubRow = card.querySelector('.announce-club-row');
+      var existingBadge = clubRow.querySelector('.announce-pin-badge');
+      if (!existingBadge) {
+        var badge = document.createElement('span');
+        badge.className = 'announce-pin-badge';
+        badge.innerHTML = '<i data-lucide="pin"></i> Pinned';
+        clubRow.appendChild(badge);
+        lucide.createIcons();
+      }
+    }
+
+    function unpinPost(id) {
+      var card = document.getElementById('post-' + id);
+      card.setAttribute('data-pinned', 'false');
+      card.classList.remove('pinned');
+
+      var manageRow = card.querySelector('.announce-manage-row');
+      manageRow.innerHTML = '<button class="announce-action-btn" onclick="pinPost(' + id + ')"><i data-lucide="pin"></i> Pin</button><button class="announce-action-btn delete" onclick="deletePost(' + id + ')"><i data-lucide="trash-2"></i> Delete</button>';
+      lucide.createIcons();
+
+      var badge = card.querySelector('.announce-pin-badge');
+      if (badge) { badge.remove(); }
+    }
+
+    function deletePost(id) {
+      var confirmed = confirm('Delete this announcement? Members will no longer see it.');
+      if (!confirmed) return;
+
+      var card = document.getElementById('post-' + id);
+      card.remove();
+    }
+  </script>
+
+</body>
+</html>
