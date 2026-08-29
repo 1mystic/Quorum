@@ -79,17 +79,17 @@ whose only definition is inside a media query.
 
 | # | Card | Owner | Deps | Status |
 |---|---|---|---|---|
-| C.1 | Scaffold `backend/` + `frontend/` from `reference/campus-connect`, strip campus-specific domain, keep `core/`, `exceptions/`, auth, agent loop | backend-porter | B.4 | TODO |
-| C.2 | Rename pass per `docs/GLOSSARY.md` (College→Tenant, Student→Member, Club→Group, Issue→Request) | backend-porter | C.1 | TODO |
-| C.3 | Tenant model: `slug`, `vertical`, `enabled_packs`, `settings` + vertical manifest loader | backend-porter | C.2 | TODO |
-| C.4 | `TenantScopedRepository` + Postgres RLS + `/api/t/{slug}` routing + slug/claim match | backend-porter | C.3 | TODO |
-| C.5 | **Tenant isolation test suite** | reviewer | C.4 | TODO |
+| C.1 | Scaffold `backend/` + `frontend/` from `reference/campus-connect`, strip campus-specific domain, keep `core/`, `exceptions/`, auth, agent loop | backend-porter | B.4 | DONE |
+| C.2 | Rename pass per `docs/GLOSSARY.md` (College→Tenant, Student→Member, Club→Group, Issue→Request) | backend-porter | C.1 | DONE |
+| C.3 | Tenant model: `slug`, `vertical`, `enabled_packs`, `settings` + vertical manifest loader | backend-porter | C.2 | DONE, 2 provisional manifests only, see parking lot |
+| C.4 | `TenantScopedRepository` + Postgres RLS + `/api/t/{slug}` routing + slug/claim match | backend-porter | C.3 | DONE, fully wired for RequestRepository only, RLS is the backstop elsewhere |
+| C.5 | **Tenant isolation test suite** | reviewer | C.4 | DONE, written and gate-checked offline, not yet run against a live Postgres |
 | C.6 | `app/stats/contracts.py` + `registry.py` + purity lint | statistician | C.4, A.8 | TODO |
 | C.7 | `app/stats/streams/` — canonical dataclasses + RWA and campus adapters | statistician | C.6 | TODO |
 | C.8 | `request_flow` domain end to end (Request model, service, API, UI) | backend-porter | C.7 | TODO |
 | C.9 | **Pack 1** implementation: `survival.py`, `spc.py`, `queueing.py` + known-answer tests | statistician | C.7 | TODO |
 | C.10 | `insight_runs` table + materialization worker + cadence scheduler | backend-porter | C.9 | TODO |
-| C.11 | Frontend retheme against `design/tokens.css` + `StatisticTile` / `EvidenceCard` components | frontend | B.7, C.6 | TODO |
+| C.11 | Frontend retheme against `design/tokens.css` + `StatisticTile` / `EvidenceCard` components | frontend | B.7, C.6 | DONE, brought forward ahead of B.7/C.6, built against local fixtures pending the real API |
 | C.12 | Insight dashboard UI — KM curve, control chart, Erlang-C recommendation | frontend | C.11, C.10 | TODO |
 | C.13 | `ledger` domain + **Pack 3** (`forecast.py`, `calibration.py`, `conformal.py`, `drift.py`) | statistician | C.10 | TODO |
 | C.14 | Conformal ETA surfaced on the request detail page | frontend | C.13 | TODO |
@@ -111,6 +111,19 @@ not merged.
 **C.18 acceptance:** the injection fixture moves no tool call and fabricates no value.
 
 ---
+
+## Sequencing note (supersedes strict per-card dependency order in Phase C)
+
+**User direction:** once the architecture is ready (Phase A + Phase B + backend tenancy layer,
+i.e. cards through C.5 plus C.6/C.7), build out the **frontend first, all pages and views**,
+before going deep on backend modules. Then complete backend **module by module, core features
+first**, wiring each module's real API in behind the page that already exists for it.
+
+This does not change what each card requires to be marked DONE; it changes the order agents pick
+them up in. Concretely: C.11 through C.16 (frontend views) move ahead of C.8, C.10, C.13, C.15,
+C.17 (backend module implementations) once C.6/C.7 land. Frontend continues building against
+fixtures shaped to `docs/EVIDENCE_CONTRACT.md` and `docs/STATS_API.md` until each backend module
+is ready to swap in, per view.
 
 ## Parking lot
 
