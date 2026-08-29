@@ -39,6 +39,15 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 30 | Callouts (`.callout-info`, `.callout-warn`): privacy-floor and policy notices |
 | 31 | Tabs / segmented toggle (`.segmented`) |
 | 32 | Demo role switcher and RBAC mismatch banner (`.role-switcher`, `.role-banner`) |
+| 33 | Landing: overlay scrollbar (`.qs`, `.qs-t`) |
+| 34 | Landing: nav and hero rails (`.landing-nav`, `.hero`, `.rails`) |
+| 35 | Landing: readout strip and metric bar (`.readout`, `.mbar`) |
+| 36 | Landing: section system (`.sec`, `.sec-head`, `.sec-no`) |
+| 37 | Landing: six-stream bento (`.bento`, `.cell`) |
+| 38 | Landing: uncertainty thesis (`.uncert`, `.plate`, `.pull`) |
+| 39 | Landing: packs table and steps (`.packs`, `.steps`, `.step`) |
+| 40 | Landing: CTA band and footer (`.cta-band`, `.landing-foot`, `.foot`, `.colophon`) |
+| 41 | Landing: sweep-fill buttons and icon arrows (`.landing-body .btn`, `.arw`, `.tl`) |
 
 ## Quick reference by concern
 
