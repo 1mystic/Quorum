@@ -39,7 +39,7 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 30 | Callouts (`.callout-info`, `.callout-warn`): privacy-floor and policy notices |
 | 31 | Tabs / segmented toggle (`.segmented`) |
 | 32 | Demo role switcher and RBAC mismatch banner (`.role-switcher`, `.role-banner`) |
-| 33 | Landing: overlay scrollbar (`.qs`, `.qs-t`) |
+| 33 | Overlay scrollbar, window and inner scrollers (`.qs`, `.qs-t`, `.qs-el`), used by landing and `TenantShell`'s sidebar |
 | 34 | Landing: nav and hero rails (`.landing-nav`, `.hero`, `.rails`) |
 | 35 | Landing: readout strip and metric bar (`.readout`, `.mbar`) |
 | 36 | Landing: section system (`.sec`, `.sec-head`, `.sec-no`) |

@@ -1,44 +1,78 @@
 import { onMounted, onBeforeUnmount } from 'vue'
 
-// Ports the document overlay scrollbar from design/samples/quorum/landing.html:
-// the native thumb's length is fixed by the viewport/content ratio and cannot
-// be shortened in CSS, so the real scrollbar is hidden (style.css section 33,
-// `html{ scrollbar-width:none }` scoped to .landing-body) and this draws a
-// short, capped, fading thumb bound to window scroll instead.
+// Ports the overlayScroll(target) factory from design/samples/quorum/dashboard.html:
+// a native thumb's length is fixed by the viewport/content ratio and cannot be
+// shortened in CSS, so the real scrollbar is hidden (style.css section 33,
+// `html.qs-active{ scrollbar-width:none }`) and this draws a short, capped,
+// fading thumb instead. Binds to either the window (no target ref, or an
+// unresolved one) or an inner scrolling element (a template ref), matching
+// the sample's window+sidebar pair.
+//
+// prefers-reduced-motion: the thumb stays visible at rest (no fade-in/out,
+// no hover-thickening transition) instead of only appearing while scrolling.
 
-export function useOverlayScrollbar() {
+const PAD = 10
+const MIN_H = 30
+const MAX_H = 84
+
+export function useOverlayScrollbar(targetRef) {
   let bar = null
   let thumb = null
   let idleTimer = null
   let dragY = 0
   let dragTop = 0
   let resizeObserver = null
+  let reduceMotion = false
 
-  const PAD = 10
-  const MIN_H = 34
-  const MAX_H = 84
+  function isWindowTarget() {
+    return !targetRef || !targetRef.value
+  }
+
+  function el() {
+    return isWindowTarget() ? document.documentElement : targetRef.value
+  }
+
+  function place() {
+    if (isWindowTarget()) return
+    const r = targetRef.value.getBoundingClientRect()
+    bar.style.top = r.top + 'px'
+    bar.style.height = r.height + 'px'
+    bar.style.left = r.right - 13 + 'px'
+  }
 
   function geometry() {
-    const doc = document.documentElement
-    const scrollHeight = Math.max(doc.scrollHeight, document.body.scrollHeight)
-    const clientHeight = window.innerHeight
+    const scrollHeight = isWindowTarget()
+      ? Math.max(document.documentElement.scrollHeight, document.body.scrollHeight)
+      : el().scrollHeight
+    const clientHeight = isWindowTarget() ? window.innerHeight : el().clientHeight
     if (scrollHeight <= clientHeight + 4) {
       bar.style.display = 'none'
       return null
     }
     bar.style.display = ''
+    place()
     const track = clientHeight - PAD * 2
     return { scrollHeight, clientHeight, track, h: Math.max(MIN_H, Math.min(MAX_H, track * (clientHeight / scrollHeight))) }
+  }
+
+  function pos() {
+    return isWindowTarget() ? window.scrollY || window.pageYOffset : el().scrollTop
+  }
+
+  function go(v) {
+    if (isWindowTarget()) window.scrollTo(0, v)
+    else el().scrollTop = v
   }
 
   function draw() {
     const g = geometry()
     if (!g) return
     const max = g.scrollHeight - g.clientHeight
-    const p = max > 0 ? Math.min(1, Math.max(0, (window.scrollY || window.pageYOffset) / max)) : 0
+    const p = max > 0 ? Math.min(1, Math.max(0, pos() / max)) : 0
     thumb.style.height = g.h + 'px'
     thumb.style.transform = 'translateY(' + (PAD + p * (g.track - g.h)) + 'px)'
     bar.classList.add('on')
+    if (reduceMotion) return
     window.clearTimeout(idleTimer)
     idleTimer = window.setTimeout(() => {
       if (!thumb.classList.contains('drag')) bar.classList.remove('on')
@@ -51,7 +85,7 @@ export function useOverlayScrollbar() {
     thumb.classList.add('drag')
     try { thumb.setPointerCapture(e.pointerId) } catch (err) { /* noop */ }
     dragY = e.clientY
-    dragTop = PAD + ((window.scrollY || 0) / (g.scrollHeight - g.clientHeight)) * (g.track - g.h)
+    dragTop = PAD + (pos() / (g.scrollHeight - g.clientHeight)) * (g.track - g.h)
     e.preventDefault()
   }
 
@@ -60,8 +94,7 @@ export function useOverlayScrollbar() {
     const g = geometry()
     if (!g) return
     const top = Math.min(g.track - g.h + PAD, Math.max(PAD, dragTop + (e.clientY - dragY)))
-    const p = (top - PAD) / (g.track - g.h)
-    window.scrollTo(0, p * (g.scrollHeight - g.clientHeight))
+    go(((top - PAD) / (g.track - g.h)) * (g.scrollHeight - g.clientHeight))
   }
 
   function onPointerEnd(e) {
@@ -71,12 +104,18 @@ export function useOverlayScrollbar() {
     draw()
   }
 
+  function scrollTarget() {
+    return isWindowTarget() ? window : el()
+  }
+
   onMounted(() => {
     if (typeof window === 'undefined' || !document.body) return
+    reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    document.documentElement.classList.add('qs-active')
+    if (isWindowTarget()) document.documentElement.classList.add('qs-active')
+
     bar = document.createElement('div')
-    bar.className = 'qs'
+    bar.className = 'qs' + (isWindowTarget() ? '' : ' qs-el')
     thumb = document.createElement('div')
     thumb.className = 'qs-t'
     bar.appendChild(thumb)
@@ -86,19 +125,23 @@ export function useOverlayScrollbar() {
     thumb.addEventListener('pointermove', onPointerMove)
     thumb.addEventListener('pointerup', onPointerEnd)
     thumb.addEventListener('pointercancel', onPointerEnd)
-    window.addEventListener('scroll', draw, { passive: true })
+    scrollTarget().addEventListener('scroll', draw, { passive: true })
     window.addEventListener('resize', draw)
+    if (!isWindowTarget()) window.addEventListener('scroll', place, { passive: true })
     if (window.ResizeObserver) {
       resizeObserver = new ResizeObserver(draw)
-      resizeObserver.observe(document.body)
+      resizeObserver.observe(isWindowTarget() ? document.body : el())
     }
     draw()
   })
 
   onBeforeUnmount(() => {
     document.documentElement.classList.remove('qs-active')
-    window.removeEventListener('scroll', draw)
+    if (bar) {
+      scrollTarget().removeEventListener('scroll', draw)
+    }
     window.removeEventListener('resize', draw)
+    window.removeEventListener('scroll', place)
     if (resizeObserver) resizeObserver.disconnect()
     if (bar && bar.parentNode) bar.parentNode.removeChild(bar)
     window.clearTimeout(idleTimer)

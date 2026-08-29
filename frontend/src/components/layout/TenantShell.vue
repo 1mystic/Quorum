@@ -1,9 +1,10 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { tenantBySlug, demoTenantList } from '../../fixtures/tenants'
 import { coreNav, insightNav, adminNav } from '../../fixtures/nav'
 import { useAuthStore } from '../../stores/auth'
+import { useOverlayScrollbar } from '../../composables/useOverlayScrollbar'
 import RoleSwitcher from '../ui/RoleSwitcher.vue'
 import ThemeToggle from '../ui/ThemeToggle.vue'
 
@@ -39,11 +40,18 @@ function switchTenant(nextSlug) {
   const target = route.name ? { name: route.name, params: { ...route.params, slug: nextSlug } } : `/t/${nextSlug}/dashboard`
   router.push(target).catch(() => router.push(`/t/${nextSlug}/dashboard`))
 }
+
+// design/samples/quorum/dashboard.html's overlayScroll(target) pair: one
+// bound to the window, one bound to the sidebar, both drawn with the same
+// short-thumb mechanism (useOverlayScrollbar).
+const sideRef = ref(null)
+useOverlayScrollbar()
+useOverlayScrollbar(sideRef)
 </script>
 
 <template>
   <div class="app">
-    <aside class="side scroll-none">
+    <aside ref="sideRef" class="side scroll-none">
       <router-link class="brand" :to="`/t/${slug}/dashboard`">
         <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
           <circle cx="16" cy="16" r="12.5" fill="none" stroke="currentColor" stroke-width="2.4" />

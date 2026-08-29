@@ -126,6 +126,18 @@
   --wrap:1200px;
   --wrap-vw:90vw;
   --sidebar:264px;
+
+  /* ── fixed inverse surface ────────────────────────────────────────────
+     A card that must always read as "the opposite of the page" (the CTA
+     band, a toast-style banner) cannot be built from --ink/--canvas: those
+     two invert their identity in dark mode, so a card that sets
+     background:var(--ink); color:var(--canvas) silently flips into a light
+     card with washed-out text once the page itself goes dark. These two
+     stay the same literal warm-black/warm-limestone pair in both themes,
+     on purpose, and are redeclared (not just inherited) in both dark blocks
+     below so that fact is visible where the rest of the palette flips. */
+  --surface-inverse:#1A1714;
+  --ink-inverse:#FAF7F2;
 }
 
 @media (prefers-color-scheme: dark){
@@ -143,6 +155,8 @@
     --band-alpha:.22;
     --shadow-card:0 1px 2px rgba(0,0,0,.24),0 8px 28px -12px rgba(0,0,0,.55);
     --shadow-pop:0 2px 6px rgba(0,0,0,.3),0 18px 48px -16px rgba(0,0,0,.65);
+    --surface-inverse:#1A1714;
+    --ink-inverse:#FAF7F2;
   }
 }
 
@@ -160,6 +174,8 @@
   --band-alpha:.22;
   --shadow-card:0 1px 2px rgba(0,0,0,.24),0 8px 28px -12px rgba(0,0,0,.55);
   --shadow-pop:0 2px 6px rgba(0,0,0,.3),0 18px 48px -16px rgba(0,0,0,.65);
+  --surface-inverse:#1A1714;
+  --ink-inverse:#FAF7F2;
 }
 
 @media (prefers-reduced-motion: reduce){

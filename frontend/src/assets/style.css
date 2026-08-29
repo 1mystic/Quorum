@@ -1368,8 +1368,8 @@ a.list-row:hover{
   max-width:min(640px,92vw);
   padding:var(--sp3) var(--sp4);
   border-radius:var(--r);
-  background:var(--ink);
-  color:var(--canvas);
+  background:var(--surface-inverse);
+  color:var(--ink-inverse);
   font-size:13px;
   line-height:1.5;
   box-shadow:var(--shadow-pop);
@@ -1379,7 +1379,7 @@ a.list-row:hover{
   color:var(--accent);
 }
 .role-banner-tag{
-  color:color-mix(in srgb,var(--canvas) 62%,transparent);
+  color:color-mix(in srgb,var(--ink-inverse) 62%,transparent);
   font:500 11px/1 var(--font-mono);
   letter-spacing:.04em;
 }
@@ -1393,13 +1393,13 @@ a.list-row:hover{
   border-radius:var(--r-sm);
   border:0;
   background:transparent;
-  color:color-mix(in srgb,var(--canvas) 70%,transparent);
+  color:color-mix(in srgb,var(--ink-inverse) 70%,transparent);
   cursor:pointer;
   transition:background var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap);
 }
 .role-banner-close:hover{
-  background:color-mix(in srgb,var(--canvas) 16%,transparent);
-  color:var(--canvas);
+  background:color-mix(in srgb,var(--ink-inverse) 16%,transparent);
+  color:var(--ink-inverse);
 }
 @media(max-width:620px){
   .role-banner{
@@ -1411,7 +1411,7 @@ a.list-row:hover{
   }
 }
 
-/*  33. Landing: overlay scrollbar  */
+/*  33. Overlay scrollbar (useOverlayScrollbar, window and inner scrollers)  */
 .qs{
   position:fixed;
   top:0;
@@ -1420,6 +1420,10 @@ a.list-row:hover{
   width:12px;
   z-index:200;
   pointer-events:none;
+}
+.qs.qs-el{
+  right:auto;
+  bottom:auto;
 }
 .qs-t{
   position:absolute;
@@ -1431,7 +1435,7 @@ a.list-row:hover{
   pointer-events:auto;
   cursor:grab;
   touch-action:none;
-  transition:opacity 280ms var(--ease-snap), background 160ms var(--ease-snap), width 160ms var(--ease-snap);
+  transition:opacity var(--t-hover) var(--ease-snap), background var(--t-hover) var(--ease-snap), width var(--t-hover) var(--ease-snap);
 }
 .qs.on .qs-t{
   opacity:.40;
@@ -1448,6 +1452,9 @@ a.list-row:hover{
   cursor:grabbing;
 }
 @media (prefers-reduced-motion: reduce){
+  /* useOverlayScrollbar keeps the "on" class permanently under reduced
+     motion (it never starts the idle fade-out timer), so the thumb stays
+     visibly present at rest rather than only appearing while scrolling. */
   .qs.on .qs-t{
     opacity:.5;
   }
@@ -2050,9 +2057,13 @@ html.qs-active::-webkit-scrollbar{
 }
 
 /*  40. Landing: CTA band and footer  */
+/* .cta-band is deliberately a fixed dark surface, the inverse of the page,
+   in both themes. It reads from --surface-inverse/--ink-inverse rather than
+   --ink/--canvas: those two swap identity in dark mode, and a card built
+   from them would silently invert into a light card on a dark page. */
 .cta-band{
-  background:var(--ink);
-  color:var(--canvas);
+  background:var(--surface-inverse);
+  color:var(--ink-inverse);
   border-radius:var(--r-lg);
   padding:var(--sp9) var(--sp7);
   text-align:center;
@@ -2063,33 +2074,33 @@ html.qs-active::-webkit-scrollbar{
   font-size:clamp(1.9rem,4vw,3.2rem);
   max-width:18ch;
   margin-inline:auto;
-  color:var(--canvas);
+  color:var(--ink-inverse);
 }
 .cta-band p{
-  color:color-mix(in srgb,var(--canvas) 68%,transparent);
+  color:color-mix(in srgb,var(--ink-inverse) 68%,transparent);
   max-width:48ch;
   margin:var(--sp4) auto var(--sp7);
 }
 .cta-band .btn-fill{
-  background:var(--canvas);
-  color:var(--ink);
+  background:var(--ink-inverse);
+  color:var(--surface-inverse);
 }
 .cta-band .btn-fill::before{
   background:var(--accent);
 }
 .cta-band .btn-fill:hover{
-  color:var(--ink);
+  color:var(--surface-inverse);
 }
 .cta-band .btn-line{
-  border-color:color-mix(in srgb,var(--canvas) 30%,transparent);
-  color:color-mix(in srgb,var(--canvas) 80%,transparent);
+  border-color:color-mix(in srgb,var(--ink-inverse) 30%,transparent);
+  color:color-mix(in srgb,var(--ink-inverse) 80%,transparent);
 }
 .cta-band .btn-line::before{
-  background:color-mix(in srgb,var(--canvas) 14%,transparent);
+  background:color-mix(in srgb,var(--ink-inverse) 14%,transparent);
 }
 .cta-band .btn-line:hover{
-  color:var(--canvas);
-  border-color:var(--canvas);
+  color:var(--ink-inverse);
+  border-color:var(--ink-inverse);
 }
 .landing-foot{
   border-top:1px solid var(--hair);
