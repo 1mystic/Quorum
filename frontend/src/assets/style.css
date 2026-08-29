@@ -2309,11 +2309,10 @@ html.qs-active::-webkit-scrollbar{
   transform:rotate(180deg);
 }
 .select-list{
-  position:absolute;
-  z-index:80;
-  top:calc(100% + 6px);
-  left:0;
-  right:0;
+  /* position:fixed and left/top/width are set inline by SelectField.vue's
+     placeList(), computed from the trigger's getBoundingClientRect() since
+     this is teleported to <body> and cannot rely on an ancestor's flow. */
+  z-index:220;
   max-height:260px;
   overflow-y:auto;
   background:var(--panel);
