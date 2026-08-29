@@ -27,3 +27,7 @@ coverage/
 # local scratch
 scratch/
 *.local
+
+# agent tooling - not part of the product
+CLAUDE.md
+.claude/
