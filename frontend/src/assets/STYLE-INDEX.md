@@ -29,6 +29,15 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 20 | Route loading bar and buffer spinner |
 | 21 | Toast stack |
 | 22 | StatTile-specific layout (`.stat-tile-empty`, `.check-detail`) |
+| 23 | Auth shell and forms (`.auth-shell`, `.auth-card`, `.field`, `.form`, `.btn-google`) |
+| 24 | Status badges (`.badge-*`): request/decision/event lifecycle status, a separate scale from the Evidence pills |
+| 25 | Filter chips (`.chips`, `.chip`), pairs with `useChipFilter` |
+| 26 | Timeline (`.timeline`, `.tl-item`): request status history |
+| 27 | List rows (`.list`, `.list-row`): requests, events, announcements, members |
+| 28 | Empty state (`.empty-state`) |
+| 29 | Pairwise matrix (`.matrix`): decision head-to-head results |
+| 30 | Callouts (`.callout-info`, `.callout-warn`): privacy-floor and policy notices |
+| 31 | Tabs / segmented toggle (`.segmented`) |
 
 ## Quick reference by concern
 
@@ -40,6 +49,8 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | Buttons and toggles | 9 |
 | Charts (SurvivalCurve, ControlChart) | 15 |
 | Async chrome (route bar, toasts) | 20, 21 |
+| Auth and onboarding forms | 23 |
+| List/detail page furniture (requests, events, announcements, members, decisions) | 24, 25, 26, 27, 28, 29, 30, 31 |
 
 ## Adding to this file
 
