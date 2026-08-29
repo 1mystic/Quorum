@@ -724,8 +724,12 @@ switched on", not an error.
   the threshold rule instead, reporting `insufficient_data` above 20% interval-censored rows.
   Turnbull is a later card, and the Method Card says so rather than pretending the case is covered.
 - Cross-tenant hierarchical pooling (`bayes.hierarchical_pool`) receives an anonymised `group_key`.
-  Whether that key can be reversed by a tenant with enough of its own data is a privacy question,
-  not a statistical one, and blocks Pack 2 shipping until it is answered.
+  **Resolved:** each tenant's contribution is a differentially private sufficient statistic, not
+  raw data, at a declared per-quarter epsilon budget, and the pool refreshes on a fixed cadence
+  rather than live, so no single update is isolable by differencing. Full mechanism and its blocking
+  checks are in `docs/STATS_CATALOG.md` under `bayes.hierarchical_pool`. No longer a blocker; it is
+  now a required part of the service's implementation, gated by the sensitivity test alongside the
+  usual known-answer test.
 - `duration_active_hours` requires paired `paused` / `resumed` events. Verticals that cannot supply
   them declare `sla_clock="wall"` and the alternative is simply unavailable, rather than
   approximated.

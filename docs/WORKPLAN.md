@@ -118,4 +118,7 @@ not merged.
 - Auth: email+password+Google as ported, or add phone+OTP per vertical manifest? (leaning both)
 - WhatsApp broadcast — the RWA research found ~99% resident usage, which is the single strongest
   adoption signal in the file. Revisit once Phase C is walking.
-- Cross-tenant hierarchical priors (Pack 2) need a privacy review before they touch real tenants.
+- Cross-tenant hierarchical priors (Pack 2): privacy mechanism settled (DP-noised sufficient
+  statistics, batched weekly refresh, per-tenant epsilon budget). See `docs/STATS_CATALOG.md`
+  `bayes.hierarchical_pool`. Implementation still lands in card C.17, gated by the sensitivity
+  test in addition to the known-answer test.

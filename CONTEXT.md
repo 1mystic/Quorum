@@ -53,6 +53,17 @@ Design and branding are done. Three agents now running in parallel on disjoint p
 - **frontend** finished the Vue scaffold and the Evidence component set (`frontend/` only); ready
   for `C.12` once `C.10`/`insight_runs` exists, but can keep building UI against fixtures meanwhile
 
+All three background agents finished and were verified against the gates in `docs/RULES.md` §7
+rather than accepted on report (em dashes, secrets, AI attribution, and for the backend agent, an
+independent re-run of its test claims). Fixes from that verification pass are committed.
+
+The one open item that was genuinely blocking, the Pack 2 cross-tenant privacy question, is now
+resolved (see decision log). Nothing is currently in flight; the session is pausing here by user
+instruction ahead of a session limit. Next unblocked cards for a future session: **C.6/C.7**
+(statistician, `app/stats/contracts.py` + `streams/`), the **manifest reconciliation** (backend's
+two provisional verticals against the now-complete `docs/VERTICALS.md`), and route-prefix cleanup
+in the ported integration test suite (noted in the backend-porter decision log entry).
+
 Each commits only its own paths to avoid racing the others.
 
 ## Blocked
@@ -67,6 +78,7 @@ Newest first. Append, never rewrite. Record *why*, not just *what*.
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-08-29 | Cross-tenant hierarchical pooling secured with differential privacy: DP-noised sufficient statistics per tenant, batched weekly refresh, per-tenant epsilon budget, sensitivity test gate | User: privacy is a must, aggregated/anonymised patterns are fine for prior training, but tenant-level guardrails are required. Concentration and min-tenant floors alone bound influence, not observability, so they could not close a differencing attack on their own. This unblocks `bayes.hierarchical_pool` in `docs/STATS_CATALOG.md`. |
 | 2026-08-29 | `Issue` -> `Request` renamed with a word-boundary pass, not substring | Campus Connect already used `Request` as its pydantic-schema-class suffix (`RaiseIssueRequest`, etc.) and also uses "issue" as a verb for certificate issuance (`issue_certificate_job`, `issued_at`). A naive substring rename corrupted `CERTIFICATE_ISSUED` into `CERTIFICATE_REQUESTD` on the first pass; caught by re-parsing every file with `ast` and grepping for the mangled token, then fixed by hand |
 | 2026-08-29 | Fourteen Campus Connect alembic migrations squashed into one `init schema` migration built from `Base.metadata.create_all`, plus one `tenancy row level security` migration | The rename touches almost every table and column name; replaying the old migration history under new names would be pure churn with no one depending on the old schema. The squashed migration cannot drift from `app/models` because it *is* the models |
 | 2026-08-29 | `email_suffix`-based auto-tenant-assignment at signup replaced with an explicit `tenant_slug` field on `SignupRequest`/`GoogleAuthRequest` | `Tenant.email_suffix` does not generalize past the campus vertical (docs/GLOSSARY.md). A housing society has no email domain to join by. `TenantRepository.email_to_tenant` removed; a MEMBER now names the tenant it wants to join by slug, same as the URL does |

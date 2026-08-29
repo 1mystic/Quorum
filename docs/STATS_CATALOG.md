@@ -1834,32 +1834,61 @@ in a two-group case, which is a computable integral.
 
 ### `bayes.hierarchical_pool`
 
+**Privacy resolution (settled, no longer blocking).** The threat is a differencing attack: a
+tenant runs the same query twice, a competitor tenant's data changes between the two runs, and the
+tenant infers something about that change from how the shared prior moved. Concentration and
+tenant-count floors alone do not close this, since they bound influence, not observability. Two
+mechanisms close it:
+
+1. **Every tenant's contribution enters the pool as a differentially private sufficient statistic**,
+   not as raw or lightly-aggregated data. Each tenant's `(events, exposure)` pair for a `group_key`
+   is perturbed with calibrated Laplace noise (the counts stream) before it is combined with any
+   other tenant's contribution, at a **declared, budgeted epsilon per pooling run**. This is a
+   guarantee about the mechanism, not a promise about behaviour: it holds even against a tenant that
+   queries adversarially.
+2. **The pool is refreshed on a fixed cadence (default weekly), never live.** A single tenant's
+   update cannot be isolated in the output because many tenants' changes land in the same batch, and
+   the previous batch's noised statistics are not retained for differencing across releases.
+
+Aggregated, anonymised patterns are what get pooled, in other words: never an identifiable tenant's
+raw rate. This is what the vertical manifest and the tenant admin see and can switch off, and it is
+what makes the platform-scale advantage in `PLAN.md` defensible rather than assumed.
+
 | | |
 |---|---|
 | **streams** | `RateObservation[]` carrying an anonymised `group_key`, potentially spanning tenants |
-| **input** | `observations, *, levels: tuple[str, ...], draws: int = 4000, seed: int, min_units_per_level: int = 5` |
-| **output** | `structure`: the pooled posterior per unit plus `{"tau", "tau_lo", "tau_hi", "pooling_factor"}`. `interval_kind="credible-95"`. |
-| **min_n** | 5 units per level, and **for cross-tenant pooling, at least 10 contributing tenants with no single tenant supplying more than 25% of the observations.** Below that, a tenant's own data dominates the "learned" prior and the cross-tenant claim is false. |
+| **input** | `observations, *, levels: tuple[str, ...], draws: int = 4000, seed: int, min_units_per_level: int = 5, epsilon: float = 1.0, refresh_cadence: str = "weekly"` |
+| **output** | `structure`: the pooled posterior per unit plus `{"tau", "tau_lo", "tau_hi", "pooling_factor", "epsilon_spent", "as_of_batch"}`. `interval_kind="credible-95"`. |
+| **min_n** | 5 units per level, and **for cross-tenant pooling, at least 10 contributing tenants with no single tenant supplying more than 25% of the observations.** Below that, a tenant's own data would dominate the "learned" prior even before noise is added, so the floor stays as a second line of defense. |
 
 This is the platform-scale advantage in `PLAN.md`: the prior a new society starts with is learned
-from every society already on the platform. It is also the service with the largest privacy surface
-in the catalog.
+from every society already on the platform, through a mechanism that is proof against a single
+tenant reconstructing another's data rather than merely unlikely to permit it.
 
 **checks**
 - `tenant-concentration`, **blocking** above 25%.
 - `min-tenants`, **blocking** below 10.
+- `dp-budget-exhausted`, **blocking**: a tenant-level (epsilon, delta) budget is tracked per rolling
+  quarter (composition across repeated pooling runs; see references). Once spent, that tenant's
+  contribution is excluded from the next pool rather than the guarantee being silently weakened.
 - `tau-identified`: with few units the between-group variance is barely identified and the pooling
   factor is driven by the prior on tau rather than by the data. WARN with the prior sensitivity
   reported.
 - `convergence`: R-hat and effective sample size across seeded chains. **Blocking** above R-hat 1.01.
-- `privacy-review-flag`: a permanent caveat stating that cross-tenant pooling is enabled, which
-  tenant admins can see and which the manifest can switch off.
+- `privacy-notice`: a permanent, non-blocking caveat stating that cross-tenant pooling is enabled
+  and DP-protected, visible to tenant admins, with a manifest switch to opt a tenant's own data out
+  of contributing (it can still receive the pooled prior).
 
 **method card**
-- *assumes:* tenants are exchangeable within a vertical. They are not exchangeable across verticals, and the service refuses to pool a housing society with a sports club.
-- *wrong_when:* one large tenant dominates; the vertical is heterogeneous; a tenant infers another tenant's data from changes in the shared prior, which is the open privacy question in `docs/DATA_SPINE.md` §10 and blocks this service shipping until it is answered.
-- *interval_meaning:* credible intervals from the posterior; the pooling factor says how much of each unit's estimate came from its own data.
-- *references:* Gelman and Hill (2006), ch. 12. Rubin (1981) J. Educational Statistics 6:377.
+- *assumes:* tenants are exchangeable within a vertical. They are not exchangeable across verticals, and the service refuses to pool a housing society with a sports club. The DP mechanism assumes each tenant's contribution per batch is bounded (one sufficient statistic per group_key per cadence), which is enforced by construction rather than trusted.
+- *wrong_when:* one large tenant dominates before noise is applied; the vertical is heterogeneous; a tenant's per-quarter privacy budget is exhausted, which excludes rather than degrades its contribution.
+- *interval_meaning:* credible intervals from the posterior over the noised sufficient statistics; the pooling factor says how much of each unit's estimate came from its own data versus the pool.
+- *references:* Gelman and Hill (2006), ch. 12. Rubin (1981) J. Educational Statistics 6:377. Dwork and Roth (2014), *The Algorithmic Foundations of Differential Privacy*, for the noise mechanism and the composition theorem the budget check enforces.
+
+**privacy test, in addition to the known-answer test below:** a sensitivity fixture asserting that
+perturbing one held-out tenant's contribution by a bounded amount changes the published pooled
+statistic by no more than the DP guarantee allows, at the declared epsilon. This is the gate,
+alongside the statistical test, that must pass before a card implementing this service can close.
 
 **known answer** The **eight schools** dataset, the canonical hierarchical-model fixture: published
 posterior estimates for the group effects and for tau appear in Rubin (1981) and in *Bayesian Data
