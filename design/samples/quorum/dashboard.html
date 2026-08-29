@@ -87,14 +87,26 @@ a{color:inherit}
 .lbl{ font:500 10.5px/1 'JetBrains Mono',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3) }
 ::selection{ background:var(--accent-soft); color:var(--ink) }
 
-/* ─── scrollbar: thin, quiet, themed ─── */
-*{ scrollbar-width:thin; scrollbar-color:var(--hair-2) transparent }
-::-webkit-scrollbar{ width:7px; height:7px }
-::-webkit-scrollbar-track{ background:transparent }
-::-webkit-scrollbar-thumb{ background:var(--hair-2); border-radius:99px;
-  transition:background var(--t-hover) var(--ease-snap) }
-::-webkit-scrollbar-thumb:hover{ background:var(--ink-4) }
-::-webkit-scrollbar-corner{ background:transparent }
+/* ─── scrollbar ───
+   The document scrollbar is an overlay (see the qs script): a native thumb's
+   length is fixed by the viewport/content ratio and cannot be shortened in CSS,
+   and we want a short one. Inner scrollers keep a thin native bar. */
+html{ scrollbar-width:none }
+html::-webkit-scrollbar{ width:0; height:0 }
+.scroll-thin{ scrollbar-width:thin; scrollbar-color:var(--hair-2) transparent }
+.scroll-thin::-webkit-scrollbar{ width:6px; height:6px }
+.scroll-thin::-webkit-scrollbar-track{ background:transparent }
+.scroll-thin::-webkit-scrollbar-thumb{ background:var(--hair-2); border-radius:99px }
+.scroll-thin::-webkit-scrollbar-thumb:hover{ background:var(--ink-4) }
+
+.qs{ position:fixed; top:0; right:5px; bottom:0; width:12px; z-index:200; pointer-events:none }
+.qs-t{ position:absolute; right:3px; width:4px; border-radius:99px; background:var(--ink-4);
+  opacity:0; pointer-events:auto; cursor:grab; touch-action:none;
+  transition:opacity 280ms var(--ease-snap), background 160ms var(--ease-snap), width 160ms var(--ease-snap) }
+.qs.on .qs-t{ opacity:.40 }
+.qs-t:hover{ background:var(--accent); width:6px; opacity:.95 }
+.qs-t.drag{ background:var(--accent); width:6px; opacity:1; cursor:grabbing }
+@media (prefers-reduced-motion: reduce){ .qs.on .qs-t{ opacity:.5 } }
 
 :focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:3px }
 
@@ -272,7 +284,7 @@ details.why .body b{ color:var(--ink); font-weight:600 }
 <body>
 <div class="app">
 
-  <aside class="side">
+  <aside class="side scroll-thin">
     <a class="brand" href="landing.html">
       <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
         <circle cx="16" cy="16" r="12.5" fill="none" stroke="currentColor" stroke-width="2.4"/>
@@ -457,6 +469,57 @@ details.why .body b{ color:var(--ink); font-weight:600 }
 
 <script>
 (function(){
+
+  /* ── overlay scrollbar: short thumb, capped, fades when idle ── */
+  (function(){
+    var bar=document.createElement('div'); bar.className='qs';
+    var th=document.createElement('div'); th.className='qs-t';
+    bar.appendChild(th); document.body.appendChild(bar);
+    var idle=null, PAD=10, MINH=34, MAXH=84;
+
+    function geom(){
+      var doc=document.documentElement;
+      var sh=Math.max(doc.scrollHeight, document.body.scrollHeight), ch=window.innerHeight;
+      if(sh<=ch+4){ bar.style.display='none'; return null; }
+      bar.style.display='';
+      var track=ch-PAD*2;
+      return { sh:sh, ch:ch, track:track, h:Math.max(MINH, Math.min(MAXH, track*(ch/sh))) };
+    }
+    function draw(){
+      var g=geom(); if(!g) return;
+      var max=g.sh-g.ch;
+      var p=max>0 ? Math.min(1,Math.max(0,(window.scrollY||window.pageYOffset)/max)) : 0;
+      th.style.height=g.h+'px';
+      th.style.transform='translateY('+(PAD+p*(g.track-g.h))+'px)';
+      bar.classList.add('on');
+      clearTimeout(idle);
+      idle=setTimeout(function(){ if(!th.classList.contains('drag')) bar.classList.remove('on'); },1200);
+    }
+
+    var dragY=0, dragTop=0;
+    th.addEventListener('pointerdown',function(e){
+      var g=geom(); if(!g) return;
+      th.classList.add('drag'); th.setPointerCapture(e.pointerId);
+      dragY=e.clientY;
+      dragTop=PAD+((window.scrollY||0)/(g.sh-g.ch))*(g.track-g.h);
+      e.preventDefault();
+    });
+    th.addEventListener('pointermove',function(e){
+      if(!th.classList.contains('drag')) return;
+      var g=geom(); if(!g) return;
+      var top=Math.min(g.track-g.h+PAD, Math.max(PAD, dragTop+(e.clientY-dragY)));
+      var p=(top-PAD)/(g.track-g.h);
+      window.scrollTo(0, p*(g.sh-g.ch));
+    });
+    function end(e){ if(th.classList.contains('drag')){ th.classList.remove('drag');
+      try{ th.releasePointerCapture(e.pointerId); }catch(x){} draw(); } }
+    th.addEventListener('pointerup',end); th.addEventListener('pointercancel',end);
+
+    addEventListener('scroll',draw,{passive:true});
+    addEventListener('resize',draw);
+    if(window.ResizeObserver){ new ResizeObserver(draw).observe(document.body); }
+    draw();
+  })();
   /* ── theme ── */
   var root=document.documentElement, tgl=document.getElementById('tgl');
   try{ var sv=localStorage.getItem('quorum-theme'); if(sv) root.setAttribute('data-theme',sv); }catch(e){}

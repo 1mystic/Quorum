@@ -48,6 +48,7 @@
   /* motion — cubic-bézier only */
   --ease:cubic-bezier(.16,1,.3,1);
   --ease-snap:cubic-bezier(.4,0,.2,1);
+  --ease-constant:cubic-bezier(0,0,1,1);
   --t-fill:520ms; --t-hover:220ms; --t-reveal:640ms;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
@@ -87,14 +88,26 @@ a{color:inherit}
 .lbl{ font:500 10.5px/1 'JetBrains Mono',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3) }
 ::selection{ background:var(--accent-soft); color:var(--ink) }
 
-/* ─── scrollbar: thin, quiet, themed ─── */
-*{ scrollbar-width:thin; scrollbar-color:var(--hair-2) transparent }
-::-webkit-scrollbar{ width:7px; height:7px }
-::-webkit-scrollbar-track{ background:transparent }
-::-webkit-scrollbar-thumb{ background:var(--hair-2); border-radius:99px;
-  transition:background var(--t-hover) var(--ease-snap) }
-::-webkit-scrollbar-thumb:hover{ background:var(--ink-4) }
-::-webkit-scrollbar-corner{ background:transparent }
+/* ─── scrollbar ───
+   The document scrollbar is an overlay (see the qs script): a native thumb's
+   length is fixed by the viewport/content ratio and cannot be shortened in CSS,
+   and we want a short one. Inner scrollers keep a thin native bar. */
+html{ scrollbar-width:none }
+html::-webkit-scrollbar{ width:0; height:0 }
+.scroll-thin{ scrollbar-width:thin; scrollbar-color:var(--hair-2) transparent }
+.scroll-thin::-webkit-scrollbar{ width:6px; height:6px }
+.scroll-thin::-webkit-scrollbar-track{ background:transparent }
+.scroll-thin::-webkit-scrollbar-thumb{ background:var(--hair-2); border-radius:99px }
+.scroll-thin::-webkit-scrollbar-thumb:hover{ background:var(--ink-4) }
+
+.qs{ position:fixed; top:0; right:5px; bottom:0; width:12px; z-index:200; pointer-events:none }
+.qs-t{ position:absolute; right:3px; width:4px; border-radius:99px; background:var(--ink-4);
+  opacity:0; pointer-events:auto; cursor:grab; touch-action:none;
+  transition:opacity 280ms var(--ease-snap), background 160ms var(--ease-snap), width 160ms var(--ease-snap) }
+.qs.on .qs-t{ opacity:.40 }
+.qs-t:hover{ background:var(--accent); width:6px; opacity:.95 }
+.qs-t.drag{ background:var(--accent); width:6px; opacity:1; cursor:grabbing }
+@media (prefers-reduced-motion: reduce){ .qs.on .qs-t{ opacity:.5 } }
 
 :focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:3px }
 
@@ -138,6 +151,37 @@ a{color:inherit}
   transform:scaleX(0); transform-origin:right; transition:transform var(--t-hover) var(--ease) }
 .tl:hover::after{ transform:scaleX(1); transform-origin:left }
 
+
+/* ─── hero rails: community imagery bleeding in from the edges ───
+   Atmosphere, not content. Faded, desaturated and spruce-tinted so it never
+   competes with the headline, masked vertically and fading toward the centre.
+   Hidden below 1200px, where there is no gutter to spare. */
+.rails{ position:absolute; inset:0; z-index:1; pointer-events:none; display:none }
+@media(min-width:1200px){ .rails{ display:block } }
+.rail{ position:absolute; top:0; bottom:0; width:clamp(150px,14vw,232px); overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 78%,transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 78%,transparent 100%) }
+.rail.l{ left:0 } .rail.r{ right:0 }
+.rail::after{ content:''; position:absolute; inset:0; z-index:3 }
+.rail.l::after{ background:linear-gradient(90deg,transparent 40%,var(--canvas) 100%) }
+.rail.r::after{ background:linear-gradient(270deg,transparent 40%,var(--canvas) 100%) }
+.track{ display:flex; flex-direction:column; gap:16px; padding:16px 18px; will-change:transform }
+.rail.l .track{ animation:railUp 58s var(--ease-constant) infinite }
+.rail.r .track{ animation:railDown 58s var(--ease-constant) infinite }
+@keyframes railUp{ from{ transform:translateY(0) } to{ transform:translateY(-50%) } }
+@keyframes railDown{ from{ transform:translateY(-50%) } to{ transform:translateY(0) } }
+@media (prefers-reduced-motion: reduce){ .rail .track{ animation:none; transform:translateY(-12%) } }
+.track figure{ position:relative; border-radius:var(--r); overflow:hidden; border:1px solid var(--hair);
+  background:linear-gradient(150deg,var(--brand-soft),var(--accent-soft)); flex:none }
+.track figure img{ display:block; width:100%; height:100%; object-fit:cover;
+  filter:grayscale(.86) sepia(.16) contrast(1.03); opacity:.46 }
+.track figure::after{ content:''; position:absolute; inset:0;
+  background:var(--brand); mix-blend-mode:multiply; opacity:.14 }
+:root[data-theme="dark"] .track figure img,
+:root:not([data-theme="light"]) .track figure img{ opacity:.30; filter:grayscale(.9) contrast(1.08) brightness(.92) }
+:root[data-theme="dark"] .track figure::after,
+:root:not([data-theme="light"]) .track figure::after{ mix-blend-mode:screen; opacity:.10 }
+
 /* ─── nav ─── */
 nav{ position:sticky; top:0; z-index:60; background:color-mix(in srgb,var(--canvas) 88%,transparent);
   backdrop-filter:blur(12px) saturate(1.4); border-bottom:1px solid var(--hair) }
@@ -168,7 +212,7 @@ nav{ position:sticky; top:0; z-index:60; background:color-mix(in srgb,var(--canv
   background-size:64px 64px; background-position:center top;
   -webkit-mask-image:radial-gradient(ellipse 78% 62% at 50% 34%,#000 0%,transparent 72%);
   mask-image:radial-gradient(ellipse 78% 62% at 50% 34%,#000 0%,transparent 72%); opacity:.85 }
-.hero-in{ position:relative; z-index:2; text-align:center }
+.hero-in{ position:relative; z-index:4; text-align:center }
 .eyebrow{ display:inline-flex; align-items:center; gap:9px; padding:7px 14px; border-radius:999px;
   border:1px solid var(--hair-2); background:var(--panel);
   font:500 11px/1 'JetBrains Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-2) }
@@ -180,7 +224,7 @@ h1 em{ font-style:normal; color:var(--brand) }
 .btnrow{ margin-top:var(--sp7); display:flex; gap:var(--sp3); justify-content:center; flex-wrap:wrap }
 
 /* readout strip — the instrument's own face, on the 8pt grid */
-.readout{ position:relative; z-index:2; margin-top:var(--sp9); display:grid;
+.readout{ position:relative; z-index:4; margin-top:var(--sp9); display:grid;
   grid-template-columns:repeat(4,1fr); gap:1px; background:var(--hair);
   border:1px solid var(--hair); border-radius:var(--r); overflow:hidden }
 @media(max-width:820px){ .readout{ grid-template-columns:1fr 1fr } }
@@ -317,6 +361,32 @@ footer{ border-top:1px solid var(--hair); padding:var(--sp8) 0 var(--sp7) }
 
 <header class="hero">
   <div class="hero-grid"></div>
+  <div class="rails" aria-hidden="true">
+    <div class="rail l"><div class="track">
+        <figure style="height:304px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-society/360/304" onerror="this.remove()"></figure>
+        <figure style="height:228px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-meeting/360/228" onerror="this.remove()"></figure>
+        <figure style="height:282px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-festival/360/282" onerror="this.remove()"></figure>
+        <figure style="height:210px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-volunteers/360/210" onerror="this.remove()"></figure>
+        <figure style="height:264px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-courtyard/360/264" onerror="this.remove()"></figure>
+        <figure style="height:304px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-society/360/304" onerror="this.remove()"></figure>
+        <figure style="height:228px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-meeting/360/228" onerror="this.remove()"></figure>
+        <figure style="height:282px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-festival/360/282" onerror="this.remove()"></figure>
+        <figure style="height:210px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-volunteers/360/210" onerror="this.remove()"></figure>
+        <figure style="height:264px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-courtyard/360/264" onerror="this.remove()"></figure>
+    </div></div>
+    <div class="rail r"><div class="track">
+        <figure style="height:250px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-club/360/250" onerror="this.remove()"></figure>
+        <figure style="height:296px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-workshop/360/296" onerror="this.remove()"></figure>
+        <figure style="height:216px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-garden/360/216" onerror="this.remove()"></figure>
+        <figure style="height:272px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-committee/360/272" onerror="this.remove()"></figure>
+        <figure style="height:238px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-terrace/360/238" onerror="this.remove()"></figure>
+        <figure style="height:250px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-club/360/250" onerror="this.remove()"></figure>
+        <figure style="height:296px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-workshop/360/296" onerror="this.remove()"></figure>
+        <figure style="height:216px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-garden/360/216" onerror="this.remove()"></figure>
+        <figure style="height:272px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-committee/360/272" onerror="this.remove()"></figure>
+        <figure style="height:238px"><img loading="lazy" alt="" src="https://picsum.photos/seed/quorum-terrace/360/238" onerror="this.remove()"></figure>
+    </div></div>
+  </div>
   <div class="wrap hero-in">
     <span class="eyebrow rv"><i></i> Community operations · statistically honest</span>
     <h1 class="rv">Numbers your community can <em>actually act on.</em></h1>
@@ -496,6 +566,57 @@ footer{ border-top:1px solid var(--hair); padding:var(--sp8) 0 var(--sp7) }
 
 <script>
 (function(){
+
+  /* ── overlay scrollbar: short thumb, capped, fades when idle ── */
+  (function(){
+    var bar=document.createElement('div'); bar.className='qs';
+    var th=document.createElement('div'); th.className='qs-t';
+    bar.appendChild(th); document.body.appendChild(bar);
+    var idle=null, PAD=10, MINH=34, MAXH=84;
+
+    function geom(){
+      var doc=document.documentElement;
+      var sh=Math.max(doc.scrollHeight, document.body.scrollHeight), ch=window.innerHeight;
+      if(sh<=ch+4){ bar.style.display='none'; return null; }
+      bar.style.display='';
+      var track=ch-PAD*2;
+      return { sh:sh, ch:ch, track:track, h:Math.max(MINH, Math.min(MAXH, track*(ch/sh))) };
+    }
+    function draw(){
+      var g=geom(); if(!g) return;
+      var max=g.sh-g.ch;
+      var p=max>0 ? Math.min(1,Math.max(0,(window.scrollY||window.pageYOffset)/max)) : 0;
+      th.style.height=g.h+'px';
+      th.style.transform='translateY('+(PAD+p*(g.track-g.h))+'px)';
+      bar.classList.add('on');
+      clearTimeout(idle);
+      idle=setTimeout(function(){ if(!th.classList.contains('drag')) bar.classList.remove('on'); },1200);
+    }
+
+    var dragY=0, dragTop=0;
+    th.addEventListener('pointerdown',function(e){
+      var g=geom(); if(!g) return;
+      th.classList.add('drag'); th.setPointerCapture(e.pointerId);
+      dragY=e.clientY;
+      dragTop=PAD+((window.scrollY||0)/(g.sh-g.ch))*(g.track-g.h);
+      e.preventDefault();
+    });
+    th.addEventListener('pointermove',function(e){
+      if(!th.classList.contains('drag')) return;
+      var g=geom(); if(!g) return;
+      var top=Math.min(g.track-g.h+PAD, Math.max(PAD, dragTop+(e.clientY-dragY)));
+      var p=(top-PAD)/(g.track-g.h);
+      window.scrollTo(0, p*(g.sh-g.ch));
+    });
+    function end(e){ if(th.classList.contains('drag')){ th.classList.remove('drag');
+      try{ th.releasePointerCapture(e.pointerId); }catch(x){} draw(); } }
+    th.addEventListener('pointerup',end); th.addEventListener('pointercancel',end);
+
+    addEventListener('scroll',draw,{passive:true});
+    addEventListener('resize',draw);
+    if(window.ResizeObserver){ new ResizeObserver(draw).observe(document.body); }
+    draw();
+  })();
   var root=document.documentElement, tgl=document.getElementById('tgl');
   var saved=null; try{ saved=localStorage.getItem('quorum-theme'); }catch(e){}
   if(saved){ root.setAttribute('data-theme',saved); }
