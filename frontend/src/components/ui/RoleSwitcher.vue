@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { UserCog } from 'lucide-vue-next'
 import { useDemoRole } from '../../composables/useDemoRole'
+import SelectField from './SelectField.vue'
 
 const props = defineProps({
   tenant: { type: Object, required: true }
@@ -9,13 +10,18 @@ const props = defineProps({
 
 const tenantRef = computed(() => props.tenant)
 const { roles, currentRoleId, selectRole } = useDemoRole(tenantRef)
+
+const options = computed(() => roles.value.map((r) => ({ value: r.id, label: r.label })))
 </script>
 
 <template>
-  <label class="role-switcher" title="Demo role, not enforced by a real backend yet">
+  <div class="role-switcher" title="Demo role, not enforced by a real backend yet">
     <UserCog :size="14" />
-    <select :value="currentRoleId" @change="selectRole($event.target.value)">
-      <option v-for="r in roles" :key="r.id" :value="r.id">{{ r.label }}</option>
-    </select>
-  </label>
+    <SelectField
+      :model-value="currentRoleId"
+      :options="options"
+      aria-label="Demo role"
+      @update:model-value="selectRole"
+    />
+  </div>
 </template>

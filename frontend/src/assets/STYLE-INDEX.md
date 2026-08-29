@@ -48,6 +48,7 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 39 | Landing: packs table and steps (`.packs`, `.steps`, `.step`) |
 | 40 | Landing: CTA band and footer (`.cta-band`, `.landing-foot`, `.foot`, `.colophon`) |
 | 41 | Landing: sweep-fill buttons and icon arrows (`.landing-body .btn`, `.arw`, `.tl`) |
+| 42 | Select field (`SelectField.vue`), replaces every native `<select>` (`.select-field`, `.select-trigger`, `.select-list`) |
 
 ## Quick reference by concern
 
