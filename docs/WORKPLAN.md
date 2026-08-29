@@ -84,8 +84,8 @@ whose only definition is inside a media query.
 | C.3 | Tenant model: `slug`, `vertical`, `enabled_packs`, `settings` + vertical manifest loader | backend-porter | C.2 | DONE, 2 provisional manifests only, see parking lot |
 | C.4 | `TenantScopedRepository` + Postgres RLS + `/api/t/{slug}` routing + slug/claim match | backend-porter | C.3 | DONE, fully wired for RequestRepository only, RLS is the backstop elsewhere |
 | C.5 | **Tenant isolation test suite** | reviewer | C.4 | DONE, written and gate-checked offline, not yet run against a live Postgres |
-| C.6 | `app/stats/contracts.py` + `registry.py` + purity lint | statistician | C.4, A.8 | TODO |
-| C.7 | `app/stats/streams/` — canonical dataclasses + RWA and campus adapters | statistician | C.6 | TODO |
+| C.6 | `app/stats/contracts.py` + `registry.py` + purity lint | statistician | C.4, A.8 | DONE, 81 services registered with method cards, purity lint verified against a planted violation |
+| C.7 | `app/stats/streams/` — canonical dataclasses + RWA and campus adapters | statistician | C.6 | DONE, ledger/decision declared empty pending their models, see CONTEXT constraints |
 | C.8 | `request_flow` domain end to end (Request model, service, API, UI) | backend-porter | C.7 | TODO |
 | C.9 | **Pack 1** implementation: `survival.py`, `spc.py`, `queueing.py` + known-answer tests | statistician | C.7 | TODO |
 | C.10 | `insight_runs` table + materialization worker + cadence scheduler | backend-porter | C.9 | TODO |

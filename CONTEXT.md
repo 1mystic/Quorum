@@ -41,13 +41,37 @@ spacing**, with fresher colour and type. That synthesis is now the **house direc
 | 2026-08-29 | Evidence component set built: `EvidenceValue`, `StatTile`, `SurvivalCurve`, `ControlChart`, `MethodCardLink`, `AuditLine`, all four render states from `docs/EVIDENCE_CONTRACT.md` §3, 27 Vitest tests passing (card C.11, brought forward) |
 | 2026-08-29 | `backend/` scaffolded from `reference/campus-connect/backend/`, full rename pass per `docs/GLOSSARY.md` applied across models/schemas/services/repository/api/exceptions/tests/templates/agent prompts, fixed-weight `LeaderboardService` deleted, `Tenant` model (`vertical`, `enabled_packs`, `settings`, `timezone`; `email_suffix` dropped), `app/verticals/` manifest loader + two provisional manifests, `TenantScopedRepository`, `/api/t/{slug}` routing with JWT slug/claim check, Postgres RLS migration, `tests/integration/test_tenancy.py` isolation suite (cards C.1-C.5, see decision log for what did not get ported to full parity) |
 | 2026-08-29 | Full frontend page set built against fixtures, per the frontend-first resequencing decision below. Every page in `docs/WORKPLAN.md`'s frontend breadth pass now exists, is routed under `/t/:slug/...` (or public for auth/method-card pages) and is reachable from the sidebar/landing nav: `LoginView`, `SignupView`, `ForgotPasswordView`, `ResetPasswordView`, `VerifyEmailView`, `OnboardView`, `WorkspaceView`; `DashboardView`, `RequestsView`/`RequestDetailView`/`RequestNewView`, `LedgerView`, `EventsView`/`EventDetailView`, `AnnouncementsView`, `DecisionsView`/`DecisionDetailView`, `MembersView`, `ProfileView`; `AdminOverviewView`, `AdminApprovalsView`, `InsightsOperationsView`/`InsightsForecastView`/`InsightsGovernanceView`/`InsightsComparisonView` (one per pack), `TenantSettingsView`, `MethodCardView`/`MethodsIndexView`. Two new layout components (`TenantShell`, `AuthShell`) generalize the dashboard sample's `.app`/`.side`/`.main` shell so every page shares one sidebar/nav/tenant-switcher instead of each view rolling its own. Ten new fixture modules (`tenants`, `nav`, `requests`, `ledger`, `events`, `announcements`, `decisions`, `members`, `methodCards`, `insights`) carry `rwa_society` (Vaikunth Heights) and `campus_club` (Aavartan Robotics) demo data shaped to `docs/EVIDENCE_CONTRACT.md` §5's wire format; every statistic on every page still renders through `StatTile`/`EvidenceValue`/`SurvivalCurve`/`ControlChart`, none takes a bare number. `style.css` gained nine new numbered sections (23-31: auth/forms, status badges, filter chips, timeline, list rows, empty state, pairwise matrix, callouts, segmented toggle), `STYLE-INDEX.md` updated. Two new Vitest suites (`LedgerView.test.js` for the mark-paid flow, `DecisionDetailView.test.js` for the mandatory Condorcet-cycle disclosure) alongside the existing Evidence suite; **34/34 tests pass, `npm run build` succeeds**. No em dashes introduced (checked by grep before commit). Committed in five path-disjoint groups (fixtures+shells+CSS, auth pages, core member pages, insight/admin/method pages) per the card's incremental-commit instruction (frontend session, breadth-first pass) |
+| 2026-08-29 | `backend/app/stats/` built: `contracts.py` (the `Evidence`/`Check`/`MethodCard`/`InsufficientData` types exactly per `docs/EVIDENCE_CONTRACT.md` §2, plus `params_hash` and the four render states as data), `registry.py` (**all 81 catalogued services registered, each with a complete Method Card**; 24 module files of `-> Evidence` stubs that raise `NotImplementedError`), `streams/` (the six streams as frozen dataclasses with the ten `RequestSpell` censoring rules and the exposure log, plus `capacity.py` and `reduce.py` signature stubs), `app/verticals/adapters/` (`PortedSchemaAdapter` + `rwa_society` + `campus_club`). Five test modules, **707 tests pass offline**, whole suite still collects clean (1268) and the 776 DB-independent tests pass (cards C.6, C.7) |
 
 ## In flight
 
 Design and branding are done. Three agents now running in parallel on disjoint paths:
 
-- **statistician**: **A.2 to A.8 complete.** Phase A is done. Next statistician cards are C.6
-  (`contracts.py`, `registry.py`, purity lint) and C.7 (`streams/`), now unblocked since C.4 is done
+- **statistician**: **A.2 to A.8, C.6 and C.7 complete.** The statistical architecture now exists in
+  code: the envelope, the registry of all 81 services with their Method Cards, the six streams and
+  two vertical adapters. Nothing is left half-wired; what is not implemented raises
+  `NotImplementedError` and says which document specifies it.
+
+  **What is implemented versus stubbed.** Implemented and tested: everything in `contracts.py`
+  (including `params_hash`, the render-state resolution and the wire format), the whole registry
+  including its import-time invariants, every stream dataclass and its validation, and both
+  adapters. Stubbed: **all 81 statistical service bodies**, the atom-to-unit reducers in
+  `streams/reduce.py`, and the cross-stream `streams/capacity.py` reducer. That split is
+  deliberate: C.6 and C.7 are the contract and the shapes, and each service body arrives with its
+  known-answer test rather than in a batch, since a stub that returns a plausible number is worse
+  than one that raises.
+
+  **The purity lint is real and was verified by breaking it.** `tests/unit/stats/test_purity.py`
+  AST-walks all 38 modules under `app/stats/` and fails on a forbidden import, a clock read or
+  mutable module-level state. It was tested by planting `import sqlalchemy`, `from app.repository
+  import ...`, `datetime.utcnow()` and `CACHE = {}` into `app/stats/survival.py`: three tests failed
+  with the file, the line number and the rule, and passed again once reverted. It also has its own
+  known-answer test so a future refactor cannot quietly neuter it, and it is AST-based so prose
+  about the rule is not a breach of it.
+
+  **Next statistician card is C.8** (`request_flow` end to end), which means
+  `streams/reduce.request_spells` plus the Kaplan-Meier family, with the `lung`/`rossi` fixtures and
+  the censoring regression fixture from `docs/RULES.md` §7
 - **backend-porter**: **C.1-C.5 done**, see decision log entries below for scope boundaries and the
   follow-up list. Next up would be C.6's dependency C.4 confirmation with statistician, then C.8
   (`request_flow` end to end) once C.6/C.7 land
@@ -95,6 +119,13 @@ Newest first. Append, never rewrite. Record *why*, not just *what*.
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-08-29 | The registry holds **81** services, not the 63 `docs/STATS_CATALOG.md`'s summary line claims | The registry test parses the catalog and asserts both directions of the parity: every `module.function` the catalog names is registered, and every registered service is named there. It passes at 81, so the "63" in the catalog's header and in this file's A.3-A.6 row is simply a stale count from before the composed views (`survival.naive_vs_km_gap`, `queueing.backlog_projection`), the three named forecast compositions, the three separate `voting.borda`/`approval`/`score` ids and `drift.label_shift` were written up. The code is the count that is checked on every commit; the prose number is not, which is the argument for the parity test existing at all |
+| 2026-08-29 | Unimplemented services are **registered with a complete Method Card and a body that raises**, not omitted | A service that is absent from the registry is invisible: `GET /api/methods/{id}` 404s, the packs endpoint under-reports, and `docs/VERTICALS.md` rule 2 (a disabled service is still listed with its reason) cannot be honoured. `ServiceSpec.implemented` distinguishes the two states, and the stub raises `NotImplementedError` naming the document that specifies it rather than returning a plausible zero. It also means the whole read surface can be built and tested against a complete registry before any mathematics exists |
+| 2026-08-29 | `min_n` stays an `int` and a companion `min_n_expression` string carries floors that are functions of a parameter | Several floors are not constants: Kaplan-Meier is "30 observed **events**, not rows", Cox is "10 events **per covariate**", every seasonal forecaster is `2 * season_length`, and split conformal has a mathematical floor of 9 and a practical floor of 100. Making `min_n` a callable would have made the registry unserialisable and the invariant "spec min_n equals card min_n" untestable. The integer is what the UI compares against for the calm empty state ("needs 30, has 11"); the expression is what it prints next to it |
+| 2026-08-29 | Service availability is resolved **per service**, never per pack | `bayes.*` runs on `request_flow` alone even though its pack also lists the ledger, and `forecast.attendance` needs `member_lifecycle` for its `bounded-by-roster` check even though its pack does not. A first attempt asserted that pack streams and service streams agree and it failed in both directions, correctly. `available_for_streams` and `missing_streams` therefore answer per service, which is also what the greyed-out onboarding row in `docs/VERTICALS.md` rule 1 actually needs |
+| 2026-08-29 | The purity lint bans `app.core`, `app.models`, `app.api` and `app.verticals` as well as the four names in the working agreement | The four named (`app.repository`, `app.services`, `sqlalchemy`, `httpx`/`requests`) are the routes to a database and a socket, but `app.core` reaches `Base` and the session factory, and `app.models` drags in SQLAlchemy transitively. Banning the reachable set rather than the enumerated set is what makes the rule mechanical. It also bans clock reads and mutable module-level state, since both break determinism, which is the property the rule exists to protect rather than an end in itself |
+| 2026-08-29 | Both shipped adapters subclass one `PortedSchemaAdapter` | `rwa_society` and `campus_club` differ in vocabulary, strata, k-anonymity floor, reopen policy and SLA clock; they do not differ in where rows come from, because there is only one ported schema. Splitting on vocabulary and sharing the row mapping means the missing models get read once when they arrive rather than twice, and it makes the conformance suite meaningful: both verticals run the same open-request fixture through the same code path |
+| 2026-08-29 | Ledger and decision are declared **empty** by both adapters rather than approximated from anything present | There is no ledger model and no decision model. An adapter that fabricated a stream would produce statistics with a currency symbol and no data behind them. Empty is a state the architecture already handles: the service raises `InsufficientData`, which the registry turns into "this pack needs the ledger switched on" rather than an error |
 | 2026-08-29 | Ledger and decision views built as genuinely new page types rather than adapted Campus Connect screens | `docs/DATA_SPINE.md`'s `ledger` stream (verification lag, receipt-collection gap) and the `decision` stream's mandatory Condorcet-cycle disclosure have no Campus Connect analogue. The Evidence contract stretched cleanly to both once treated as ordinary envelopes: `LedgerView` reads `verification_lag`/`receipt_gap` through `StatTile` exactly like any other statistic, and `DecisionDetailView` treats the cycle disclosure as a `callout`, not a `details.why`: the contract's rule that a `Check` is measured, not asserted in prose, argues for always-visible disclosure on a cycle specifically, since `docs/STATS_CATALOG.md` calls this one "not blocking, and deliberately not an error" but still non-optional to show |
 | 2026-08-29 | Auth/onboarding pages sign a demo session directly into `stores/auth` rather than calling `useAuthSession`'s `completeSignIn` | `completeSignIn` expects a real JWT with `role`/`tenant_slug`/`tenant_id` claims to decode via `jwt-decode`; no backend auth endpoint exists yet. Faking a JWT string felt more misleading than naming the stub: each auth view sets `auth.token = 'demo-token'` and routes to the chosen demo tenant's dashboard directly, with a code comment pointing at the real shape once `POST /api/auth/login` exists. Google sign-in is a `toast.info` stub, not a fake OAuth flow |
 | 2026-08-29 | One shared `TenantShell` layout component generalizes the dashboard sample's hand-authored `.app`/`.side`/`.main` HTML into a Vue component driven by `fixtures/nav.js`, rather than each of the ~20 tenant-scoped views re-declaring the sidebar | The sample was one static page; the product needs the same chrome on every page with the active nav item, tenant switcher and pack-availability-aware nav groups (`insightNav` only lists a pack's link if the tenant's `enabled_packs`/`optional_packs` includes it) computed once. `AuthShell` is the equivalent for the five auth pages, sharing the `.card` token system without assuming a tenant context exists |
@@ -152,6 +183,36 @@ Newest first. Append, never rewrite. Record *why*, not just *what*.
 
 ## Known constraints worth remembering
 
+- **Four of the six streams have no backend model.** The adapters mark each gap with a `TODO`
+  naming the missing model rather than inventing one. In descending order of consequence:
+  **(1) the exposure log** (`nudge_sent`/`delivered`/`opened`/`acted` with `arm_ref`) has no table,
+  so Pack 2's `experiments.*` and `bandits.*` have no input at all: this is the gap that blocks a
+  whole pack rather than degrading a service. **(2) the ledger** has no model, so `forecast_risk`'s
+  money half, `montecarlo.runway_shortfall`, `risk.late_payment_risk` and `audit.*` have nothing to
+  read, and `rwa_society`'s two most interview-grounded headline statistics (verification lag,
+  receipt-collection gap) cannot exist. **(3) decision/option/ballot** has no model, so
+  `governance_insight` is unavailable; whoever adds it must make `declared_rule` non-nullable from
+  the first migration, since spine rule D1 requires it to be recorded before any ballot is cast and
+  backfilling it later leaves a history of decisions whose rule cannot be trusted. **(4) member
+  lifecycle events** (lapse, reinstate, exit) do not exist, so `survival.churn_curve` would see a
+  population nobody has ever left; its floor of 30 observed exits is what stops that being
+  published. Also missing: a request event log (no reassignment, pause/resume, escalation or
+  withdrawal, so `competing_risks_cif` cannot estimate and `duration_active_hours` is unavailable,
+  which means `campus_club`'s declared `sla_clock="active"` cannot actually be honoured yet), and
+  any ordinal/survey response table.
+- **`rwa_society` cannot categorise a complaint yet.** `Request.category` is still the ported
+  Campus Connect enum (EVENT, GROUP, CERTIFICATE, TECHNICAL, GENERAL) and no column holds a society
+  complaint category, so the adapter maps every row to `"other"` and counts it as unmapped, loudly,
+  which is the declared behaviour. Consequence: `survival.logrank_compare` and
+  `survival.cox_hazard_ratios` have one category to work with, so "sewage requests resolve 2.4x
+  slower than electrical", which the interview evidence makes a budget argument, cannot be computed.
+  `campus_club` is fine: its legacy enum maps onto its declared vocabulary.
+- **`app/verticals/manifests/*.json` is still the backend's two provisional manifests** and has not
+  been reconciled against `docs/VERTICALS.md`. The adapters therefore carry their vocabulary,
+  strata schema, k-anonymity floor, reopen policy and SLA clock as class attributes rather than
+  reading the manifest, with the `campus_club` `department` list a placeholder. The reconciliation
+  card should collapse the two: an adapter reading its own vocabulary is a vertical defined in two
+  places.
 - **`brandkit-gen` is an image-generation skill** and no image-gen tool is available in the current
   environment. Phase B ships hand-authored SVG under VibeCurb's constraint discipline. The strategy
   brief is the input if a later session has image generation.
