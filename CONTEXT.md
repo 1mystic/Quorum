@@ -33,6 +33,8 @@ spacing**, with fresher colour and type. That synthesis is now the **house direc
 | 2026-08-29 | `design/tokens.css` + `design/tokens.json`, 76 tokens, light and dark (card B.4) |
 | 2026-08-29 | `design/brand/logo/` mark, mono, favicon cut, two lockups, usage rules (card B.3) |
 | 2026-08-29 | `design/BRAND.md` updated from the provisional terracotta/serif proposal to the shipped palette and type |
+| 2026-08-29 | `frontend/` scaffolded — Vite + Vue 3 + Vue Router + Pinia + Vitest, composables ported near-verbatim from Campus Connect, tokenized `style.css` (22 numbered sections) built from `design/samples/quorum/dashboard.html`, `STYLE-INDEX.md` written (Vue scaffold half of card C.1) |
+| 2026-08-29 | Evidence component set built: `EvidenceValue`, `StatTile`, `SurvivalCurve`, `ControlChart`, `MethodCardLink`, `AuditLine`, all four render states from `docs/EVIDENCE_CONTRACT.md` §3, 27 Vitest tests passing (card C.11, brought forward) |
 
 ## In flight
 
@@ -40,7 +42,8 @@ Design and branding are done. Three agents now running in parallel on disjoint p
 
 - **statistician** on **A.2 to A.8**, the statistical specification (`docs/` only)
 - **backend-porter** on **C.1 to C.4**, scaffold, rename pass, tenant model, RLS (`backend/` only)
-- **frontend** on the Vue scaffold and the Evidence component set (`frontend/` only)
+- **frontend** finished the Vue scaffold and the Evidence component set (`frontend/` only); ready
+  for `C.12` once `C.10`/`insight_runs` exists, but can keep building UI against fixtures meanwhile
 
 Each commits only its own paths to avoid racing the others.
 
@@ -56,6 +59,7 @@ Newest first. Append, never rewrite. Record *why*, not just *what*.
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-08-29 | `EvidenceValue` gets a `display="range"` mode that shows the interval bounds as the headline figure, for conformal/predictive intervals | The contract doesn't say how a conformal ETA's point value relates to its interval, and the dashboard sample shows the interval itself as the big number ("2 ... 9 days"), not a point estimate. Read as: some methods assert a guarantee about a range, not a point, so the component needs an explicit mode rather than guessing from `interval_kind` |
 | 2026-08-29 | Prose style: no em dashes anywhere in product copy or docs | User rule. En dashes stay in numeric ranges (`3.4-5.6`) and in `Kaplan-Meier`, where they are the correct mark rather than punctuation |
 | 2026-08-29 | Status colours are mapped to the four Evidence render states, not to sentiment | `--accent` had to stay free for "actionable". A warning that competes with a hover fill is a worse bug than a dull palette |
 | 2026-08-29 | Backend and frontend scaffolding run in parallel with the statistics spec | They touch disjoint paths and C.1 to C.4 only depend on B.4, which is now done. The stats spec is the long pole and should not block the port |
