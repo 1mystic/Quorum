@@ -6,7 +6,7 @@ import ThemeToggle from '../ui/ThemeToggle.vue'
 <template>
   <nav class="landing-nav">
     <div class="wrap landing-nav-in">
-      <a class="brand" href="#top">
+      <a class="brand" href="/#top">
         <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
           <circle cx="16" cy="16" r="12.5" fill="none" stroke="currentColor" stroke-width="2.4" />
           <path d="M4.6 19.6a12.5 12.5 0 0 0 22.8 0Z" fill="var(--brand)" />
@@ -15,9 +15,9 @@ import ThemeToggle from '../ui/ThemeToggle.vue'
         Quorum
       </a>
       <div class="landing-navlinks">
-        <a class="nl" href="#spine">Spine</a>
-        <a class="nl" href="#uncertainty">Uncertainty</a>
-        <a class="nl" href="#packs">Packs</a>
+        <a class="nl" href="/#spine">Spine</a>
+        <a class="nl" href="/#uncertainty">Uncertainty</a>
+        <a class="nl" href="/#packs">Packs</a>
         <router-link class="nl" to="/methods">Method cards</router-link>
         <ThemeToggle />
         <router-link class="btn btn-brand sm" to="/login">

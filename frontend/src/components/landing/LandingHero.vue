@@ -54,7 +54,7 @@ const rails = {
           <span>See the dashboard</span>
           <span class="arw"><ArrowRight :size="16" /></span>
         </router-link>
-        <a class="btn btn-line" href="#uncertainty">Why intervals</a>
+        <a class="btn btn-line" href="/#uncertainty">Why intervals</a>
       </div>
 
       <div class="readout rv">

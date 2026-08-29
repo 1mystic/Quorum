@@ -16,7 +16,7 @@ const primaryTenant = demoTenantList[0]
             <span>Open the dashboard</span>
             <span class="arw"><ArrowRight :size="16" /></span>
           </router-link>
-          <a class="btn btn-line" href="#spine">Read the spine</a>
+          <a class="btn btn-line" href="/#spine">Read the spine</a>
         </div>
       </div>
     </div>

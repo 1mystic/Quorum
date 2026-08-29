@@ -26,6 +26,10 @@ const routes = [
   { path: '/methods', name: 'methods-index', component: () => import('../views/MethodsIndexView.vue'), meta: { role: 'public', bodyClass: 'landing-body' } },
   { path: '/methods/:id', name: 'method-card', component: () => import('../views/MethodCardView.vue'), meta: { role: 'public', bodyClass: 'landing-body' } },
 
+  // ── marketing content pages, linked from the landing footer ──
+  { path: '/about', name: 'about', component: () => import('../views/AboutView.vue'), meta: { role: 'public', bodyClass: 'landing-body' } },
+  { path: '/verticals', name: 'verticals', component: () => import('../views/VerticalsView.vue'), meta: { role: 'public', bodyClass: 'landing-body' } },
+
   // ── member-facing core, tenant shell ──
   { path: '/t/:slug/dashboard', name: 'dashboard', component: () => import('../views/DashboardView.vue'), meta: { role: 'member', bodyClass: 'portal-body' } },
 
@@ -63,7 +67,10 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior() {
+  scrollBehavior(to) {
+    if (to.hash) {
+      return { el: to.hash, top: 96 }
+    }
     return { top: 0 }
   }
 })

@@ -7,7 +7,7 @@ import { demoTenantList } from '../../fixtures/tenants'
     <div class="wrap">
       <div class="foot">
         <div>
-          <a class="brand" href="#top" style="font-size:18px">
+          <a class="brand" href="/#top" style="font-size:18px">
             <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
               <circle cx="16" cy="16" r="12.5" fill="none" stroke="currentColor" stroke-width="2.4" />
               <path d="M4.6 19.6a12.5 12.5 0 0 0 22.8 0Z" fill="var(--brand)" />
@@ -19,10 +19,11 @@ import { demoTenantList } from '../../fixtures/tenants'
         <div>
           <h4>Product</h4>
           <ul>
-            <li><a href="#spine">The spine</a></li>
-            <li><a href="#packs">Insight packs</a></li>
+            <li><a href="/#spine">The spine</a></li>
+            <li><a href="/#packs">Insight packs</a></li>
             <li><router-link :to="`/t/${demoTenantList[0].slug}/dashboard`">Dashboard</router-link></li>
             <li><router-link to="/methods">Method cards</router-link></li>
+            <li><router-link to="/about">About</router-link></li>
           </ul>
         </div>
         <div>
@@ -31,13 +32,14 @@ import { demoTenantList } from '../../fixtures/tenants'
             <li v-for="t in demoTenantList" :key="t.slug">
               <router-link :to="`/t/${t.slug}/dashboard`">{{ t.name }}, {{ t.vertical.replace('_', ' ') }}</router-link>
             </li>
+            <li><router-link to="/verticals">All seven verticals</router-link></li>
             <li><router-link to="/onboard">Join or create a tenant</router-link></li>
           </ul>
         </div>
         <div>
           <h4>Rigour</h4>
           <ul>
-            <li><a href="#uncertainty">Censoring</a></li>
+            <li><a href="/#uncertainty">Censoring</a></li>
             <li><router-link to="/methods/conformal.eta_calibration">Calibration</router-link></li>
             <li><router-link to="/methods/conformal.mondrian_eta">Conformal ETA</router-link></li>
             <li><router-link to="/methods/network.isolation_report">Privacy floor</router-link></li>
