@@ -1,0 +1,59 @@
+import { describe, test, expect } from 'vitest'
+import { mount } from '@vue/test-utils'
+import EvidenceValue from './EvidenceValue.vue'
+import {
+  medianResolution,
+  tankerCycleInsufficient,
+  hazardsWithheld
+} from '../../fixtures/evidence'
+
+describe('EvidenceValue', () => {
+  test('estimate: renders the value, n and interval', () => {
+    const wrapper = mount(EvidenceValue, { props: { evidence: medianResolution } })
+
+    expect(wrapper.find('.big').text()).toContain('4.3')
+    expect(wrapper.text()).toContain('187')
+    expect(wrapper.text()).toContain('3.4')
+    expect(wrapper.text()).toContain('5.6')
+  })
+
+  test('qualified: value still shown alongside the failing check', () => {
+    const wrapper = mount(EvidenceValue, { props: { evidence: medianResolution } })
+
+    // medianResolution carries a non-blocking WARN check
+    expect(wrapper.classes()).toContain('ev-qualified')
+    expect(wrapper.find('.big').exists()).toBe(true)
+    expect(wrapper.text()).toContain('systematically the hard ones')
+  })
+
+  test('insufficient_data: no number is rendered', () => {
+    const wrapper = mount(EvidenceValue, { props: { evidence: tankerCycleInsufficient } })
+
+    expect(wrapper.classes()).toContain('ev-insufficient-data')
+    expect(wrapper.find('.big').exists()).toBe(false)
+    expect(wrapper.find('.withheld').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Not enough data')
+  })
+
+  test('insufficient_data: never renders an error tone class', () => {
+    const wrapper = mount(EvidenceValue, { props: { evidence: tankerCycleInsufficient } })
+
+    expect(wrapper.classes().join(' ')).not.toMatch(/error|danger|fail/i)
+  })
+
+  test('a blocking failed check suppresses the value entirely', () => {
+    const wrapper = mount(EvidenceValue, { props: { evidence: hazardsWithheld } })
+
+    expect(wrapper.classes()).toContain('ev-not-interpretable')
+    expect(wrapper.find('.big').exists()).toBe(false)
+    expect(wrapper.find('.withheld').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Schoenfeld')
+  })
+
+  test('a missing evidence prop is treated as insufficient data, never a crash', () => {
+    const wrapper = mount(EvidenceValue, { props: { evidence: null } })
+
+    expect(wrapper.classes()).toContain('ev-insufficient-data')
+    expect(wrapper.find('.big').exists()).toBe(false)
+  })
+})
