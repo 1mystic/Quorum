@@ -39,6 +39,9 @@
   --brand-soft:#DDEBE4;
   --accent:#E07A3F;
   --accent-soft:#FBE8DA;
+  /* text sitting on a --brand or --accent fill. Fixed in both modes:
+     both fills stay dark enough for white at every theme. */
+  --on-brand:#FFFFFF;
 
   /* ── hairlines ───────────────────────────────────────────────────────── */
   --hair:#E6DFD4;

@@ -16,16 +16,16 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 7 | Grid helpers (`.row`, `.r-4`, `.r-32`, `.r-23`) |
 | 8 | Card (`.card`, `.chead`) |
 | 9 | Buttons (`.btn-primary` sweep-fill hover, `.btn-ghost`, `.tgl`) |
-| 10 | Pills — the four Evidence render states (`.p-est`, `.p-qual`, `.p-hold`, `.p-wait`) |
+| 10 | Pills: the four Evidence render states (`.p-est`, `.p-qual`, `.p-hold`, `.p-wait`) |
 | 11 | The Evidence value (`.big`, `.big.range`) |
-| 12 | Meta strip (`.meta`) — `n`, interval, censored count |
-| 13 | Progressive disclosure (`details.why`) — the long explanation, closed by default |
-| 14 | Audit line (`.audit`) — method id + `params_hash` |
+| 12 | Meta strip (`.meta`): `n`, interval, censored count |
+| 13 | Progressive disclosure (`details.why`): the long explanation, closed by default |
+| 14 | Audit line (`.audit`): method id + `params_hash` |
 | 15 | Charts (`.chart`, `.legend`, `.draw`/`.fade` reveal keyframes) |
-| 16 | Waiting state (`.wait-bar`, `.wait-num`) — calm, never an error colour |
-| 17 | Withheld state (`.withheld`) — value suppressed by a blocking check |
+| 16 | Waiting state (`.wait-bar`, `.wait-num`): calm, never an error colour |
+| 17 | Withheld state (`.withheld`): value suppressed by a blocking check |
 | 18 | Table (`.tbl`, `.tbl-scroll` for horizontal overflow containment) |
-| 19 | Shrinkage bar (`.shr`) — raw rate as a tick, posterior as a bar |
+| 19 | Shrinkage bar (`.shr`): raw rate as a tick, posterior as a bar |
 | 20 | Route loading bar and buffer spinner |
 | 21 | Toast stack |
 | 22 | StatTile-specific layout (`.stat-tile-empty`, `.check-detail`) |

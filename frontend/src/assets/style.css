@@ -1,7 +1,7 @@
 /* ============================================================================
-   Quorum — application stylesheet
+   Quorum application stylesheet
    Card C.1/C.11. Layered on top of tokens.css. Nothing here may hard-code a
-   colour, font, radius, shadow or duration — every value below is a var().
+   colour, font, radius, shadow or duration. Every value below is a var().
 
    Conventions:
    - one declaration per line
@@ -169,7 +169,7 @@ a{
   display:grid;
   place-items:center;
   background:var(--brand);
-  color:#fff;
+  color:var(--on-brand);
   font:600 11px/1 var(--font-mono);
 }
 .tn .nm{
@@ -377,7 +377,7 @@ a{
 }
 .btn-primary{
   background:var(--brand);
-  color:#fff;
+  color:var(--on-brand);
 }
 .btn-primary::before{
   content:'';
@@ -422,7 +422,7 @@ a{
   color:var(--accent);
 }
 
-/*  10. Pills — the four Evidence render states, not sentiment  */
+/*  10. Pills: the four Evidence render states, not sentiment  */
 .pill{
   font:500 10px/1 var(--font-mono);
   letter-spacing:.1em;
@@ -454,7 +454,7 @@ a{
   background:transparent;
 }
 
-/*  11. The Evidence value — big, tabular, unmissable  */
+/*  11. The Evidence value: big, tabular, unmissable  */
 .big{
   font-family:var(--font-mono);
   font-variant-numeric:tabular-nums;
@@ -483,7 +483,7 @@ a{
   margin-bottom:.28em;
 }
 
-/*  12. Meta strip — replaces paragraphs of prose  */
+/*  12. Meta strip: replaces paragraphs of prose  */
 .meta{
   display:flex;
   flex-wrap:wrap;
@@ -496,7 +496,7 @@ a{
   font-weight:500;
 }
 
-/*  13. Progressive disclosure — the prose lives here, closed by default  */
+/*  13. Progressive disclosure: the prose lives here, closed by default  */
 details.why{
   border-top:1px solid var(--hair);
   padding-top:var(--sp4);
@@ -544,7 +544,7 @@ details.why .body b{
   font-weight:600;
 }
 
-/*  14. Audit line — method id + params_hash  */
+/*  14. Audit line: method id + params_hash  */
 .audit{
   display:flex;
   align-items:center;
@@ -611,7 +611,7 @@ details.why .body b{
   }
 }
 
-/*  16. Waiting state — calm, deliberate, never an error  */
+/*  16. Waiting state: calm, deliberate, never an error  */
 .wait-bar{
   height:6px;
   border-radius:var(--r-pill);
@@ -640,7 +640,7 @@ details.why .body b{
   letter-spacing:0;
 }
 
-/*  17. Withheld state — value suppressed, blocking check failed  */
+/*  17. Withheld state: value suppressed, blocking check failed  */
 .withheld{
   border:1px dashed var(--hair-2);
   border-radius:var(--r);
@@ -721,7 +721,7 @@ details.why .body b{
   padding:4px 7px;
 }
 
-/*  19. Shrinkage bar — raw as a tick, posterior as a bar  */
+/*  19. Shrinkage bar: raw as a tick, posterior as a bar  */
 .shr{
   position:relative;
   height:22px;

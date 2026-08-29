@@ -11,7 +11,7 @@ import {
 
 // The one component allowed to render a figure from an Evidence envelope.
 // Takes `evidence: Evidence`, never `value: number` - see docs/EVIDENCE_CONTRACT.md
-// §3 and CLAUDE.md rule 2. Handles all four render states; which one applies
+// section 3, and docs/RULES.md section 4. Handles all four render states; which one applies
 // is decided entirely by the data.
 //
 // `display="range"` shows the interval bounds as the headline figure instead
@@ -72,7 +72,7 @@ const need = computed(() => {
       </div>
       <p>
         Not enough data yet. Quorum needs more observations before this reading is
-        trustworthy<span v-if="need"> — has {{ evidence?.n ?? 0 }} of {{ need }}</span>.
+        trustworthy<span v-if="need">, has {{ evidence?.n ?? 0 }} of {{ need }}</span>.
       </p>
     </div>
 
