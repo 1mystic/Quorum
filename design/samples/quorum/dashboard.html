@@ -86,6 +86,16 @@ a{color:inherit}
 .wrap{ width:min(1200px,90vw); margin-inline:auto }
 .lbl{ font:500 10.5px/1 'JetBrains Mono',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3) }
 ::selection{ background:var(--accent-soft); color:var(--ink) }
+
+/* ─── scrollbar: thin, quiet, themed ─── */
+*{ scrollbar-width:thin; scrollbar-color:var(--hair-2) transparent }
+::-webkit-scrollbar{ width:7px; height:7px }
+::-webkit-scrollbar-track{ background:transparent }
+::-webkit-scrollbar-thumb{ background:var(--hair-2); border-radius:99px;
+  transition:background var(--t-hover) var(--ease-snap) }
+::-webkit-scrollbar-thumb:hover{ background:var(--ink-4) }
+::-webkit-scrollbar-corner{ background:transparent }
+
 :focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:3px }
 
 @media (prefers-reduced-motion: reduce){
