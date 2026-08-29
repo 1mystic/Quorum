@@ -1,0 +1,16 @@
+{% extends "_base.svg" %}
+
+{% block accent %}#a67c12{% endblock %}
+{% block accent_soft %}#e6cf95{% endblock %}
+{% block wash %}#fffdf5{% endblock %}
+
+{% block award_title %}OF EXCELLENCE{% endblock %}
+{% block lead_line %}has been declared the Winner of{% endblock %}
+{% block closing_line %}and has demonstrated outstanding skill, effort and sportsmanship.{% endblock %}
+
+{% block seal_mark %}
+  <text x="421" y="509" text-anchor="middle" font-family="{{ serif }}" font-size="24"
+        font-weight="bold" fill="{{ wash }}">1</text>
+  <text x="421" y="490" text-anchor="middle" font-family="{{ sans }}" font-size="7"
+        letter-spacing="1" fill="{{ wash }}">FIRST</text>
+{% endblock %}

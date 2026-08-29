@@ -1,0 +1,13 @@
+{
+  "id": "rwa_society",
+  "label": "Residents' Welfare Association",
+  "description": "A housing society or apartment complex: maintenance requests, dues, notices, committee elections.",
+  "provisional": true,
+  "default_packs": ["pack1", "pack3"],
+  "categories": {
+    "request": ["PLUMBING", "ELECTRICAL", "SECURITY", "PARKING", "COMMON_AREA", "NOISE", "GENERAL"],
+    "group": ["MAINTENANCE_COMMITTEE", "SECURITY_COMMITTEE", "SOCIAL_COMMITTEE", "BLOCK"]
+  },
+  "roles": ["MEMBER", "TENANT_ADMIN"],
+  "auth_mode": "phone_otp"
+}

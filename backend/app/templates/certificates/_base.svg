@@ -1,0 +1,103 @@
+{% set accent = self.accent()|trim %}
+{% set accent_soft = self.accent_soft()|trim %}
+{% set wash = self.wash()|trim %}
+{% set ink = "#241f45" %}
+{% set muted = "#6b6880" %}
+{% set serif = "DejaVu Serif, Georgia, Times New Roman, serif" %}
+{% set sans = "DejaVu Sans, Helvetica, Arial, sans-serif" %}
+{% macro corner() %}
+<path d="M16,16 L96,16 L16,96 Z" fill="{{ accent }}"/>
+<path d="M34,34 L64,34 L34,64 Z" fill="{{ wash }}"/>
+{% endmacro %}
+{% macro divider(y) %}
+<line x1="291" y1="{{ y }}" x2="405" y2="{{ y }}" stroke="{{ accent_soft }}" stroke-width="1"/>
+<path d="M421,{{ y - 6 }} L427,{{ y }} L421,{{ y + 6 }} L415,{{ y }} Z" fill="{{ accent }}"/>
+<line x1="437" y1="{{ y }}" x2="551" y2="{{ y }}" stroke="{{ accent_soft }}" stroke-width="1"/>
+{% endmacro %}
+{% macro info_cell(x, y, label, value, limit) %}
+<rect x="{{ x }}" y="{{ y - 10 }}" width="13" height="13" rx="2.5" fill="none"
+      stroke="{{ accent }}" stroke-width="1.2"/>
+<line x1="{{ x + 3 }}" y1="{{ y - 5.5 }}" x2="{{ x + 10 }}" y2="{{ y - 5.5 }}"
+      stroke="{{ accent }}" stroke-width="1.2"/>
+<text x="{{ x + 22 }}" y="{{ y }}" font-family="{{ sans }}" font-size="9"
+      letter-spacing="1.4" fill="{{ muted }}">{{ label }}</text>
+<text x="{{ x + 22 }}" y="{{ y + 16 }}" font-family="{{ sans }}" font-size="12"
+      font-weight="bold" fill="{{ ink }}">{{ value|clip(limit) }}</text>
+{% endmacro %}
+<svg xmlns="http://www.w3.org/2000/svg" width="842" height="595" viewBox="0 0 842 595">
+  <rect width="842" height="595" fill="{{ wash }}"/>
+  <rect x="16" y="16" width="810" height="563" fill="none" stroke="{{ accent }}" stroke-width="3"/>
+  <rect x="26" y="26" width="790" height="543" fill="none" stroke="{{ accent_soft }}" stroke-width="1"/>
+
+  {{ corner() }}
+  <g transform="translate(842,0) scale(-1,1)">{{ corner() }}</g>
+  <g transform="translate(0,595) scale(1,-1)">{{ corner() }}</g>
+  <g transform="translate(842,595) scale(-1,-1)">{{ corner() }}</g>
+
+  <path d="M396,90 C378,76 376,54 390,40" fill="none" stroke="{{ accent }}"
+        stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M446,90 C464,76 466,54 452,40" fill="none" stroke="{{ accent }}"
+        stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="385" cy="52" rx="6" ry="3" fill="{{ accent }}" transform="rotate(-40 385 52)"/>
+  <ellipse cx="382" cy="68" rx="6" ry="3" fill="{{ accent }}" transform="rotate(-15 382 68)"/>
+  <ellipse cx="388" cy="83" rx="6" ry="3" fill="{{ accent }}" transform="rotate(15 388 83)"/>
+  <ellipse cx="457" cy="52" rx="6" ry="3" fill="{{ accent }}" transform="rotate(40 457 52)"/>
+  <ellipse cx="460" cy="68" rx="6" ry="3" fill="{{ accent }}" transform="rotate(15 460 68)"/>
+  <ellipse cx="454" cy="83" rx="6" ry="3" fill="{{ accent }}" transform="rotate(-15 454 83)"/>
+  <circle cx="421" cy="64" r="18" fill="{{ accent }}"/>
+  <text x="421" y="71" text-anchor="middle" font-family="{{ serif }}" font-size="19"
+        font-weight="bold" fill="{{ wash }}">{{ group_name[:1]|upper }}</text>
+
+  <text x="421" y="140" text-anchor="middle" font-family="{{ serif }}" font-size="44"
+        font-weight="bold" letter-spacing="5" fill="{{ ink }}">CERTIFICATE</text>
+  <text x="421" y="164" text-anchor="middle" font-family="{{ sans }}" font-size="13"
+        letter-spacing="5" fill="{{ accent }}">{% block award_title %}{% endblock %}</text>
+  {{ divider(182) }}
+
+  <text x="421" y="212" text-anchor="middle" font-family="{{ sans }}" font-size="10"
+        letter-spacing="3" fill="{{ muted }}">THIS IS TO CERTIFY THAT</text>
+  <text x="421" y="262" text-anchor="middle" font-family="{{ serif }}"
+        font-size="{{ name_size }}" fill="{{ accent }}">{{ member_name }}</text>
+  <line x1="231" y1="278" x2="611" y2="278" stroke="{{ accent_soft }}" stroke-width="1"/>
+
+  <text x="421" y="304" text-anchor="middle" font-family="{{ sans }}" font-size="12"
+        fill="{{ muted }}">{% block lead_line %}{% endblock %}</text>
+  <text x="421" y="332" text-anchor="middle" font-family="{{ sans }}"
+        font-size="{{ title_size }}" font-weight="bold" fill="{{ accent }}">{{ event_title }}</text>
+  <text x="421" y="354" text-anchor="middle" font-family="{{ sans }}" font-size="12"
+        fill="{{ muted }}">organized by {{ group_name }}</text>
+  <text x="421" y="374" text-anchor="middle" font-family="{{ sans }}" font-size="11"
+        fill="{{ muted }}">{% block closing_line %}{% endblock %}</text>
+  {{ divider(392) }}
+
+  {{ info_cell(166, 424, "Event", event_title, 26) }}
+  {{ info_cell(486, 424, "Group", group_name, 20) }}
+  {{ info_cell(166, 462, "Community", tenant_name, 26) }}
+  {{ info_cell(486, 462, "Date", event_date, 20) }}
+
+  <text x="196" y="506" text-anchor="middle" font-family="{{ serif }}" font-size="19"
+        font-style="italic" fill="{{ ink }}">{{ signatory_name }}</text>
+  <line x1="116" y1="516" x2="276" y2="516" stroke="{{ ink }}" stroke-width="1"/>
+  <text x="196" y="532" text-anchor="middle" font-family="{{ sans }}" font-size="11"
+        font-weight="bold" fill="{{ ink }}">{{ signatory_name }}</text>
+  <text x="196" y="546" text-anchor="middle" font-family="{{ sans }}" font-size="9"
+        fill="{{ muted }}">{{ signatory_role }}</text>
+
+  <circle cx="421" cy="500" r="30" fill="{{ accent }}"/>
+  <circle cx="421" cy="500" r="24" fill="none" stroke="{{ wash }}" stroke-width="1.5"
+          stroke-dasharray="3 3"/>
+  {% block seal_mark %}{% endblock %}
+
+  <g transform="translate(644,452) scale({{ qr_scale }})">
+    <path d="{{ qr_path }}" fill="{{ ink }}"/>
+  </g>
+  <text x="686" y="550" text-anchor="middle" font-family="{{ sans }}" font-size="7.5"
+        fill="{{ muted }}">Verify this certificate</text>
+  <text x="686" y="560" text-anchor="middle" font-family="{{ sans }}" font-size="7.5"
+        fill="{{ muted }}">by scanning the QR code</text>
+
+  <line x1="286" y1="562" x2="326" y2="562" stroke="{{ accent_soft }}" stroke-width="1"/>
+  <text x="421" y="566" text-anchor="middle" font-family="{{ sans }}" font-size="10"
+        letter-spacing="1" fill="{{ ink }}">Serial No.: {{ serial }}</text>
+  <line x1="516" y1="562" x2="556" y2="562" stroke="{{ accent_soft }}" stroke-width="1"/>
+</svg>

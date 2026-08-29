@@ -1,0 +1,13 @@
+{
+  "id": "campus_club",
+  "label": "Campus Club",
+  "description": "A student club or society at a higher-education institution: membership, events, announcements, member issues. Closest to the Campus Connect port source.",
+  "provisional": true,
+  "default_packs": ["pack1", "pack4"],
+  "categories": {
+    "request": ["EVENT", "GROUP", "CERTIFICATE", "TECHNICAL", "GENERAL"],
+    "group": ["OFFICIAL", "UNOFFICIAL"]
+  },
+  "roles": ["MEMBER", "TENANT_ADMIN"],
+  "auth_mode": "email_password"
+}

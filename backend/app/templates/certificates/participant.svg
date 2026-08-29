@@ -1,0 +1,14 @@
+{% extends "_base.svg" %}
+
+{% block accent %}#4c35b3{% endblock %}
+{% block accent_soft %}#cdc4ee{% endblock %}
+{% block wash %}#fbfaff{% endblock %}
+
+{% block award_title %}OF PARTICIPATION{% endblock %}
+{% block lead_line %}has actively participated in{% endblock %}
+{% block closing_line %}and has demonstrated dedication and enthusiasm throughout the event.{% endblock %}
+
+{% block seal_mark %}
+  <path d="M421,486 l4.6,9.3 10.3,1.5 -7.5,7.3 1.8,10.2 -9.2,-4.8 -9.2,4.8 1.8,-10.2 -7.5,-7.3 10.3,-1.5 Z"
+        fill="{{ wash }}"/>
+{% endblock %}
