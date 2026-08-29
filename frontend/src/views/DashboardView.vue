@@ -1,68 +1,36 @@
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import TenantShell from '../components/layout/TenantShell.vue'
 import StatTile from '../components/evidence/StatTile.vue'
 import SurvivalCurve from '../components/evidence/SurvivalCurve.vue'
 import ControlChart from '../components/evidence/ControlChart.vue'
-import {
-  medianResolution,
-  conformalEta,
-  openRightNow,
-  tankerCycleInsufficient,
-  hazardsWithheld,
-  kaplanMeierCurve,
-  ewmaChart
-} from '../fixtures/evidence'
+import { tenantBySlug } from '../fixtures/tenants'
+import { operationsPack } from '../fixtures/insights'
+
+const route = useRoute()
+const slug = computed(() => route.params.slug)
+const tenant = computed(() => tenantBySlug(slug.value))
+const pack = computed(() => operationsPack[slug.value])
 </script>
 
 <template>
-  <div class="app">
-    <aside class="side">
-      <a class="brand" href="/">Quorum</a>
-    </aside>
-
-    <div class="main">
-      <div class="topbar">
-        <div>
-          <h1>Resolution</h1>
-          <div class="sub">request_flow · demo tenant</div>
-        </div>
-      </div>
-
-      <div class="content">
-        <div class="row r-4">
-          <StatTile title="Median time to resolution" subtitle="all categories" :evidence="medianResolution">
-            <template #why>
-              <p>Requests still open past 30 days skew towards plumbing (censoring test <b>p = 0.04</b>). The median may be optimistic.</p>
-            </template>
-          </StatTile>
-
-          <StatTile title="ETA · RQ-2214" subtitle="leaking tap, C-704" :evidence="conformalEta" display="range">
-            <template #why>
-              <p>A conformal interval guarantees marginal coverage: across many requests like this one, <b>90% resolve inside it</b>.</p>
-            </template>
-          </StatTile>
-
-          <StatTile title="Open right now" subtitle="unresolved, all wings" :evidence="openRightNow" />
-
-          <StatTile title="Water-tanker call-out cycle" subtitle="kaplan-meier · tanker category" :evidence="tankerCycleInsufficient">
-            <template #why>
-              <p>A curve over 11 observations is a staircase of single events, not an estimate. This is the minimum-n policy doing exactly what it is for.</p>
-            </template>
-          </StatTile>
-        </div>
-
-        <div class="row r-32">
-          <SurvivalCurve title="Requests still unresolved, by day" subtitle="kaplan-meier · greenwood 95% band" :evidence="kaplanMeierCurve" />
-          <ControlChart title="Weekly request rate" subtitle="ewma control chart" :evidence="ewmaChart" />
-        </div>
-
-        <div class="row" style="grid-template-columns:1fr">
-          <StatTile title="Resolution speed by wing" subtitle="cox proportional hazards" :evidence="hazardsWithheld">
-            <template #why>
-              <p>Wing D was slow for six weeks after its pump replacement and ordinary afterwards. A single hazard ratio would average two regimes into one number that reads as decisive and is not.</p>
-            </template>
-          </StatTile>
-        </div>
-      </div>
+  <TenantShell title="Resolution" :subtitle="`request_flow · ${tenant.name}`" as-of="insight_run · contract v1">
+    <div class="row r-4">
+      <StatTile v-for="(t, i) in pack.tiles" :key="i" :title="t.title" :subtitle="t.subtitle" :evidence="t.evidence" :display="t.display || 'scalar'">
+        <template v-if="t.why" #why><p>{{ t.why }}</p></template>
+      </StatTile>
     </div>
-  </div>
+
+    <div class="row r-32">
+      <SurvivalCurve :title="pack.survival.title" :subtitle="pack.survival.subtitle" :evidence="pack.survival.evidence" />
+      <ControlChart :title="pack.controlChart.title" :subtitle="pack.controlChart.subtitle" :evidence="pack.controlChart.evidence" />
+    </div>
+
+    <div class="row" style="grid-template-columns:1fr">
+      <StatTile :title="pack.withheldTile.title" :subtitle="pack.withheldTile.subtitle" :evidence="pack.withheldTile.evidence">
+        <template #why><p>{{ pack.withheldTile.why }}</p></template>
+      </StatTile>
+    </div>
+  </TenantShell>
 </template>
