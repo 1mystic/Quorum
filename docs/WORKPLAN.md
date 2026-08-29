@@ -90,11 +90,11 @@ whose only definition is inside a media query.
 | C.9 | **Pack 1** implementation: `survival.py`, `spc.py`, `queueing.py` + known-answer tests | statistician | C.7 | TODO |
 | C.10 | `insight_runs` table + materialization worker + cadence scheduler | backend-porter | C.9 | TODO |
 | C.11 | Frontend retheme against `design/tokens.css` + `StatisticTile` / `EvidenceCard` components | frontend | B.7, C.6 | DONE, brought forward ahead of B.7/C.6, built against local fixtures pending the real API |
-| C.12 | Insight dashboard UI — KM curve, control chart, Erlang-C recommendation | frontend | C.11, C.10 | TODO |
+| C.12 | Insight dashboard UI — KM curve, control chart, Erlang-C recommendation | frontend | C.11, C.10 | DONE against fixtures (`InsightsOperationsView`), pending real `insight_runs` API |
 | C.13 | `ledger` domain + **Pack 3** (`forecast.py`, `calibration.py`, `conformal.py`, `drift.py`) | statistician | C.10 | TODO |
-| C.14 | Conformal ETA surfaced on the request detail page | frontend | C.13 | TODO |
+| C.14 | Conformal ETA surfaced on the request detail page | frontend | C.13 | DONE against fixtures (`RequestDetailView`, `display="range"` StatTile), pending the real per-request ETA endpoint |
 | C.15 | `participation` + `decision` domains + **Pack 4** | statistician | C.13 | TODO |
-| C.16 | Decision console UI — pairwise matrix, cycle disclosure, budgeting fairness report | frontend | C.15 | TODO |
+| C.16 | Decision console UI — pairwise matrix, cycle disclosure, budgeting fairness report | frontend | C.15 | DONE against fixtures (`DecisionDetailView`, pairwise matrix + mandatory cycle disclosure, tested); budgeting fairness report not yet a page, no fixture shape drafted for it |
 | C.17 | **Pack 2** (`bayes.py`, `experiments.py`, `bandits.py`) + shrunk leaderboard | statistician | C.15 | TODO |
 | C.18 | Agent stats tools returning `Evidence` + grounding tests | backend-porter | C.9 | TODO |
 | C.19 | Seed script: one demo tenant per vertical with enough history for the packs to be non-trivial | backend-porter | C.15 | TODO |
@@ -124,6 +124,17 @@ them up in. Concretely: C.11 through C.16 (frontend views) move ahead of C.8, C.
 C.17 (backend module implementations) once C.6/C.7 land. Frontend continues building against
 fixtures shaped to `docs/EVIDENCE_CONTRACT.md` and `docs/STATS_API.md` until each backend module
 is ready to swap in, per view.
+
+**Frontend breadth pass (2026-08-29) went further than C.11-C.16 name explicitly**, per the direct
+user instruction to build "all pages and views" before going deep on any one: the full auth/
+onboarding flow (login, signup, forgot/reset password, verify email, onboard, workspace chooser),
+ledger, events, announcements, members, profile, admin oversight/approvals/settings, and both
+Pack 2 (comparison) and Pack 3 (forecast) insight views, plus the public method-card pages, are all
+built and routed against fixtures now too, ahead of any card that named them. No workplan card
+covers `budgeting.fairness_report` as a page yet; the decision-detail page covers the poll/Schulze
+half of Pack 4 but not participatory budgeting, which needs its own fixture shape and view. See
+CONTEXT.md's `Done` entry for this session for the full list of what shipped, and its "In flight"
+section for what remains.
 
 ## Parking lot
 
