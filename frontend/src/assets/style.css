@@ -2322,6 +2322,23 @@ html.qs-active::-webkit-scrollbar{
   box-shadow:var(--shadow-pop);
   padding:6px;
   list-style:none;
+  /* thin themed scrollbar, not the OS default: too short-lived a popover to
+     be worth mounting useOverlayScrollbar's drag/fade thumb on */
+  scrollbar-width:thin;
+  scrollbar-color:var(--hair-2) transparent;
+}
+.select-list::-webkit-scrollbar{
+  width:7px;
+}
+.select-list::-webkit-scrollbar-track{
+  background:transparent;
+}
+.select-list::-webkit-scrollbar-thumb{
+  background:var(--hair-2);
+  border-radius:var(--r-pill);
+}
+.select-list::-webkit-scrollbar-thumb:hover{
+  background:var(--accent);
 }
 .select-option{
   padding:9px 11px;

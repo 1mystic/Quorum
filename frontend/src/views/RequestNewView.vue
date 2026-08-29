@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
+import SelectField from '../components/ui/SelectField.vue'
 import { tenantBySlug } from '../fixtures/tenants'
 import { requestsFor } from '../fixtures/requests'
 import { toast } from '../composables/useToast'
@@ -10,6 +11,9 @@ const route = useRoute()
 const router = useRouter()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))
+
+const categoryOptions = computed(() => tenant.value.requestCategories.map((c) => ({ value: c, label: c.replace(/_/g, ' ') })))
+const priorityOptions = computed(() => tenant.value.requestPriorities.map((p) => ({ value: p, label: p.replace(/_/g, ' ') })))
 
 const title = ref('')
 const category = ref(tenant.value.requestCategories[0])
@@ -56,15 +60,11 @@ function submit() {
         <div class="form-row">
           <div class="field">
             <label for="category">Category</label>
-            <select id="category" v-model="category">
-              <option v-for="c in tenant.requestCategories" :key="c" :value="c">{{ c.replace(/_/g, ' ') }}</option>
-            </select>
+            <SelectField id="category" v-model="category" :options="categoryOptions" />
           </div>
           <div class="field">
             <label for="priority">Priority</label>
-            <select id="priority" v-model="priority">
-              <option v-for="p in tenant.requestPriorities" :key="p" :value="p">{{ p.replace(/_/g, ' ') }}</option>
-            </select>
+            <SelectField id="priority" v-model="priority" :options="priorityOptions" />
           </div>
         </div>
 

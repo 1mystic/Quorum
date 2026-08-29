@@ -2,10 +2,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AuthShell from '../components/layout/AuthShell.vue'
+import SelectField from '../components/ui/SelectField.vue'
 import { useFormValidation } from '../composables/useFormValidation'
 import { useAuthStore } from '../stores/auth'
 import { demoTenantList } from '../fixtures/tenants'
 import { toast } from '../composables/useToast'
+
+const tenantOptions = demoTenantList.map((t) => ({ value: t.slug, label: t.name }))
 
 // No backend yet (docs/STATS_API.md is a read surface only). This signs a
 // demo session into whichever fixture tenant is selected, per the OnboardView
@@ -60,9 +63,7 @@ function submit() {
 
       <div class="field">
         <label for="tenant">Tenant</label>
-        <select id="tenant" v-model="tenantSlug">
-          <option v-for="t in demoTenantList" :key="t.slug" :value="t.slug">{{ t.name }}</option>
-        </select>
+        <SelectField id="tenant" v-model="tenantSlug" :options="tenantOptions" />
       </div>
 
       <div class="field">

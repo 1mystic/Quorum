@@ -1,7 +1,8 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
+import SelectField from '../components/ui/SelectField.vue'
 import { tenantBySlug } from '../fixtures/tenants'
 import { useAuthStore } from '../stores/auth'
 import { toast } from '../composables/useToast'
@@ -10,6 +11,14 @@ const route = useRoute()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))
 const auth = useAuthStore()
+
+const channel = ref('app')
+const channelOptions = [
+  { value: 'app', label: 'App' },
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'email', label: 'Email' },
+  { value: 'phone', label: 'Phone' }
+]
 
 function save() {
   toast.success('Profile saved. UI stub until the member write path lands.')
@@ -28,12 +37,7 @@ function save() {
           </div>
           <div class="field">
             <label for="channel">Preferred channel</label>
-            <select id="channel">
-              <option>App</option>
-              <option>WhatsApp</option>
-              <option>Email</option>
-              <option>Phone</option>
-            </select>
+            <SelectField id="channel" v-model="channel" :options="channelOptions" />
           </div>
           <button class="btn btn-primary" style="align-self:flex-start" @click="save"><span>Save</span></button>
         </div>

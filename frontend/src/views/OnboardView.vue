@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AuthShell from '../components/layout/AuthShell.vue'
+import SelectField from '../components/ui/SelectField.vue'
 import { demoTenantList } from '../fixtures/tenants'
 import { toast } from '../composables/useToast'
 
@@ -27,6 +28,8 @@ const verticals = [
   { id: 'sports_club', label: 'Sports club', demo: false },
   { id: 'professional_guild', label: 'Professional guild', demo: false }
 ]
+
+const verticalOptions = verticals.map((v) => ({ value: v.id, label: v.label + (v.demo ? '' : ' (no demo data yet)') }))
 
 function join() {
   const tenant = demoTenantList.find((t) => t.slug === joinSlug.value.trim())
@@ -75,9 +78,7 @@ function create() {
       </div>
       <div class="field">
         <label for="vertical">Vertical</label>
-        <select id="vertical" v-model="vertical">
-          <option v-for="v in verticals" :key="v.id" :value="v.id">{{ v.label }}{{ v.demo ? '' : ' (no demo data yet)' }}</option>
-        </select>
+        <SelectField id="vertical" v-model="vertical" :options="verticalOptions" />
       </div>
       <button type="submit" class="btn btn-primary" style="width:100%"><span>Create tenant</span></button>
     </form>
