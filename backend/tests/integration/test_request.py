@@ -1386,7 +1386,7 @@ async def test_group_queue_same_status_sorts_oldest_first(client, db_session, le
     second_request = await client.post("/requests", headers=member, json=second_payload)
     second_id = second_request.json()["id"]
 
-    # force distinct timestamps — same-transaction func.now() can otherwise tie
+    # force distinct timestamps: same-transaction func.now() can otherwise tie
     request_row = await db_session.get(Request, second_id)
     request_row.created_at = datetime.now() + timedelta(seconds=5)
     await db_session.flush()

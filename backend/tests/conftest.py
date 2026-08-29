@@ -71,7 +71,7 @@ async def setup_db():
     await test_engine.dispose()
 
 
-# Simple fixture — fast, used by most tests (no internal commits happen)
+# Simple fixture: fast, used by most tests (no internal commits happen)
 @pytest_asyncio.fixture()
 async def db_session(setup_db) -> AsyncGenerator[AsyncSession, None]:
     async with TestSessionLocal() as session:
@@ -79,7 +79,7 @@ async def db_session(setup_db) -> AsyncGenerator[AsyncSession, None]:
         await session.rollback()
 
 
-# SAVEPOINT-based fixture — only for tests that hit an endpoint calling db.commit() internally
+# SAVEPOINT-based fixture, only for tests that hit an endpoint calling db.commit() internally
 @pytest_asyncio.fixture()
 # async def db_session_committing(setup_db) -> AsyncGenerator[AsyncSession, None]:
 async def db_session(setup_db) -> AsyncGenerator[AsyncSession, None]:

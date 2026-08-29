@@ -33,9 +33,9 @@ def _reset_text(full_name: str, reset_url: str, expires_minutes: int) -> str:
         f"Open the link below to choose a new one:\n\n"
         f"{reset_url}\n\n"
         f"This link expires in {expires_minutes} minutes and can only be used once.\n"
-        f"If you did not request a password reset, you can ignore this email — "
+        f"If you did not request a password reset, you can ignore this email. "
         f"your password stays unchanged.\n\n"
-        f"— The {APP_NAME} team"
+        f"The {APP_NAME} team"
     )
 
 

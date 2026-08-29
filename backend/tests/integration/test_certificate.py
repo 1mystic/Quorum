@@ -10,7 +10,7 @@ def future_time(hours: int) -> str:
 
 @pytest.fixture(autouse=True)
 def mock_storage_url(monkeypatch):
-    """No S3 access available — stub storage.get_url() so certificate download tests don't need real AWS."""
+    """No S3 access available: stub storage.get_url() so certificate download tests don't need real AWS."""
     from app.core.storage import storage
     monkeypatch.setattr(storage, "get_url", lambda key, signed=False, expires_in=3600: f"https://fake-s3.test/{key}")
 

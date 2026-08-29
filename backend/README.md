@@ -1,4 +1,4 @@
-# Quorum — Backend
+# Quorum: Backend
 
 REST API for Quorum, a multi-tenant community operations platform: tenant onboarding, member
 and group directories, the event lifecycle from draft to results, announcements, request
@@ -30,7 +30,7 @@ Every tenant-owned table carries `tenant_id`. Almost every route lives under
 `/api/t/{slug}/...`; the `{slug}` in the URL must match the `tenant_slug` claim signed into the
 caller's JWT or the request 403s before any repository runs a query (`app/core/tenancy.py`).
 Postgres row-level security is enabled as defense in depth on top of that check, not instead of
-it — see the `alembic/versions/*_tenancy_rls*` migration.
+it. See the `alembic/versions/*_tenancy_rls*` migration.
 
 A handful of routes are deliberately global or public and sit outside `/api/t/{slug}`:
 `/api/auth/*` (no tenant yet), `/api/tenant/onboarding` (creates the tenant), and the two
@@ -38,7 +38,7 @@ A handful of routes are deliberately global or public and sit outside `/api/t/{s
 
 ## Configuration
 
-All five core variables in `.env.example` are required — the app fails to start if any is
+All five core variables in `.env.example` are required. The app fails to start if any is
 missing. Tenant timezone is a per-tenant setting (`Tenant.timezone`), not an environment variable.
 
 | Variable | Purpose |
@@ -61,7 +61,7 @@ get a token from `POST /api/auth/signup` or `POST /api/auth/login` and send it a
 uv run pytest
 ```
 
-Tests run against `TEST_DATABASE_URL` and **drop every table on teardown** — point it at a
+Tests run against `TEST_DATABASE_URL` and **drop every table on teardown**. Point it at a
 throwaway database. `tests/integration/test_tenancy.py` is the isolation suite: a cross-tenant
 read must 403 at the API and return zero rows under RLS with the API bypassed.
 
@@ -93,4 +93,4 @@ docker build -t quorum-backend .
 docker run --env-file .env -p 8000:8000 quorum-backend
 ```
 
-Migrations are not run by the container — apply them separately.
+Migrations are not run by the container. Apply them separately.

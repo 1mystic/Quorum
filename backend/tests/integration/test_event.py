@@ -96,7 +96,7 @@ async def started_event(client, db_session, leader, member):
     event = await db_session.get(Event, event_id)
     event.starts_at = datetime.now(timezone.utc) - timedelta(hours=1)
     event.ends_at = datetime.now(timezone.utc) + timedelta(hours=1)
-    await db_session.flush()   # <- flush, not commit — stays inside the same transaction
+    await db_session.flush()   # <- flush, not commit, stays inside the same transaction
 
     return leader_headers, event_id, registration_id
 
