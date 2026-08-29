@@ -29,13 +29,13 @@ falls out of it.*
 | # | Card | Owner | Deps | Status |
 |---|---|---|---|---|
 | A.1 | `docs/EVIDENCE_CONTRACT.md` — the envelope, `Check`, `MethodCard`, `InsufficientData`, min-n policy, serialization shape | statistician | 0.4 | DONE |
-| A.2 | `docs/DATA_SPINE.md` — the six canonical streams: field-level schema, event semantics, censoring rules, per-vertical adapter contract | statistician | A.1 | TODO |
-| A.3 | `docs/STATS_CATALOG.md` Pack 1 — Reliability & Service Ops, service by service | statistician | A.2 | TODO |
-| A.4 | `docs/STATS_CATALOG.md` Pack 3 — Forecasting & Calibrated Risk | statistician | A.2 | TODO |
-| A.5 | `docs/STATS_CATALOG.md` Pack 4 — Governance, Segmentation & Text | statistician | A.2 | TODO |
-| A.6 | `docs/STATS_CATALOG.md` Pack 2 — Bayesian Ranking & Experimentation | statistician | A.2 | TODO |
-| A.7 | `docs/VERTICALS.md` — seven vertical manifests: labels, default packs, categories, roles, auth mode | statistician | A.3–A.6 | TODO |
-| A.8 | `docs/STATS_API.md` — the read surface: endpoints, pack toggling, cadence, `insight_runs` shape, agent tool signatures | statistician | A.7 | TODO |
+| A.2 | `docs/DATA_SPINE.md` — the six canonical streams: field-level schema, event semantics, censoring rules, per-vertical adapter contract | statistician | A.1 | DONE |
+| A.3 | `docs/STATS_CATALOG.md` Pack 1 — Reliability & Service Ops, service by service | statistician | A.2 | DONE |
+| A.4 | `docs/STATS_CATALOG.md` Pack 3 — Forecasting & Calibrated Risk | statistician | A.2 | DONE |
+| A.5 | `docs/STATS_CATALOG.md` Pack 4 — Governance, Segmentation & Text | statistician | A.2 | DONE |
+| A.6 | `docs/STATS_CATALOG.md` Pack 2 — Bayesian Ranking & Experimentation | statistician | A.2 | DONE |
+| A.7 | `docs/VERTICALS.md` — seven vertical manifests: labels, default packs, categories, roles, auth mode | statistician | A.3–A.6 | DONE |
+| A.8 | `docs/STATS_API.md` — the read surface: endpoints, pack toggling, cadence, `insight_runs` shape, agent tool signatures | statistician | A.7 | DONE |
 
 **A.1 acceptance:** a frontend engineer could build the "statistic tile" component from this doc
 alone, including the below-min-n and failed-assumption states.

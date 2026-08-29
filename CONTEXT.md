@@ -33,6 +33,10 @@ spacing**, with fresher colour and type. That synthesis is now the **house direc
 | 2026-08-29 | `design/tokens.css` + `design/tokens.json`, 76 tokens, light and dark (card B.4) |
 | 2026-08-29 | `design/brand/logo/` mark, mono, favicon cut, two lockups, usage rules (card B.3) |
 | 2026-08-29 | `design/BRAND.md` updated from the provisional terracotta/serif proposal to the shipped palette and type |
+| 2026-08-29 | `docs/DATA_SPINE.md`: six streams, field-level schema, ten normative censoring rules for `request_flow`, adapter conformance contract (card A.2) |
+| 2026-08-29 | `docs/STATS_CATALOG.md`: 63 services across the four packs, each with min-n, automatic checks, Method Card and its known answer (cards A.3–A.6) |
+| 2026-08-29 | `docs/VERTICALS.md`: seven manifests; `rwa_society` and `campus_club` complete with demo seed requirements (card A.7) |
+| 2026-08-29 | `docs/STATS_API.md`: read surface, `insight_runs` shape, cadence table, five agent tools, registry invariants (card A.8) |
 | 2026-08-29 | `frontend/` scaffolded — Vite + Vue 3 + Vue Router + Pinia + Vitest, composables ported near-verbatim from Campus Connect, tokenized `style.css` (22 numbered sections) built from `design/samples/quorum/dashboard.html`, `STYLE-INDEX.md` written (Vue scaffold half of card C.1) |
 | 2026-08-29 | Evidence component set built: `EvidenceValue`, `StatTile`, `SurvivalCurve`, `ControlChart`, `MethodCardLink`, `AuditLine`, all four render states from `docs/EVIDENCE_CONTRACT.md` §3, 27 Vitest tests passing (card C.11, brought forward) |
 
@@ -40,7 +44,8 @@ spacing**, with fresher colour and type. That synthesis is now the **house direc
 
 Design and branding are done. Three agents now running in parallel on disjoint paths:
 
-- **statistician** on **A.2 to A.8**, the statistical specification (`docs/` only)
+- **statistician**: **A.2 to A.8 complete.** Phase A is done. Next statistician cards are C.6
+  (`contracts.py`, `registry.py`, purity lint) and C.7 (`streams/`), both blocked on C.4
 - **backend-porter** on **C.1 to C.4**, scaffold, rename pass, tenant model, RLS (`backend/` only)
 - **frontend** finished the Vue scaffold and the Evidence component set (`frontend/` only); ready
   for `C.12` once `C.10`/`insight_runs` exists, but can keep building UI against fixtures meanwhile
@@ -59,6 +64,17 @@ Newest first. Append, never rewrite. Record *why*, not just *what*.
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-08-29 | The exposure log (`nudge_sent`/`delivered`/`opened`/`acted` with `arm_ref`) is added to `participation` | Pack 2's A/B tests and bandits need who was *offered* a nudge, not only who acted. Without it every nudge experiment measures self-selection. The six-stream sketch had no place for a system action against a member |
+| 2026-08-29 | `StreamWindow.complete_through` is a first-class field, separate from `end` | Reporting lag is a property of the pipeline, not of any event. A forecaster fitted through `end` reads the partial final bucket as a collapse in collections. Nothing else in the spine protects against it |
+| 2026-08-29 | Resident-facing ETAs use conformalized survival analysis (Candes, Lei, Ren), not split conformal | Split conformal calibrated on resolved requests is calibrated on the fast ones. Exchangeability fails in the direction that makes the ETA look good, which is the worst possible direction for the one number a resident will trust and quote |
+| 2026-08-29 | A blocking MASE failure returns the seasonal-naive forecast, not an error | The tenant still gets a number and the number is the honest one. An error state would push people to a tool that answers |
+| 2026-08-29 | `survey.likert_distribution` returns a `structure` with no `mean` key at all | Same mechanism as `TextDoc` having no identity field: prevention by type, not by discipline. A reviewer cannot forget a rule the shape does not permit breaking |
+| 2026-08-29 | `network.isolation_report` returns shares by stratum and can never return individuals | A list of socially isolated neighbours is the most sensitive output the platform could produce. The service is shaped so the list cannot be constructed |
+| 2026-08-29 | `rwa_society` disables `network.betweenness_centrality` and `audit.benford_digits` | Interview 1 documents active committee friction; naming informal power brokers is a foreseeable harm. Benford on fixed monthly dues is a guaranteed false positive. A vertical switches a wrong service off rather than shipping it with a caveat |
+| 2026-08-29 | "Not enough data" is HTTP 200 with `insufficient_data: true`, never 404 or 422 | If honesty returns an error code, every client treats it as a failure and users learn that honest tools look broken |
+| 2026-08-29 | The agent gets exactly five tools and none of them computes or queries a stream | No `compute_statistic` means it cannot produce an unaudited number; no `query_stream` means it cannot count rows and state a figure with no `n` and no checks |
+| 2026-08-29 | A `ServiceSpec` without a Method Card fails at import | `docs/RULES.md` §4 as a load-time error rather than a review convention. Also: catalog and registry must match both ways, so the doc cannot drift from the code |
+| 2026-08-29 | Where no external ground truth exists, the catalog says so in an appendix | Seven services are gated or property-tested rather than validated. A product whose claim is honesty cannot have a "known answer" column where some entries are quietly invented |
 | 2026-08-29 | `EvidenceValue` gets a `display="range"` mode that shows the interval bounds as the headline figure, for conformal/predictive intervals | The contract doesn't say how a conformal ETA's point value relates to its interval, and the dashboard sample shows the interval itself as the big number ("2 ... 9 days"), not a point estimate. Read as: some methods assert a guarantee about a range, not a point, so the component needs an explicit mode rather than guessing from `interval_kind` |
 | 2026-08-29 | Prose style: no em dashes anywhere in product copy or docs | User rule. En dashes stay in numeric ranges (`3.4-5.6`) and in `Kaplan-Meier`, where they are the correct mark rather than punctuation |
 | 2026-08-29 | Status colours are mapped to the four Evidence render states, not to sentiment | `--accent` had to stay free for "actionable". A warning that competes with a hover fill is a worse bug than a dull palette |
