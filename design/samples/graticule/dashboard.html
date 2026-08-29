@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quorum — Graticule dashboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5.2 19a12 12 0 0 0 21.6 0Z' fill='%230E6A62'/%3E%3Ccircle cx='16' cy='16' r='12' fill='none' stroke='%23111417' stroke-width='2.5'/%3E%3Crect x='1' y='17.6' width='30' height='2.4' fill='%230E6A62'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   QUORUM — direction B: GRATICULE · product surface
+   Uncertainty language: THE GRATICULE. Bands are hairline-bounded
+   and ruled; every interval terminates in tick caps on a real scale.
+   Motion budget: near zero. A secretary opens this forty times a week.
+   ============================================================ */
+:root{
+  --bg:#F7F8F7; --bg-2:#EFF1F0; --panel:#FFFFFF; --panel-2:#F3F5F4;
+  --ink:#111417; --ink-2:#454C52; --ink-3:#7B848B; --ink-4:#A9B1B6;
+  --teal:#0E6A62; --teal-soft:#DCEAE7; --indigo:#243B55;
+  --hair:#DCE0DF; --hair-2:#C3C9C7;
+  --st-good:#0B7A33; --st-warn:#8A6300; --st-serious:#9C4E1C; --st-crit:#A22A2A;
+  --st-warn-bg:#F6EFDC; --st-crit-bg:#F7E3E1; --st-good-bg:#E3F0E7;
+  --s1:#2E6E9E; --s2:#C0562F; --s3:#7A5AA8; --s4:#B58500;
+  --chart-surface:#FFFFFF; --grid:#E6EAE9; --axis:#C3C9C7; --limit:#9C4E1C;
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+  --ease-snap:cubic-bezier(0.4,0,0.2,1);
+  --t-hover:130ms;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1113; --bg-2:#0A0C0E; --panel:#161A1C; --panel-2:#121618;
+    --ink:#EDF1F0; --ink-2:#AFB8BC; --ink-3:#7C868C; --ink-4:#5A6469;
+    --teal:#2FA396; --teal-soft:#0E2A28; --indigo:#8FA9C4;
+    --hair:#252B2E; --hair-2:#384145;
+    --st-good:#3FB35F; --st-warn:#D2A238; --st-serious:#DA8352; --st-crit:#E06A63;
+    --st-warn-bg:#2A2210; --st-crit-bg:#2C1917; --st-good-bg:#122619;
+    --s1:#3D87C4; --s2:#CF6636; --s3:#8E6FD0; --s4:#B58500;
+    --chart-surface:#161A1C; --grid:#222829; --axis:#384145; --limit:#DA8352;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1113; --bg-2:#0A0C0E; --panel:#161A1C; --panel-2:#121618;
+  --ink:#EDF1F0; --ink-2:#AFB8BC; --ink-3:#7C868C; --ink-4:#5A6469;
+  --teal:#2FA396; --teal-soft:#0E2A28; --indigo:#8FA9C4;
+  --hair:#252B2E; --hair-2:#384145;
+  --st-good:#3FB35F; --st-warn:#D2A238; --st-serious:#DA8352; --st-crit:#E06A63;
+  --st-warn-bg:#2A2210; --st-crit-bg:#2C1917; --st-good-bg:#122619;
+  --s1:#3D87C4; --s2:#CF6636; --s3:#8E6FD0; --s4:#B58500;
+  --chart-surface:#161A1C; --grid:#222829; --axis:#384145; --limit:#DA8352;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{ background:var(--bg); color:var(--ink); font-family:'Archivo',ui-sans-serif,system-ui,sans-serif;
+  font-size:14.5px; line-height:1.5; -webkit-font-smoothing:antialiased }
+h1,h2,h3{ font-weight:600; letter-spacing:-.03em; line-height:1.15 }
+a{color:inherit}
+.mono{ font-family:'IBM Plex Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums }
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{ transition-duration:.01ms !important } }
+
+/* ---------- shell: rail + main ---------- */
+.shell{ display:grid; grid-template-columns:224px 1fr; min-height:100vh }
+@media(max-width:980px){ .shell{ grid-template-columns:1fr } }
+.rail{ border-right:1px solid var(--hair); background:var(--panel); padding:18px 0 24px; position:sticky; top:0; height:100vh; overflow:auto }
+@media(max-width:980px){ .rail{ position:static; height:auto; border-right:0; border-bottom:1px solid var(--hair) } }
+.rail .brand{ display:flex; align-items:center; gap:9px; font-size:16px; font-weight:700; letter-spacing:-.03em; text-decoration:none; padding:0 18px 18px; border-bottom:1px solid var(--hair) }
+.rail h5{ font:500 9.5px/1 'IBM Plex Mono',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-4); padding:20px 18px 9px }
+.rail a.item{ display:flex; justify-content:space-between; gap:8px; padding:9px 18px; font:400 13px/1.3 'IBM Plex Mono',monospace; color:var(--ink-2); text-decoration:none; border-left:2px solid transparent; transition:background var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap) }
+.rail a.item:hover{ background:var(--panel-2); color:var(--ink) }
+.rail a.item.on{ border-left-color:var(--teal); color:var(--ink); background:var(--panel-2) }
+.rail a.item i{ font-style:normal; font-size:10.5px; color:var(--ink-4) }
+.tenantbox{ margin:16px 14px 0; border:1px solid var(--hair); border-radius:3px; overflow:hidden }
+.tenantbox button{ display:block; width:100%; text-align:left; border:0; background:var(--panel); color:var(--ink-2); font:400 12px/1.3 'IBM Plex Mono',monospace; padding:10px 12px; cursor:pointer; transition:background var(--t-hover) var(--ease-snap) }
+.tenantbox button + button{ border-top:1px solid var(--hair) }
+.tenantbox button[aria-pressed="true"]{ background:var(--teal-soft); color:var(--ink) }
+
+main{ min-width:0 }
+.mainhead{ border-bottom:1px solid var(--hair); background:var(--panel); padding:20px 26px }
+.mainhead-row{ display:flex; align-items:flex-start; gap:20px; flex-wrap:wrap }
+.mainhead h1{ font-size:1.5rem }
+.mainhead .sub{ color:var(--ink-2); font-size:13.5px; margin-top:7px; max-width:76ch }
+.mainhead .right{ margin-left:auto; display:flex; align-items:center; gap:12px }
+.stamp{ font:400 10.5px/1.4 'IBM Plex Mono',monospace; color:var(--ink-3); text-align:right }
+.toggle{ font:500 10.5px/1 'IBM Plex Mono',monospace; letter-spacing:.08em; text-transform:uppercase;
+  background:var(--panel); border:1px solid var(--hair-2); color:var(--ink-2); padding:8px 12px; border-radius:3px; cursor:pointer;
+  transition:border-color var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap) }
+.toggle:hover{ border-color:var(--teal); color:var(--teal) }
+
+.pad{ padding:20px 26px 56px }
+.grid{ display:grid; grid-template-columns:repeat(12,1fr); gap:14px; align-items:start }
+.c3{grid-column:span 3} .c4{grid-column:span 4} .c5{grid-column:span 5}
+.c6{grid-column:span 6} .c7{grid-column:span 7} .c8{grid-column:span 8} .c12{grid-column:span 12}
+@media(max-width:1180px){ .c3,.c4,.c5{grid-column:span 6} .c7,.c8{grid-column:span 12} }
+@media(max-width:760px){ .c3,.c4,.c5,.c6,.c7,.c8{grid-column:span 12} }
+
+/* ---------- panel: the instrument face ---------- */
+.panel{ background:var(--panel); border:1px solid var(--hair); border-radius:4px; height:100%; display:flex; flex-direction:column }
+.p-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:13px 16px; border-bottom:1px solid var(--hair) }
+.p-t{ font-size:13.5px; font-weight:600; letter-spacing:-.015em }
+.p-s{ font:400 10.5px/1.45 'IBM Plex Mono',monospace; color:var(--ink-3); margin-top:4px }
+.p-body{ padding:16px; flex:1; display:flex; flex-direction:column }
+.p-foot{ border-top:1px solid var(--hair); padding:9px 16px; font:400 10px/1.5 'IBM Plex Mono',monospace; color:var(--ink-4); display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap }
+.p-foot a{ color:var(--teal); text-decoration:none; border-bottom:1px solid color-mix(in srgb,var(--teal) 40%,transparent) }
+
+.tag{ font:500 9.5px/1 'IBM Plex Mono',monospace; letter-spacing:.1em; text-transform:uppercase;
+  border:1px solid var(--hair-2); color:var(--ink-3); border-radius:2px; padding:5px 7px; white-space:nowrap }
+.tag.ok{ color:var(--st-good); border-color:var(--st-good) }
+.tag.warn{ color:var(--st-warn); border-color:var(--st-warn); background:var(--st-warn-bg) }
+.tag.stop{ color:var(--st-crit); border-color:var(--st-crit); background:var(--st-crit-bg) }
+.tag.wait{ border-style:dashed; color:var(--ink-3) }
+
+/* the reading: value on a scale with tick caps */
+.reading{ font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; font-weight:600;
+  font-size:clamp(1.9rem,3vw,2.5rem); letter-spacing:-.045em; line-height:1 }
+.reading u{ text-decoration:none; font-size:.36em; font-weight:500; color:var(--ink-2); letter-spacing:0 }
+.scale{ margin-top:16px }
+.scale svg{ display:block; width:100%; height:auto }
+.kv{ display:grid; grid-template-columns:auto 1fr; gap:3px 14px; margin-top:14px; font:400 11px/1.5 'IBM Plex Mono',monospace }
+.kv dt{ color:var(--ink-4) } .kv dd{ color:var(--ink-2) }
+
+.callout{ margin-top:14px; border:1px solid var(--st-warn); background:var(--st-warn-bg); border-radius:3px; padding:11px 12px }
+.callout b{ display:block; font-size:12px; margin-bottom:4px; color:var(--ink) }
+.callout p{ font-size:12px; color:var(--ink-2); line-height:1.5 }
+.callout.neutral{ border-color:var(--hair-2); background:var(--panel-2) }
+
+/* NOT INTERPRETABLE — the instrument holds its space, the reading is withheld */
+.withheld{ border:1px solid var(--st-crit); border-radius:3px; overflow:hidden }
+.withheld .bar{ background:var(--st-crit-bg); border-bottom:1px solid var(--st-crit); padding:9px 12px;
+  font:500 10px/1 'IBM Plex Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--st-crit) }
+.withheld .in{ padding:14px 12px }
+.withheld .blank{ height:44px; margin-bottom:12px; border:1px dashed var(--hair-2); border-radius:2px;
+  background:repeating-linear-gradient(135deg,transparent 0 6px,color-mix(in srgb,var(--ink) 5%,transparent) 6px 7px);
+  display:flex; align-items:center; justify-content:center;
+  font:400 11px/1 'IBM Plex Mono',monospace; color:var(--ink-3) }
+.withheld p{ font-size:12.3px; color:var(--ink-2); line-height:1.55 }
+.withheld p + p{ margin-top:9px }
+
+/* NOT ENOUGH DATA — the scale is drawn in full; there is simply no reading on it */
+.pending{ display:flex; flex-direction:column; gap:14px }
+.pending .lead{ font-size:15px; color:var(--ink-2); letter-spacing:-.015em }
+.pending .gauge{ position:relative }
+.pending .gauge svg{ display:block; width:100%; height:auto }
+.pending .cnt{ font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; font-size:1.55rem; font-weight:600; color:var(--ink-2); letter-spacing:-.03em }
+.pending .cnt em{ font-style:normal; font-size:.55em; color:var(--ink-3); font-weight:400 }
+.pending p{ font-size:12.3px; color:var(--ink-3); line-height:1.55 }
+
+/* charts */
+.chartwrap{ overflow-x:auto; margin:0 -4px }
+svg.chart{ display:block; width:100%; height:auto; min-width:470px; font-family:'IBM Plex Mono',monospace }
+.legend{ display:flex; flex-wrap:wrap; gap:5px 18px; margin-top:12px; padding-top:11px; border-top:1px solid var(--hair);
+  font:400 10.5px/1 'IBM Plex Mono',monospace; color:var(--ink-2) }
+.legend i{ display:inline-block; width:16px; height:0; border-top:2px solid; margin-right:6px; vertical-align:middle }
+.risk{ margin-top:10px; font:400 10px/1 'IBM Plex Mono',monospace; color:var(--ink-3) }
+.risk table{ width:100%; border-collapse:collapse } .risk td{ padding:3px 0; text-align:center }
+.risk td:first-child{ text-align:left; color:var(--ink-4) }
+
+/* leaderboard */
+table.board{ width:100%; border-collapse:collapse; font-size:13px }
+table.board th{ text-align:left; font:500 9.5px/1 'IBM Plex Mono',monospace; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-4); padding:0 10px 9px 0; border-bottom:1px solid var(--hair-2) }
+table.board td{ padding:11px 10px 11px 0; border-bottom:1px solid var(--hair); vertical-align:middle }
+table.board tr:last-child td{ border-bottom:0 }
+table.board .num{ text-align:right; font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums }
+.rk{ width:22px; font:500 11px/1 'IBM Plex Mono',monospace; color:var(--ink-4) }
+.vn{ font-weight:600 } .vn small{ display:block; font:400 10.5px/1.4 'IBM Plex Mono',monospace; color:var(--ink-3); font-weight:400 }
+.moved{ font:400 10px/1 'IBM Plex Mono',monospace; color:var(--st-serious); white-space:nowrap }
+.ivcell svg{ display:block; width:100%; height:26px; min-width:150px }
+.note{ margin-top:14px; border-left:2px solid var(--teal); padding-left:12px; font-size:12.3px; color:var(--ink-2); line-height:1.55 }
+@media(max-width:900px){ .hidecol{ display:none } }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="rail">
+    <a class="brand" href="landing.html">
+      <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true">
+        <clipPath id="m1"><circle cx="16" cy="16" r="12"/></clipPath>
+        <g clip-path="url(#m1)"><rect x="0" y="19" width="32" height="13" fill="var(--teal)"/></g>
+        <circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2"/>
+        <rect x="1" y="18" width="30" height="2" fill="var(--teal)"/>
+      </svg> Quorum
+    </a>
+    <div class="tenantbox" role="group" aria-label="Tenant">
+      <button aria-pressed="true">t/vaikunth-heights<br><span style="color:var(--ink-3);font-size:10.5px">housing society · 214 flats</span></button>
+      <button aria-pressed="false">t/aavartan-robotics<br><span style="color:var(--ink-3);font-size:10.5px">campus club · 96 members</span></button>
+    </div>
+    <h5>Pack 01 · Operations</h5>
+    <a class="item on" href="#">resolution<i>187</i></a>
+    <a class="item" href="#">first response<i>24w</i></a>
+    <a class="item" href="#">queue &amp; roster<i>erlang-c</i></a>
+    <a class="item" href="#">changepoints<i>2</i></a>
+    <h5>Pack 03 · Foresight</h5>
+    <a class="item" href="#">dues forecast<i>predictive-80</i></a>
+    <a class="item" href="#">ETA calibration<i>91.4%</i></a>
+    <h5>Pack 02 · Comparison</h5>
+    <a class="item" href="#">vendor board<i>7</i></a>
+    <h5>Pack 04 · Voice</h5>
+    <a class="item" href="#">poll results<i>—</i></a>
+    <a class="item" href="#">budget fairness<i>—</i></a>
+    <h5>Reference</h5>
+    <a class="item" href="#">method cards<i>34</i></a>
+    <a class="item" href="../index.html">directions<i>3</i></a>
+  </aside>
+
+  <main>
+    <div class="mainhead">
+      <div class="mainhead-row">
+        <div>
+          <h1>Resolution — <span class="mono" style="font-weight:500">request_flow</span></h1>
+          <div class="sub">Vaikunth Heights CHS, Baner, Pune · wings A–F · window 01 Mar – 29 Aug 2026 · 7 categories, 7 vendors.
+            No reading is shown without its sample size and its interval.</div>
+        </div>
+        <div class="right">
+          <div class="stamp">insight_run<br>as of 29 Aug 2026 06:15 IST<br>contract v1</div>
+          <button class="toggle" id="tt">Dark</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pad grid">
+
+      <!-- QUALIFIED -->
+      <section class="panel c4">
+        <div class="p-head">
+          <div><div class="p-t">Median time to resolution</div><div class="p-s">all categories · censored properly</div></div>
+          <span class="tag warn">Qualified</span>
+        </div>
+        <div class="p-body">
+          <div class="reading">4.3<u> days</u></div>
+          <div class="scale"><svg id="sc-median" viewBox="0 0 320 46" role="img" aria-label="Median 4.3 days on a scale from 0 to 12 days, with a 95 percent confidence interval from 3.4 to 5.6 marked by tick caps."></svg></div>
+          <dl class="kv">
+            <dt>interval</dt><dd>3.4 – 5.6 · greenwood-95</dd>
+            <dt>n</dt><dd>187 requests</dd>
+            <dt>censored</dt><dd>44 still open (23.5%)</dd>
+            <dt>excluded</dt><dd>0</dd>
+          </dl>
+          <div class="callout">
+            <b>WARN · censoring may be informative</b>
+            <p>Requests open past 30 days skew to plumbing (p = 0.04). The median may be optimistic.
+            The reading is qualified, not withheld — a non-blocking check never hides a value.</p>
+          </div>
+        </div>
+        <div class="p-foot"><a href="#">survival.median_resolution_days</a><span>e3f1a9c2</span></div>
+      </section>
+
+      <!-- ESTIMATE: conformal ETA -->
+      <section class="panel c4">
+        <div class="p-head">
+          <div><div class="p-t">ETA · RQ-2214 leaking tap, C-704</div><div class="p-s">raised 27 Aug · Shreeya Plumbing Works</div></div>
+          <span class="tag ok">conformal-90</span>
+        </div>
+        <div class="p-body">
+          <div class="reading">2 – 9<u> days</u></div>
+          <div class="scale"><svg id="sc-eta" viewBox="0 0 320 46" role="img" aria-label="Conformal ETA interval from 2 to 9 days on a scale from 0 to 21 days, with 90 percent coverage."></svg></div>
+          <dl class="kv">
+            <dt>coverage</dt><dd>90% marginal, guaranteed</dd>
+            <dt>observed</dt><dd>91.4% over the last 39,118</dd>
+            <dt>n</dt><dd>143 calibration requests</dd>
+            <dt>point est.</dt><dd>deliberately none</dd>
+          </dl>
+          <div class="callout neutral">
+            <b>Why there is no single day</b>
+            <p>A conformal interval is distribution-free: across many requests like this one, 90%
+            resolve inside it. Collapsing that to “about 5 days” would discard the guarantee and keep
+            only the confidence.</p>
+          </div>
+        </div>
+        <div class="p-foot"><a href="#">conformal.split_eta</a><span>7b2c0d41</span></div>
+      </section>
+
+      <!-- NOT ENOUGH DATA -->
+      <section class="panel c4">
+        <div class="p-head">
+          <div><div class="p-t">Water-tanker call-out cycle</div><div class="p-s">kaplan–meier · tanker category</div></div>
+          <span class="tag wait">Not enough data yet</span>
+        </div>
+        <div class="p-body">
+          <div class="pending">
+            <div class="lead">The scale is drawn. There is no reading on it yet.</div>
+            <div class="gauge"><svg id="sc-pending" viewBox="0 0 320 60" role="img" aria-label="An empty scale showing 11 closed requests of the 30 required, with no reading marked."></svg></div>
+            <div class="cnt">11 <em>of 30 closed · 7 more still open</em></div>
+            <p>A Kaplan–Meier curve over 11 observations is a staircase of single events. Quorum will
+            not draw one, and will not report a median whose interval is wider than the range of
+            plausible answers. At the current arrival rate this method becomes readable around
+            <b>mid-November 2026</b>.</p>
+            <p style="color:var(--ink-2)">This is not an error and it is not a permission problem.
+            It is the minimum-n policy doing exactly what it is for.</p>
+          </div>
+        </div>
+        <div class="p-foot"><a href="#">survival.kaplan_meier</a><span>min_n 30 events · insufficient_data: true</span></div>
+      </section>
+
+      <!-- KM CURVE -->
+      <section class="panel c7">
+        <div class="p-head">
+          <div><div class="p-t">Requests still unresolved, by day</div><div class="p-s">kaplan–meier estimator · greenwood 95% band · all categories</div></div>
+          <span class="tag ok">Estimate</span>
+        </div>
+        <div class="p-body">
+          <div class="chartwrap"><svg class="chart" id="km" viewBox="0 0 760 340" role="img"
+            aria-label="Kaplan-Meier curve with a ruled 95 percent Greenwood band, censoring ticks, and the median 4.3 days marked with a tick-capped interval."></svg></div>
+          <div class="legend">
+            <span><i style="border-color:var(--s1)"></i>survival estimate</span>
+            <span><i style="border-color:var(--s1);border-top-style:dotted"></i>95% greenwood band (ruled)</span>
+            <span><i style="border-color:var(--teal)"></i>median interval, tick-capped</span>
+            <span>│ censored observation</span>
+          </div>
+          <div class="risk"><table><tbody>
+            <tr><td>at risk</td><td>187</td><td>139</td><td>97</td><td>73</td><td>48</td><td>31</td><td>17</td></tr>
+            <tr><td>day</td><td>0</td><td>3</td><td>5</td><td>8</td><td>14</td><td>21</td><td>35</td></tr>
+          </tbody></table></div>
+        </div>
+        <div class="p-foot"><a href="#">survival.kaplan_meier</a><span>n 187 · censored 44 · greenwood-95 · e3f1a9c2</span></div>
+      </section>
+
+      <!-- NOT INTERPRETABLE -->
+      <section class="panel c5">
+        <div class="p-head">
+          <div><div class="p-t">Resolution speed by wing</div><div class="p-s">cox proportional hazards · wings A–F</div></div>
+          <span class="tag stop">Not interpretable</span>
+        </div>
+        <div class="p-body">
+          <div class="withheld">
+            <div class="bar">Reading withheld · blocking check failed</div>
+            <div class="in">
+              <div class="blank">value suppressed</div>
+              <p><b>“Hazards stay proportional over time” — FAIL, blocking.</b>
+                Schoenfeld residual test: global p = 0.003; wing D alone p &lt; 0.001.</p>
+              <p>Wing D was slow for six weeks after its pump replacement and ordinary afterwards. A
+                single hazard ratio would average two different regimes into one number that reads as
+                decisive and is not.</p>
+              <p style="color:var(--ink-3)"><b>Remedies on the method card:</b> stratify by wing, or fit a
+                time-varying coefficient. Either produces a readable model; neither is chosen
+                automatically, because that choice changes what the number means.</p>
+            </div>
+          </div>
+          <dl class="kv"><dt>n</dt><dd>187 requests</dd><dt>events</dt><dd>143</dd>
+            <dt>covariates</dt><dd>6 wings · 23.8 events per covariate</dd></dl>
+        </div>
+        <div class="p-foot"><a href="#">survival.cox_by_wing</a><span>check proportional-hazards · FAIL · blocking: true</span></div>
+      </section>
+
+      <!-- EWMA -->
+      <section class="panel c12">
+        <div class="p-head">
+          <div><div class="p-t">First-response time · EWMA control chart</div>
+            <div class="p-s">weekly · λ = 0.30 · σ̂ = 3.4 h · centre and limits from the first 20 in-control weeks</div></div>
+          <span class="tag warn">1 signal · week 19</span>
+        </div>
+        <div class="p-body">
+          <div class="chartwrap"><svg class="chart" id="spc" viewBox="0 0 1200 350" role="img"
+            aria-label="EWMA control chart over 24 weeks with widening control limits; week 19 signals above the upper control limit at 22.6 hours."></svg></div>
+          <div class="legend">
+            <span><i style="border-color:var(--s1)"></i>EWMA statistic</span>
+            <span><i style="border-color:var(--limit)"></i>control limits (3σ) — a decision boundary</span>
+            <span><i style="border-color:var(--ink-3);border-top-style:dashed"></i>centre 18.0 h</span>
+            <span>◉ signalled point</span>
+          </div>
+          <div class="callout" style="max-width:78ch">
+            <b>Week 19 signalled: 22.6 h against an upper limit of 22.3 h</b>
+            <p>Limits are drawn as a hard-edged corridor with tick rules, never as a soft band, because
+            crossing them is a decision rather than an estimate. They widen at the start because
+            limits estimated from few periods are themselves noisy. Week 19 is the week the day
+            guard's shift was cut; weeks 20–24 recover but have not returned to centre.</p>
+          </div>
+        </div>
+        <div class="p-foot"><a href="#">spc.ewma_first_response</a><span>n 24 periods · 612 requests · control-limits · 55c1e0af</span></div>
+      </section>
+
+      <!-- LEADERBOARD -->
+      <section class="panel c12">
+        <div class="p-head">
+          <div><div class="p-t">Vendor reliability — resolved inside the agreed window</div>
+            <div class="p-s">empirical-bayes shrinkage · beta-binomial prior pooled across 7 vendors · every row carries its own n and interval</div></div>
+          <span class="tag ok">credible-95</span>
+        </div>
+        <div class="p-body">
+          <div style="overflow-x:auto">
+          <table class="board">
+            <thead><tr>
+              <th></th><th>Vendor</th><th class="num">Raw</th><th class="num">n</th>
+              <th class="num">Shrunk</th><th class="hidecol" style="width:34%">95% credible interval</th>
+              <th class="num hidecol">Pull</th><th class="hidecol">Rank vs raw</th>
+            </tr></thead>
+            <tbody id="board"></tbody>
+          </table></div>
+          <div class="note">
+            <b>Row 3 is the whole argument.</b> Vertex Lift Care is 3-for-3 — a raw rate of 1.000 and
+            the top of any naive leaderboard. Three observations cannot separate an excellent vendor
+            from a lucky one, so the estimate is pulled toward the pooled prior of 0.81 and lands
+            third, behind Shreeya's 47-of-52. Its interval, 0.641 – 0.951, is the widest on the board,
+            and that width is the row's real content.
+          </div>
+        </div>
+        <div class="p-foot"><a href="#">bayes.beta_binomial_shrinkage</a><span>7 groups (min 5) · prior mean 0.81, strength 12.5 · 9f04b7c3</span></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+var root=document.documentElement, tt=document.getElementById('tt');
+function isDark(){ return root.getAttribute('data-theme')==='dark' ||
+  (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+try{ var st=localStorage.getItem('quorum-theme'); if(st) root.setAttribute('data-theme',st); }catch(e){}
+function label(){ tt.textContent=isDark()?'Light':'Dark'; } label();
+tt.addEventListener('click',function(){ var n=isDark()?'light':'dark'; root.setAttribute('data-theme',n);
+  try{ localStorage.setItem('quorum-theme',n); }catch(e){} label(); paint(); });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){ label(); paint(); });
+function cv(n){ return getComputedStyle(root).getPropertyValue(n).trim(); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+[].forEach.call(document.querySelectorAll('.tenantbox button'),function(b){
+  b.addEventListener('click',function(){
+    [].forEach.call(document.querySelectorAll('.tenantbox button'),function(x){ x.setAttribute('aria-pressed','false'); });
+    b.setAttribute('aria-pressed','true');
+  });
+});
+
+var KM=[[0,1,1,1],[1,.861,.808,.902],[2,.744,.678,.799],[3,.615,.543,.680],[4,.521,.448,.589],
+        [5,.447,.375,.516],[6,.392,.322,.461],[8,.321,.254,.390],[10,.268,.204,.336],
+        [14,.212,.152,.279],[18,.176,.119,.242],[21,.158,.103,.224],[28,.131,.079,.196],[35,.119,.068,.184]];
+var CENSOR=[2.4,3.6,6.8,9.2,12.5,16.1,19.8,24.4,30.2,33.1];
+var EW=[17.9,18.3,17.9,17.5,17.8,18.2,18.8,18.5,18.1,17.8,17.6,18.1,
+        18.9,19.6,20.2,21.0,21.6,22.1,22.6,22.0,21.3,20.5,19.8,19.3];
+var CENTRE=18.0, LAM=0.30, SIG=3.4;
+function hw(k){ return 3*SIG*Math.sqrt(LAM/(2-LAM))*Math.sqrt(1-Math.pow(1-LAM,2*k)); }
+var BOARD=[
+ {v:'Shreeya Plumbing Works',   cat:'plumbing',    k:47,n:52, s:.881, lo:.786, hi:.940, raw:2},
+ {v:'Nandan Electricals',       cat:'electrical',  k:61,n:71, s:.848, lo:.760, hi:.909, raw:3},
+ {v:'Vertex Lift Care',         cat:'lifts',       k:3, n:3,  s:.842, lo:.641, hi:.951, raw:1},
+ {v:'Mahalaxmi Pest Control',   cat:'pest control',k:5, n:6,  s:.796, lo:.607, hi:.918, raw:4},
+ {v:'Om Sai Housekeeping',      cat:'housekeeping',k:38,n:49, s:.775, lo:.660, hi:.860, raw:5},
+ {v:'Pushpak Water Tankers',    cat:'water supply',k:9, n:14, s:.708, lo:.545, hi:.833, raw:7},
+ {v:'Sunrise Security Services',cat:'security',    k:22,n:34, s:.679, lo:.548, hi:.789, raw:6}
+];
+
+/* ---- a small scale: the direction's signature interval component ---- */
+function scale(id,opts){
+  var svg=document.getElementById(id); if(!svg) return;
+  var W=320,H=opts.h||46,L=6,R=6,y=opts.y||22;
+  var lo=opts.lo,hi=opts.hi;
+  var px=function(v){ return L+(v-lo)/(hi-lo)*(W-L-R); };
+  var axis=cv('--axis'), ink3=cv('--ink-3'), ink4=cv('--ink-4'), surf=cv('--panel');
+  var acc=opts.color||cv('--teal');
+  var o=[];
+  o.push('<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'" stroke="'+axis+'" stroke-width="1"/>');
+  for(var i=0;i<=opts.ticks;i++){
+    var v=lo+(hi-lo)*i/opts.ticks, maj=(i%opts.major===0);
+    o.push('<line x1="'+px(v)+'" y1="'+y+'" x2="'+px(v)+'" y2="'+(y+(maj?7:4))+'" stroke="'+(maj?axis:ink4)+'" stroke-width="1"/>');
+    if(maj) o.push('<text x="'+px(v)+'" y="'+(y+19)+'" text-anchor="middle" font-size="9" fill="'+ink3+'">'+(Math.round(v*10)/10)+'</text>');
+  }
+  if(opts.band){
+    o.push('<rect x="'+px(opts.band[0])+'" y="'+(y-9)+'" width="'+(px(opts.band[1])-px(opts.band[0]))+'" height="9" fill="'+acc+'" opacity="0.16"/>');
+    [opts.band[0],opts.band[1]].forEach(function(v){
+      o.push('<line x1="'+px(v)+'" y1="'+(y-13)+'" x2="'+px(v)+'" y2="'+(y+1)+'" stroke="'+acc+'" stroke-width="2"/>'); });
+  }
+  if(opts.point!=null){
+    o.push('<circle cx="'+px(opts.point)+'" cy="'+(y-4.5)+'" r="4" fill="'+acc+'" stroke="'+surf+'" stroke-width="1.5"/>');
+  }
+  if(opts.caption){
+    o.push('<text x="'+L+'" y="'+(y-16)+'" font-size="9.5" fill="'+ink3+'">'+opts.caption+'</text>');
+  }
+  svg.innerHTML=o.join('');
+}
+
+function drawKM(){
+  var svg=document.getElementById('km'); if(!svg) return;
+  var W=760,H=340,L=52,R=100,T=16,B=48, o=[];
+  var px=function(d){ return L+d/36*(W-L-R); }, py=function(s){ return T+(1-s)*(H-T-B); };
+  var grid=cv('--grid'), axis=cv('--axis'), ink=cv('--ink'), ink2=cv('--ink-2'), ink3=cv('--ink-3'),
+      s1=cv('--s1'), teal=cv('--teal'), surf=cv('--chart-surface');
+  o.push('<defs><pattern id="rule" width="5" height="4" patternUnits="userSpaceOnUse">'+
+    '<rect width="5" height="4" fill="'+s1+'" opacity="0.05"/>'+
+    '<line x1="0" y1="0.5" x2="5" y2="0.5" stroke="'+s1+'" stroke-width="0.75" opacity="0.42"/></pattern></defs>');
+  for(var g=0;g<=10;g++){
+    var yy=py(g/10);
+    o.push('<line x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'" stroke="'+grid+'" stroke-width="1" opacity="'+(g%2===0?1:.5)+'"/>');
+    if(g%2===0) o.push('<text x="'+(L-9)+'" y="'+(yy+4)+'" text-anchor="end" font-size="10.5" fill="'+ink3+'">'+(g*10)+'</text>');
+  }
+  for(var d=0;d<=36;d++) o.push('<line x1="'+px(d)+'" y1="'+py(0)+'" x2="'+px(d)+'" y2="'+(py(0)+(d%5===0?7:3.5))+'" stroke="'+axis+'" stroke-width="1"/>');
+  for(var d5=0;d5<=35;d5+=5) o.push('<text x="'+px(d5)+'" y="'+(py(0)+22)+'" text-anchor="middle" font-size="10.5" fill="'+ink3+'">'+d5+'</text>');
+  o.push('<text x="'+(L-9)+'" y="'+(T-3)+'" text-anchor="end" font-size="9.5" fill="'+ink3+'">%</text>');
+  o.push('<text x="'+((L+W-R)/2)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10.5" fill="'+ink3+'">days since the request was raised</text>');
+
+  var up=[],dn=[],ln='M '+px(0)+' '+py(1);
+  for(var i=0;i<KM.length;i++){
+    var d2=KM[i][0], nx=(i+1<KM.length)?KM[i+1][0]:36;
+    up.push(px(d2)+','+py(KM[i][3]), px(nx)+','+py(KM[i][3]));
+    ln+=' L '+px(d2)+' '+py(KM[i][1])+' L '+px(nx)+' '+py(KM[i][1]);
+  }
+  for(var j=KM.length-1;j>=0;j--){
+    var d3=KM[j][0], nx2=(j+1<KM.length)?KM[j+1][0]:36;
+    dn.push(px(nx2)+','+py(KM[j][2]), px(d3)+','+py(KM[j][2]));
+  }
+  o.push('<polygon points="'+up.concat(dn).join(' ')+'" fill="url(#rule)" stroke="'+s1+'" stroke-width="1" stroke-opacity=".55" stroke-dasharray="3 2"/>');
+  o.push('<path d="'+ln+'" fill="none" stroke="'+s1+'" stroke-width="2" stroke-linejoin="round"/>');
+
+  function Sat(d){ var v=1; for(var q=0;q<KM.length;q++){ if(KM[q][0]<=d) v=KM[q][1]; } return v; }
+  CENSOR.forEach(function(d){ var yy=py(Sat(d));
+    o.push('<line x1="'+px(d)+'" y1="'+(yy-5)+'" x2="'+px(d)+'" y2="'+(yy+5)+'" stroke="'+s1+'" stroke-width="1.5"/>'); });
+
+  var y50=py(.5);
+  o.push('<line x1="'+L+'" y1="'+y50+'" x2="'+px(5.6)+'" y2="'+y50+'" stroke="'+ink3+'" stroke-width="1" stroke-dasharray="1 3"/>');
+  o.push('<line x1="'+px(3.4)+'" y1="'+y50+'" x2="'+px(5.6)+'" y2="'+y50+'" stroke="'+teal+'" stroke-width="2"/>');
+  [3.4,5.6].forEach(function(v){ o.push('<line x1="'+px(v)+'" y1="'+(y50-7)+'" x2="'+px(v)+'" y2="'+(y50+7)+'" stroke="'+teal+'" stroke-width="2"/>'); });
+  o.push('<circle cx="'+px(4.3)+'" cy="'+y50+'" r="4" fill="'+teal+'" stroke="'+surf+'" stroke-width="2"/>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(y50-4)+'" font-size="11" font-weight="600" fill="'+ink+'">4.3 d</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(y50+10)+'" font-size="9.5" fill="'+ink2+'">CI 3.4–5.6</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(KM[KM.length-1][1])+4)+'" font-size="10.5" font-weight="600" fill="'+s1+'">11.9%</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(KM[KM.length-1][1])+17)+'" font-size="9.5" fill="'+ink3+'">at day 35</text>');
+
+  o.push('<line x1="'+L+'" y1="'+py(0)+'" x2="'+(W-R)+'" y2="'+py(0)+'" stroke="'+axis+'" stroke-width="1"/>');
+  o.push('<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+py(0)+'" stroke="'+axis+'" stroke-width="1"/>');
+  svg.innerHTML=o.join('');
+}
+
+function drawSPC(){
+  var svg=document.getElementById('spc'); if(!svg) return;
+  var W=1200,H=350,L=54,R=124,T=20,B=50,n=EW.length, o=[];
+  var y0=12,y1=25;
+  var px=function(i){ return L+i/(n-1)*(W-L-R); }, py=function(v){ return T+(y1-v)/(y1-y0)*(H-T-B); };
+  var grid=cv('--grid'), axis=cv('--axis'), ink=cv('--ink'), ink2=cv('--ink-2'), ink3=cv('--ink-3'),
+      s1=cv('--s1'), lim=cv('--limit'), crit=cv('--st-crit'), surf=cv('--chart-surface');
+  for(var g=y0;g<=y1;g++){
+    var yy=py(g), maj=(g%2===0);
+    o.push('<line x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'" stroke="'+grid+'" stroke-width="1" opacity="'+(maj?1:.5)+'"/>');
+    if(maj) o.push('<text x="'+(L-9)+'" y="'+(yy+4)+'" text-anchor="end" font-size="10.5" fill="'+ink3+'">'+g+'</text>');
+  }
+  o.push('<text x="'+(L-9)+'" y="'+(T-5)+'" text-anchor="end" font-size="9.5" fill="'+ink3+'">hours</text>');
+
+  var upper=[],lower=[];
+  for(var i=0;i<n;i++){ var h=hw(i+1); upper.push([px(i),py(CENTRE+h)]); lower.push([px(i),py(CENTRE-h)]); }
+  // corridor: hard hairline edges + short cross-ticks. Deliberately NOT the band language.
+  o.push('<path d="M '+upper.map(function(p){return p[0]+' '+p[1];}).join(' L ')+'" fill="none" stroke="'+lim+'" stroke-width="1.6"/>');
+  o.push('<path d="M '+lower.map(function(p){return p[0]+' '+p[1];}).join(' L ')+'" fill="none" stroke="'+lim+'" stroke-width="1.6"/>');
+  for(var t=0;t<n;t+=1){
+    o.push('<line x1="'+upper[t][0]+'" y1="'+upper[t][1]+'" x2="'+upper[t][0]+'" y2="'+(upper[t][1]+5)+'" stroke="'+lim+'" stroke-width="1" opacity=".7"/>');
+    o.push('<line x1="'+lower[t][0]+'" y1="'+lower[t][1]+'" x2="'+lower[t][0]+'" y2="'+(lower[t][1]-5)+'" stroke="'+lim+'" stroke-width="1" opacity=".7"/>');
+  }
+  o.push('<line x1="'+L+'" y1="'+py(CENTRE)+'" x2="'+(W-R)+'" y2="'+py(CENTRE)+'" stroke="'+ink3+'" stroke-width="1.2" stroke-dasharray="7 4"/>');
+  o.push('<path d="M '+EW.map(function(v,i){return px(i)+' '+py(v);}).join(' L ')+'" fill="none" stroke="'+s1+'" stroke-width="2" stroke-linejoin="round"/>');
+  EW.forEach(function(v,i){
+    var sig=v>CENTRE+hw(i+1);
+    o.push('<circle cx="'+px(i)+'" cy="'+py(v)+'" r="'+(sig?6:4)+'" fill="'+(sig?crit:s1)+'" stroke="'+surf+'" stroke-width="2"/>');
+    if(sig){
+      o.push('<line x1="'+px(i)+'" y1="'+py(v)+'" x2="'+px(i)+'" y2="'+(py(v)-30)+'" stroke="'+crit+'" stroke-width="1"/>');
+      o.push('<text x="'+px(i)+'" y="'+(py(v)-36)+'" text-anchor="middle" font-size="11" font-weight="600" fill="'+crit+'">SIGNAL W19</text>');
+      o.push('<text x="'+px(i)+'" y="'+(py(v)-24)+'" text-anchor="middle" font-size="9.5" fill="'+ink2+'">22.6 h &gt; UCL 22.3</text>');
+    }
+  });
+  for(var w=0;w<n;w++){
+    o.push('<line x1="'+px(w)+'" y1="'+py(y0)+'" x2="'+px(w)+'" y2="'+(py(y0)+(w%3===0?7:3.5))+'" stroke="'+axis+'" stroke-width="1"/>');
+    if(w%3===0||w===n-1) o.push('<text x="'+px(w)+'" y="'+(py(y0)+21)+'" text-anchor="middle" font-size="10" fill="'+ink3+'">W'+(w+1<10?'0':'')+(w+1)+'</text>');
+  }
+  o.push('<text x="'+((L+W-R)/2)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10.5" fill="'+ink3+'">week of 2026 · 09 Mar → 24 Aug</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(CENTRE+hw(n))+4)+'" font-size="10.5" font-weight="600" fill="'+lim+'">UCL 22.3</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(CENTRE)+4)+'" font-size="10.5" fill="'+ink3+'">centre 18.0</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(CENTRE-hw(n))+4)+'" font-size="10.5" font-weight="600" fill="'+lim+'">LCL 13.7</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(EW[n-1])-6)+'" font-size="10.5" font-weight="600" fill="'+ink+'">19.3 h</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(EW[n-1])+7)+'" font-size="9.5" fill="'+ink3+'">week 24</text>');
+  o.push('<line x1="'+L+'" y1="'+py(y0)+'" x2="'+(W-R)+'" y2="'+py(y0)+'" stroke="'+axis+'" stroke-width="1"/>');
+  o.push('<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+py(y0)+'" stroke="'+axis+'" stroke-width="1"/>');
+  svg.innerHTML=o.join('');
+}
+
+function drawBoard(){
+  var tb=document.getElementById('board'); if(!tb) return;
+  var s1=cv('--s1'), axis=cv('--axis'), ink4=cv('--ink-4'), surf=cv('--panel');
+  var lo=0.50,hi=1.0;
+  tb.innerHTML=BOARD.map(function(r,i){
+    var W=260,H=26,L=4,R=4,y=13;
+    var px=function(v){ return L+(v-lo)/(hi-lo)*(W-L-R); };
+    var g=['<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'" stroke="'+axis+'" stroke-width="1" opacity=".6"/>'];
+    [0.5,0.6,0.7,0.8,0.9,1.0].forEach(function(v){
+      g.push('<line x1="'+px(v)+'" y1="'+(y-3)+'" x2="'+px(v)+'" y2="'+(y+3)+'" stroke="'+ink4+'" stroke-width="1"/>'); });
+    g.push('<rect x="'+px(r.lo)+'" y="'+(y-5)+'" width="'+(px(r.hi)-px(r.lo))+'" height="10" fill="'+s1+'" opacity="0.15"/>');
+    [r.lo,r.hi].forEach(function(v){ g.push('<line x1="'+px(v)+'" y1="'+(y-7)+'" x2="'+px(v)+'" y2="'+(y+7)+'" stroke="'+s1+'" stroke-width="1.8"/>'); });
+    g.push('<circle cx="'+px(r.s)+'" cy="'+y+'" r="4" fill="'+s1+'" stroke="'+surf+'" stroke-width="2"/>');
+    var pull=r.s-(r.k/r.n);
+    var move=(r.raw-(i+1));
+    return '<tr>'+
+      '<td class="rk">'+(i+1)+'</td>'+
+      '<td class="vn">'+esc(r.v)+'<small>'+esc(r.cat)+'</small></td>'+
+      '<td class="num">'+r.k+'/'+r.n+'<br><span style="font-size:10.5px;color:var(--ink-3)">'+(r.k/r.n).toFixed(3)+'</span></td>'+
+      '<td class="num">'+r.n+'</td>'+
+      '<td class="num" style="font-weight:600">'+r.s.toFixed(3)+'</td>'+
+      '<td class="hidecol ivcell"><svg viewBox="0 0 260 26" preserveAspectRatio="none">'+g.join('')+'</svg>'+
+        '<div style="font:400 10px/1 \'IBM Plex Mono\',monospace;color:var(--ink-3)">'+r.lo.toFixed(3)+' – '+r.hi.toFixed(3)+'</div></td>'+
+      '<td class="num moved hidecol">'+(pull>0?'+':'')+pull.toFixed(3)+'</td>'+
+      '<td class="hidecol" style="font:400 10.5px/1 \'IBM Plex Mono\',monospace;color:var(--ink-3)">'+
+        (move===0?'—':(move>0?'▲ '+move:'▼ '+Math.abs(move)))+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function paint(){
+  scale('sc-median',{lo:0,hi:12,ticks:24,major:4,band:[3.4,5.6],point:4.3,caption:'days · 95% CI, greenwood'});
+  scale('sc-eta',{lo:0,hi:21,ticks:21,major:3,band:[2,9],point:null,color:cv('--st-good'),caption:'days · conformal-90, no point estimate'});
+  scale('sc-pending',{lo:0,hi:30,ticks:30,major:5,band:null,point:null,h:60,y:30,caption:'closed requests · min_n 30 — nothing plotted yet'});
+  var p=document.getElementById('sc-pending');
+  if(p){
+    var extra='<rect x="6" y="21" width="'+((11/30)*(320-12))+'" height="9" fill="'+cv('--ink-4')+'" opacity="0.5"/>'+
+              '<text x="'+(6+(11/30)*(320-12)+6)+'" y="18" font-size="9.5" fill="'+cv('--ink-3')+'">11 accrued</text>';
+    p.innerHTML=p.innerHTML+extra;
+  }
+  drawKM(); drawSPC(); drawBoard();
+}
+if(document.fonts && document.fonts.ready){ document.fonts.ready.then(paint); }
+paint();
+})();
+</script>
+</body>
+</html>

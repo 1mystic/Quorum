@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quorum — Signal direction</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23131210'/%3E%3Cpath d='M5.2 19a12 12 0 0 0 21.6 0Z' fill='%23C8F031'/%3E%3Ccircle cx='16' cy='16' r='12' fill='none' stroke='%23C8F031' stroke-width='2.5'/%3E%3Crect x='1' y='17.6' width='30' height='2.6' fill='%23C8F031'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400;12..96,75..100,700;12..96,75..100,800&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   QUORUM — direction C: SIGNAL (high-contrast poster)
+   Dark-first, but light is a printed bone-paper poster, not a
+   washed-out dark mode. Every colour on bare :root for light and
+   redefined for dark under BOTH the media query and [data-theme].
+   ============================================================ */
+:root{
+  /* LIGHT = bone paper, black ink, acid as a highlighter block */
+  --bg:#F2F0E9;
+  --bg-2:#E7E4DA;
+  --panel:#FFFDF6;
+  --ink:#141310;
+  --ink-2:#45423A;
+  --ink-3:#75705F;
+  --ink-4:#A29C89;
+  --acid:#C8F031;              /* block fill — always this, both modes */
+  --acid-ink:#131210;          /* text sitting on the acid block */
+  --acid-line:#6E8000;         /* acid as a stroke/text colour, light-safe */
+  --ember:#D2541C;
+  --edge:#141310;
+  --hair:#CFCABA;
+  --st-good:#0B7A33; --st-warn:#8A6300; --st-serious:#9C4E1C; --st-crit:#A8221F;
+  --st-crit-bg:#F6DEDA; --st-warn-bg:#F5EDD6;
+  /* dataviz — separate system from brand colour, validated light + dark */
+  --s1:#1E7ACC; --s2:#D95E2B; --s3:#159C86; --s4:#B98A00;
+  --chart-surface:#FFFDF6; --grid:#DFDACA; --axis:#A29C89; --limit:#9C4E1C;
+  /* motion — PHYSICAL. cubic-bézier only, no keywords. */
+  --ease-phys:cubic-bezier(0.34,1.26,0.44,1);
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+  --ease-snap:cubic-bezier(0.4,0,0.2,1);
+  --t-reveal:520ms;
+  --t-hover:260ms;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131210;
+    --bg-2:#0C0B0A;
+    --panel:#1C1A17;
+    --ink:#F4F2EA;
+    --ink-2:#BDB9AC;
+    --ink-3:#8A8578;
+    --ink-4:#5E5A50;
+    --acid:#C8F031;
+    --acid-ink:#131210;
+    --acid-line:#C8F031;
+    --ember:#F2823F;
+    --edge:#F4F2EA;
+    --hair:#332F29;
+    --st-good:#4CBB68; --st-warn:#D9AC3E; --st-serious:#E08B5A; --st-crit:#E9645C;
+    --st-crit-bg:#2E1917; --st-warn-bg:#2C2311;
+    --s1:#2E93E0; --s2:#E06B2E; --s3:#1FA07C; --s4:#C08A00;
+    --chart-surface:#1C1A17; --grid:#2A2723; --axis:#4A4640; --limit:#E08B5A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131210;
+  --bg-2:#0C0B0A;
+  --panel:#1C1A17;
+  --ink:#F4F2EA;
+  --ink-2:#BDB9AC;
+  --ink-3:#8A8578;
+  --ink-4:#5E5A50;
+  --acid:#C8F031;
+  --acid-ink:#131210;
+  --acid-line:#C8F031;
+  --ember:#F2823F;
+  --edge:#F4F2EA;
+  --hair:#332F29;
+  --st-good:#4CBB68; --st-warn:#D9AC3E; --st-serious:#E08B5A; --st-crit:#E9645C;
+  --st-crit-bg:#2E1917; --st-warn-bg:#2C2311;
+  --s1:#2E93E0; --s2:#E06B2E; --s3:#1FA07C; --s4:#C08A00;
+  --chart-surface:#1C1A17; --grid:#2A2723; --axis:#4A4640; --limit:#E08B5A;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{ background:var(--bg); color:var(--ink);
+  font-family:'Space Grotesk',ui-sans-serif,system-ui,sans-serif; font-size:16px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden }
+h1,h2,h3{ font-family:'Bricolage Grotesque','Space Grotesk',sans-serif; font-weight:800;
+  font-stretch:80%; letter-spacing:-.045em; line-height:.9; text-transform:uppercase }
+a{color:inherit}
+.mono{ font-family:'Space Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums }
+.wrap{ width:min(1280px,92vw); margin-inline:auto }
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ transition-duration:.01ms !important; animation-duration:.01ms !important; scroll-behavior:auto !important }
+  .rv{ opacity:1 !important; transform:none !important }
+}
+.rv{ opacity:0; transform:translateY(20px) scale(.995); transition:opacity var(--t-reveal) var(--ease-out), transform var(--t-reveal) var(--ease-phys) }
+.rv.in{ opacity:1; transform:none }
+
+/* ---------- nav ---------- */
+nav{ position:sticky; top:0; z-index:50; background:var(--bg); border-bottom:2px solid var(--edge) }
+.nav-in{ display:flex; align-items:center; gap:24px; height:62px }
+.brand{ display:flex; align-items:center; gap:9px; font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:20px; text-transform:uppercase; letter-spacing:-.04em; text-decoration:none }
+.navspace{ margin-left:auto; display:flex; align-items:center; gap:20px }
+.navspace a{ font:700 11px/1 'Space Mono',monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); text-decoration:none; transition:color var(--t-hover) var(--ease-snap) }
+.navspace a:hover{ color:var(--ink) }
+@media(max-width:880px){ .navspace a:not(.cta){ display:none } }
+.toggle{ font:700 10.5px/1 'Space Mono',monospace; letter-spacing:.1em; text-transform:uppercase;
+  background:transparent; border:2px solid var(--edge); color:var(--ink); padding:8px 12px; cursor:pointer;
+  transition:background var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap), transform var(--t-hover) var(--ease-phys) }
+.toggle:hover{ background:var(--acid); color:var(--acid-ink); border-color:var(--acid) }
+.toggle:active{ transform:translate(2px,2px) }
+a.cta{ background:var(--acid); color:var(--acid-ink) !important; border:2px solid var(--edge);
+  padding:9px 16px; box-shadow:4px 4px 0 var(--edge);
+  transition:transform var(--t-hover) var(--ease-phys), box-shadow var(--t-hover) var(--ease-phys) }
+a.cta:hover{ transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--edge) }
+a.cta:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--edge) }
+
+/* ---------- hero: Architecture D — typographic poster ---------- */
+.hero{ min-height:92vh; display:flex; flex-direction:column; justify-content:space-between; padding:40px 0 26px; position:relative; overflow:hidden }
+.hero-top{ display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; font:400 11.5px/1.5 'Space Mono',monospace; color:var(--ink-3) }
+.hero-type{ margin:clamp(28px,5vh,64px) 0 }
+.hero-type h1{ font-size:clamp(3.2rem,15.5vw,15rem); line-height:.82; letter-spacing:-.055em }
+.hero-type .l2{ text-align:right }
+.hero-type .l2 mark{ background:var(--acid); color:var(--acid-ink); padding:0 .1em; box-decoration-break:clone }
+.hero-bottom{ display:grid; grid-template-columns:1fr auto; gap:26px; align-items:end; border-top:2px solid var(--edge); padding-top:22px }
+@media(max-width:820px){ .hero-bottom{ grid-template-columns:1fr } }
+.hero-bottom p{ max-width:46ch; color:var(--ink-2); font-size:clamp(1rem,1.15vw,1.14rem) }
+.btnrow{ display:flex; gap:12px; flex-wrap:wrap }
+.btn{ display:inline-flex; align-items:center; min-height:48px; padding:14px 24px; text-decoration:none; border:2px solid var(--edge);
+  font:700 12px/1 'Space Mono',monospace; letter-spacing:.1em; text-transform:uppercase;
+  transition:transform var(--t-hover) var(--ease-phys), box-shadow var(--t-hover) var(--ease-phys), background var(--t-hover) var(--ease-snap) }
+.btn-1{ background:var(--acid); color:var(--acid-ink); box-shadow:5px 5px 0 var(--edge) }
+.btn-2{ background:transparent; color:var(--ink); box-shadow:5px 5px 0 var(--edge) }
+.btn:hover{ transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--edge) }
+.btn:active{ transform:translate(3px,3px); box-shadow:1px 1px 0 var(--edge) }
+
+/* ---------- the signature: an interval that casts its own shadow ---------- */
+.figure{ position:relative; display:inline-block }
+.figure .shadow{ position:absolute; background:var(--acid); z-index:0 }
+.figure .num{ position:relative; z-index:1; font-family:'Space Mono',monospace; font-weight:700;
+  font-variant-numeric:tabular-nums; letter-spacing:-.05em; line-height:1 }
+
+/* ---------- sections ---------- */
+.sec{ padding:clamp(60px,8vw,110px) 0; border-top:2px solid var(--edge) }
+.sec.inv{ background:var(--ink); color:var(--bg) }
+.sec.inv h2,.sec.inv h3{ color:var(--bg) }
+.sec.alt{ background:var(--bg-2) }
+.sec-head{ margin-bottom:clamp(30px,4vw,52px) }
+.sec-head .no{ font:700 11px/1 'Space Mono',monospace; letter-spacing:.16em; color:var(--acid-line); margin-bottom:16px }
+.sec-head h2{ font-size:clamp(2rem,5.6vw,4.6rem); max-width:18ch }
+.sec-head p{ margin-top:18px; color:var(--ink-2); max-width:56ch; font-size:16px }
+.sec.inv .sec-head p{ color:color-mix(in srgb,var(--bg) 72%,transparent) }
+
+/* six streams — a poster index, not cards */
+.index{ border-top:2px solid var(--edge) }
+.ix{ display:grid; grid-template-columns:78px 1fr 1.5fr; gap:clamp(12px,3vw,36px); padding:22px 0; border-bottom:1px solid var(--hair); align-items:baseline;
+  transition:background var(--t-hover) var(--ease-snap) }
+.ix:hover{ background:var(--acid); color:var(--acid-ink) }
+.ix:hover .ixn,.ix:hover .ixd{ color:var(--acid-ink) }
+.ixn{ font:700 12px/1 'Space Mono',monospace; color:var(--ink-4) }
+.ixt{ font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:clamp(1.1rem,2.2vw,1.75rem); text-transform:uppercase; letter-spacing:-.035em }
+.ixd{ color:var(--ink-2); font-size:14.5px }
+@media(max-width:760px){ .ix{ grid-template-columns:52px 1fr } .ixd{ grid-column:2 } }
+
+/* single spotlight */
+.spot{ display:grid; grid-template-columns:1fr 1.15fr; gap:clamp(26px,5vw,64px); align-items:center }
+@media(max-width:900px){ .spot{ grid-template-columns:1fr } }
+.spot-vis{ border:2px solid var(--edge); background:var(--chart-surface); box-shadow:8px 8px 0 var(--edge); padding:18px 16px 12px }
+.spot-vis svg{ display:block; width:100%; height:auto; font-family:'Space Mono',monospace }
+.spot-vis .cap{ font:400 11px/1.5 'Space Mono',monospace; color:var(--ink-3); margin-top:12px; border-top:1px solid var(--hair); padding-top:10px }
+.spot h3{ font-size:clamp(1.6rem,3.4vw,2.7rem); margin-bottom:18px }
+.spot p{ color:var(--ink-2); margin-bottom:14px; max-width:52ch }
+.spot .kicker{ font:700 11px/1 'Space Mono',monospace; letter-spacing:.14em; color:var(--acid-line); margin-bottom:14px }
+
+/* packs — big numbered blocks */
+.packs{ display:grid; grid-template-columns:repeat(2,1fr); gap:0; border:2px solid var(--edge) }
+@media(max-width:860px){ .packs{ grid-template-columns:1fr } }
+.pk{ padding:clamp(24px,3vw,38px); border-right:2px solid var(--edge); border-bottom:2px solid var(--edge); position:relative;
+  transition:background var(--t-hover) var(--ease-snap) }
+.pk:nth-child(2n){ border-right:0 } .pk:nth-child(n+3){ border-bottom:0 }
+@media(max-width:860px){ .pk{ border-right:0 } .pk:last-child{ border-bottom:0 } .pk:nth-child(3){ border-bottom:2px solid var(--edge) } }
+.pk:hover{ background:var(--panel) }
+.pk .n{ font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:clamp(2.6rem,5vw,4.2rem); line-height:.85; color:var(--acid-line); letter-spacing:-.06em }
+.pk h3{ font-size:clamp(1.15rem,2vw,1.6rem); margin:14px 0 10px }
+.pk p{ color:var(--ink-2); font-size:14.5px }
+.pk .mods{ display:flex; flex-wrap:wrap; gap:6px; margin-top:16px }
+.pk .mods span{ font:400 10.5px/1 'Space Mono',monospace; border:1px solid var(--hair); padding:6px 8px; color:var(--ink-3) }
+.pk .late{ position:absolute; top:18px; right:18px; font:700 10px/1 'Space Mono',monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); border:1px solid var(--hair); padding:5px 7px }
+
+/* giant stat break */
+.giant{ background:var(--acid); color:var(--acid-ink); border-block:2px solid var(--edge); padding:clamp(40px,6vw,84px) 0 }
+.giant .wrap{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(24px,5vw,60px); align-items:center }
+@media(max-width:860px){ .giant .wrap{ grid-template-columns:1fr } }
+.giant .n{ font-family:'Space Mono',monospace; font-weight:700; font-variant-numeric:tabular-nums;
+  font-size:clamp(3.2rem,11vw,9rem); line-height:.86; letter-spacing:-.06em }
+.giant .lab{ font:700 12px/1.5 'Space Mono',monospace; letter-spacing:.1em; text-transform:uppercase; margin-top:16px; max-width:26ch }
+.giant p{ font-size:clamp(1rem,1.4vw,1.2rem); max-width:46ch }
+.giant p b{ background:var(--acid-ink); color:var(--acid); padding:0 .18em }
+
+/* proof — metric strip + quotes */
+.mstrip{ display:grid; grid-template-columns:repeat(4,1fr); border:2px solid var(--edge) }
+@media(max-width:840px){ .mstrip{ grid-template-columns:1fr 1fr } }
+.mstrip > div{ padding:24px 20px; border-right:2px solid var(--edge) }
+.mstrip > div:last-child{ border-right:0 }
+@media(max-width:840px){ .mstrip > div:nth-child(2n){ border-right:0 } .mstrip > div:nth-child(-n+2){ border-bottom:2px solid var(--edge) } }
+.mstrip .v{ font-family:'Space Mono',monospace; font-weight:700; font-variant-numeric:tabular-nums; font-size:clamp(1.6rem,3vw,2.3rem); letter-spacing:-.05em }
+.mstrip .l{ font-size:13.5px; color:var(--ink-2); margin-top:8px }
+.mstrip .n{ font:400 10.5px/1.5 'Space Mono',monospace; color:var(--ink-4); margin-top:8px }
+.quotes{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(18px,2.5vw,32px); margin-top:clamp(32px,4vw,52px) }
+@media(max-width:900px){ .quotes{ grid-template-columns:1fr } }
+.quote{ border:2px solid var(--edge); padding:24px 22px; background:var(--panel) }
+.quote p{ font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:1.06rem; line-height:1.28; letter-spacing:-.02em }
+.quote footer{ margin-top:16px; padding-top:14px; border-top:1px solid var(--hair); font:400 11px/1.55 'Space Mono',monospace; color:var(--ink-3) }
+.quote footer b{ display:block; color:var(--ink); font-size:12.5px; font-weight:700 }
+
+/* how — big numbered steps */
+.steps{ border-top:2px solid var(--edge) }
+.stp{ display:grid; grid-template-columns:auto 1fr; gap:clamp(18px,4vw,54px); padding:clamp(24px,3vw,40px) 0; border-bottom:1px solid var(--hair); align-items:start }
+.stp .k{ font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:clamp(2.2rem,5vw,4rem); line-height:.85; letter-spacing:-.06em; color:var(--ink-4) }
+.stp h3{ font-size:clamp(1.15rem,2.2vw,1.7rem); margin-bottom:10px }
+.stp p{ color:var(--ink-2); max-width:66ch; font-size:15px }
+.sec.inv .stp p{ color:color-mix(in srgb,var(--bg) 70%,transparent) }
+.sec.inv .stp{ border-bottom-color:color-mix(in srgb,var(--bg) 22%,transparent) }
+.sec.inv .steps{ border-top-color:var(--bg) }
+.sec.inv .stp .k{ color:var(--acid) }
+
+/* CTA */
+.finalcta{ border:2px solid var(--edge); background:var(--acid); color:var(--acid-ink); box-shadow:10px 10px 0 var(--edge);
+  padding:clamp(34px,6vw,76px); text-align:center }
+.finalcta h2{ font-size:clamp(2.1rem,6.6vw,5.4rem); color:var(--acid-ink) !important }
+.finalcta p{ margin:20px auto 0; max-width:50ch; font-size:16px }
+.finalcta .btnrow{ justify-content:center; margin-top:30px }
+.finalcta .btn{ border-color:var(--acid-ink); box-shadow:5px 5px 0 var(--acid-ink) }
+.finalcta .btn-1{ background:var(--acid-ink); color:var(--acid) }
+.finalcta .btn-2{ background:transparent; color:var(--acid-ink) }
+.finalcta .btn:hover{ box-shadow:7px 7px 0 var(--acid-ink) }
+
+/* footer */
+footer.site{ border-top:2px solid var(--edge); padding:48px 0 28px }
+.f-grid{ display:grid; grid-template-columns:1.6fr repeat(3,1fr); gap:30px }
+@media(max-width:800px){ .f-grid{ grid-template-columns:1fr 1fr } }
+.f-grid h4{ font:700 10px/1 'Space Mono',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3); margin-bottom:14px }
+.f-grid ul{ list-style:none; display:grid; gap:9px }
+.f-grid a{ font-size:13.5px; color:var(--ink-2); text-decoration:none }
+.f-grid a:hover{ color:var(--ink); background:var(--acid); color:var(--acid-ink) }
+.f-bottom{ margin-top:38px; padding-top:18px; border-top:1px solid var(--hair); display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; font:400 11px/1.5 'Space Mono',monospace; color:var(--ink-4) }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-in">
+    <a class="brand" href="#top">
+      <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
+        <clipPath id="k1"><circle cx="16" cy="16" r="12"/></clipPath>
+        <g clip-path="url(#k1)"><rect x="0" y="19" width="32" height="13" fill="var(--acid-line)"/></g>
+        <circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2.4"/>
+        <rect x="1" y="18" width="30" height="2.2" fill="var(--acid-line)"/>
+      </svg> Quorum
+    </a>
+    <div class="navspace">
+      <a href="#streams">Streams</a>
+      <a href="#uncert">Uncertainty</a>
+      <a href="#packs">Packs</a>
+      <a href="dashboard.html">Dashboard</a>
+      <button class="toggle" id="tt">Dark</button>
+      <a class="cta" href="#start">Start</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO — typographic poster ============ -->
+<header class="hero wrap" id="top">
+  <div class="hero-top rv">
+    <span>QUORUM / COMMUNITY OPERATIONS / EST. 2026</span>
+    <span>THE LLM NARRATES · STATISTICS DECIDE</span>
+  </div>
+
+  <div class="hero-type">
+    <h1 class="rv">Enough</h1>
+    <h1 class="l2 rv">to <mark>decide.</mark></h1>
+  </div>
+
+  <div class="hero-bottom">
+    <p class="rv">Survival curves, control charts and conformal intervals for housing societies,
+      campus clubs and co-ops. Every number arrives with the sample it rests on and the width of its
+      own doubt. Nothing here is a vibe.</p>
+    <div class="btnrow rv">
+      <a class="btn btn-1" href="#start">Open a community</a>
+      <a class="btn btn-2" href="dashboard.html">See the dashboard</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ WHAT — six streams as a poster index ============ -->
+<section class="sec" id="streams">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="no">01 — THE SPINE</div>
+      <h2>Six streams. Every statistic written once.</h2>
+      <p>A society's complaint, a club's task and an NGO's volunteer request are one shape wearing
+      three names. Map onto the spine and survival analysis is implemented once, not once per
+      community type.</p>
+    </div>
+    <div class="index">
+      <div class="ix rv"><span class="ixn">01</span><span class="ixt">member_lifecycle</span><span class="ixd">Join, activate, lapse, exit. Retention curves and lapse risk — who is quietly on the way out, and how sure we are.</span></div>
+      <div class="ix rv"><span class="ixn">02</span><span class="ixt">request_flow</span><span class="ixd">Opens, gets assigned, closes. The load-bearing stream: Kaplan–Meier, control charts, queueing, changepoints, conformal ETAs.</span></div>
+      <div class="ix rv"><span class="ixn">03</span><span class="ixt">ledger</span><span class="ixd">Signed money movements with a counterparty. Dues, contributions, expenses. Forecasting, runway, Benford screening.</span></div>
+      <div class="ix rv"><span class="ixn">04</span><span class="ixt">participation</span><span class="ixd">Attendance, RSVPs, volunteer hours, votes cast. Engagement segmentation and the fairness reports.</span></div>
+      <div class="ix rv"><span class="ixn">05</span><span class="ixt">signal</span><span class="ixd">Free text and ordinal ratings. Topic mining, near-duplicate detection, ordinal models on survey answers.</span></div>
+      <div class="ix rv"><span class="ixn">06</span><span class="ixt">decision</span><span class="ixd">Polls, ballots, allocations. Social choice — including telling you your poll had a Condorcet cycle and the winner depended on the counting rule.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE UNCERTAINTY THESIS — single spotlight ============ -->
+<section class="sec alt" id="uncert">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="no">02 — THE SHADOW</div>
+      <h2>A number should cast the width of its own doubt.</h2>
+      <p>Most of this product is uncertainty, not values. So in this direction an interval is a solid
+      block sitting behind its estimate — you can see how wide the doubt is from across the room,
+      which is where most of these screens are actually read from.</p>
+    </div>
+    <div class="spot">
+      <figure class="spot-vis rv">
+        <svg id="plate" viewBox="0 0 720 340" role="img" aria-label="Kaplan-Meier survival curve where the 95 percent confidence band is drawn as a hard-edged offset block behind the step line."></svg>
+        <div class="cap">survival.kaplan_meier · n 187 · 44 censored · greenwood-95 · as of 29 Aug 2026 06:15 IST</div>
+      </figure>
+      <div class="rv">
+        <div class="kicker">READ IT FROM THE BACK ROW</div>
+        <h3>Wide doubt looks heavy. Narrow doubt looks light.</h3>
+        <p>Confidence bands are hard-edged offset blocks, not soft washes. A wide interval is
+        physically a bigger shape than a narrow one, so the eye ranks certainty before it reads a
+        digit.</p>
+        <p>Control limits get their own language — a hard rule with a cross-hatched exceedance zone —
+        because a limit is a <b>decision boundary</b>, not an estimate, and a committee that confuses
+        the two makes a bad decision confidently.</p>
+        <p style="font-family:'Space Mono',monospace;font-size:12.5px;color:var(--ink-3)">
+          interval_kind ∈ { greenwood-95 · bootstrap-bca-95 · credible-95 · conformal-90 ·
+          predictive-80 · control-limits · none }</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GIANT STAT BREAK ============ -->
+<section class="giant">
+  <div class="wrap">
+    <div class="rv">
+      <div class="n">11,204</div>
+      <div class="lab">still-open requests that most dashboards silently drop</div>
+    </div>
+    <p class="rv">An average built from closed tickets only is <b>biased downward</b>, because the slow
+    ones are exactly the ones still open. Quorum censors them properly and prints the count on the
+    face of the figure. A service that averages only closed items is a defect here — there is a
+    permanent regression test for it.</p>
+  </div>
+</section>
+
+<!-- ============ PACKS ============ -->
+<section class="sec" id="packs">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="no">03 — THE PACKS</div>
+      <h2>Four packs. Four committee questions.</h2>
+    </div>
+    <div class="packs">
+      <div class="pk rv"><div class="n">01</div><h3>Is this getting better or worse?</h3>
+        <p>Kaplan–Meier curves that count the still-open requests, EWMA control charts that separate a real shift from a noisy week, Erlang-C staffing for the guard roster.</p>
+        <div class="mods"><span>survival</span><span>spc</span><span>queueing</span><span>changepoint</span></div></div>
+      <div class="pk rv"><div class="n">03</div><h3>What is coming, and how sure?</h3>
+        <p>Dues forecasts with prediction intervals, calibration scoring that says whether last quarter's forecast was any good, conformal ETAs with guaranteed coverage.</p>
+        <div class="mods"><span>forecast</span><span>calibration</span><span>conformal</span><span>drift</span></div></div>
+      <div class="pk rv"><div class="n">04</div><h3>What does the community want?</h3>
+        <p>Social choice over polls, participatory budgeting with a fairness report, ordinal survey models, and a k-anonymity floor so a statistic over three households is never published.</p>
+        <div class="mods"><span>voting</span><span>budgeting</span><span>survey</span><span>privacy</span></div></div>
+      <div class="pk rv"><span class="late">Ships last</span><div class="n">02</div><h3>Is the new vendor actually better?</h3>
+        <p>Empirical-Bayes shrinkage, so a vendor at 3-for-3 does not outrank one at 47-for-52. Deliberately last: it needs accumulated history before it can say anything honest.</p>
+        <div class="mods"><span>bayes</span><span>experiments</span><span>bandits</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROOF ============ -->
+<section class="sec alt">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="no">04 — IN USE</div>
+      <h2>For the people who have to answer for the number.</h2>
+    </div>
+    <div class="mstrip rv">
+      <div><div class="v">41</div><div class="l">communities</div><div class="n">exact count · interval_kind: none</div></div>
+      <div><div class="v">218,406</div><div class="l">requests in request_flow</div><div class="n">exact count · interval_kind: none</div></div>
+      <div><div class="v">4.3 d</div><div class="l">median resolution, all tenants</div><div class="n">95% CI 4.1–4.6 · n 218,406 · 11,204 censored</div></div>
+      <div><div class="v">91.4%</div><div class="l">ETA intervals containing the truth</div><div class="n">target 90% · n 39,118 · 95% CI 91.1–91.7</div></div>
+    </div>
+    <div class="quotes">
+      <blockquote class="quote rv"><p>“I stopped arguing about whether the plumber was better and showed them the curve, the band, and the 52 jobs it rests on. Four minutes.”</p>
+        <footer><b>Meenakshi Deshpande</b>Hon. Secretary · Vaikunth Heights CHS, Baner, Pune · 214 flats</footer></blockquote>
+      <blockquote class="quote rv"><p>“For two months it only told us how much more data it needed. That is exactly why I believe the third month.”</p>
+        <footer><b>Kavya Iyer</b>Coordinator · Aavartan Robotics &amp; Automation Club · 96 members</footer></blockquote>
+      <blockquote class="quote rv"><p>“The collection forecast came with an interval. We landed near the bottom of it and nobody had to be blamed for it.”</p>
+        <footer><b>Imran Qureshi</b>Treasurer · Shanti Nagar Co-operative Housing Society, Nagpur</footer></blockquote>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW — inverted ============ -->
+<section class="sec inv">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="no" style="color:var(--acid)">05 — THE METHOD</div>
+      <h2>From your record to a number you can defend.</h2>
+    </div>
+    <div class="steps">
+      <div class="stp rv"><div class="k">01</div><div><h3>Map, don't rebuild</h3>
+        <p>A vertical manifest maps your entities onto the six streams. Complaints and club tasks both become <span class="mono">request_flow</span>. Nothing is written twice.</p></div></div>
+      <div class="stp rv"><div class="k">02</div><div><h3>Every method declares its floor</h3>
+        <p>30 events for a survival curve. 20 periods for control limits. 5 members for any published per-stratum cell — a hard k-anonymity floor that overrides even a tenant admin asking to see it.</p></div></div>
+      <div class="stp rv"><div class="k">03</div><div><h3>Nothing crosses as a bare float</h3>
+        <p>Every figure travels in an evidence envelope: value, <span class="mono">n</span>, interval, interval kind, method id, and the assumption checks the service ran on its own output. A blocking failure suppresses the value and shows the reason in its place.</p></div></div>
+      <div class="stp rv"><div class="k">04</div><div><h3>The model narrates. That's all.</h3>
+        <p>The assistant's tools return envelopes. It may quote a value, its interval and its <span class="mono">n</span>, and explain a failing check. It may not do arithmetic on two envelopes or state a figure that is not in one — enforced by a grounding test, not by a polite prompt.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="sec" id="start">
+  <div class="wrap">
+    <div class="finalcta rv">
+      <h2>Bring the record.<br>Keep the doubt.</h2>
+      <p>Housing societies, campus clubs, NGOs, alumni chapters, co-ops, sports clubs, guilds.
+      Onboard by slug, map your streams, and let the tiles say <span class="mono">not enough data yet</span> until they honestly don't.</p>
+      <div class="btnrow">
+        <a class="btn btn-1" href="dashboard.html">Open the dashboard</a>
+        <a class="btn btn-2" href="../index.html">Compare directions</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="f-grid">
+      <div>
+        <a class="brand" href="#top" style="margin-bottom:14px">
+          <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true">
+            <clipPath id="k2"><circle cx="16" cy="16" r="12"/></clipPath>
+            <g clip-path="url(#k2)"><rect x="0" y="19" width="32" height="13" fill="var(--acid-line)"/></g>
+            <circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2.4"/>
+            <rect x="1" y="18" width="30" height="2.2" fill="var(--acid-line)"/>
+          </svg> Quorum
+        </a>
+        <p style="color:var(--ink-2);font-size:13.5px;max-width:34ch">Enough people to decide. Enough data to conclude.</p>
+      </div>
+      <div><h4>Product</h4><ul><li><a href="#streams">Data spine</a></li><li><a href="#packs">Insight packs</a></li><li><a href="dashboard.html">Dashboard</a></li></ul></div>
+      <div><h4>Method</h4><ul><li><a href="#">Method cards</a></li><li><a href="#uncert">Evidence contract</a></li><li><a href="#">Minimum-n policy</a></li></ul></div>
+      <div><h4>Verticals</h4><ul><li><a href="#">Housing societies</a></li><li><a href="#">Campus clubs</a></li><li><a href="#">Co-operatives</a></li></ul></div>
+    </div>
+    <div class="f-bottom">
+      <span>Direction C — Signal · high-contrast poster</span>
+      <span>Every figure on this page carries its n and its interval.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+var root=document.documentElement, tt=document.getElementById('tt');
+function isDark(){ return root.getAttribute('data-theme')==='dark' ||
+  (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+try{ var st=localStorage.getItem('quorum-theme'); if(st) root.setAttribute('data-theme',st); }catch(e){}
+function label(){ tt.textContent=isDark()?'Light':'Dark'; } label();
+tt.addEventListener('click',function(){ var n=isDark()?'light':'dark'; root.setAttribute('data-theme',n);
+  try{ localStorage.setItem('quorum-theme',n); }catch(e){} label(); paint(); });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){ label(); paint(); });
+function cv(n){ return getComputedStyle(root).getPropertyValue(n).trim(); }
+
+var KM=[[0,1,1,1],[1,.861,.808,.902],[2,.744,.678,.799],[3,.615,.543,.680],[4,.521,.448,.589],
+        [5,.447,.375,.516],[6,.392,.322,.461],[8,.321,.254,.390],[10,.268,.204,.336],
+        [14,.212,.152,.279],[18,.176,.119,.242],[21,.158,.103,.224],[28,.131,.079,.196],[35,.119,.068,.184]];
+var CENSOR=[2.4,3.6,6.8,9.2,12.5,16.1,19.8,24.4,30.2,33.1];
+
+/* the band as a hard-edged block — this direction's whole idea */
+function plate(){
+  var svg=document.getElementById('plate'); if(!svg) return;
+  var W=720,H=340,L=50,R=96,T=18,B=48, o=[];
+  var px=function(d){ return L+d/36*(W-L-R); }, py=function(s){ return T+(1-s)*(H-T-B); };
+  var grid=cv('--grid'), axis=cv('--axis'), ink=cv('--ink'), ink3=cv('--ink-3'),
+      s1=cv('--s1'), acid=cv('--acid'), edge=cv('--edge'), surf=cv('--chart-surface');
+
+  for(var g=0;g<=5;g++){
+    var yy=py(g/5);
+    o.push('<line x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'" stroke="'+grid+'" stroke-width="1"/>');
+    o.push('<text x="'+(L-9)+'" y="'+(yy+4)+'" text-anchor="end" font-size="10.5" fill="'+ink3+'">'+(g*20)+'%</text>');
+  }
+  [0,5,10,15,20,25,30,35].forEach(function(d){
+    o.push('<text x="'+px(d)+'" y="'+(py(0)+21)+'" text-anchor="middle" font-size="10.5" fill="'+ink3+'">'+d+'</text>'); });
+  o.push('<text x="'+((L+W-R)/2)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10.5" fill="'+ink3+'">days since raised</text>');
+
+  var up=[],dn=[],ln='M '+px(0)+' '+py(1);
+  for(var i=0;i<KM.length;i++){
+    var d=KM[i][0], nx=(i+1<KM.length)?KM[i+1][0]:36;
+    up.push(px(d)+','+py(KM[i][3]), px(nx)+','+py(KM[i][3]));
+    ln+=' L '+px(d)+' '+py(KM[i][1])+' L '+px(nx)+' '+py(KM[i][1]);
+  }
+  for(var j=KM.length-1;j>=0;j--){
+    var d2=KM[j][0], nx2=(j+1<KM.length)?KM[j+1][0]:36;
+    dn.push(px(nx2)+','+py(KM[j][2]), px(d2)+','+py(KM[j][2]));
+  }
+  // solid block, hard edge, offset — the doubt has physical weight
+  o.push('<polygon points="'+up.concat(dn).join(' ')+'" fill="'+s1+'" opacity="0.26" transform="translate(4,4)"/>');
+  o.push('<polygon points="'+up.concat(dn).join(' ')+'" fill="none" stroke="'+s1+'" stroke-width="1.6"/>');
+  o.push('<path d="'+ln+'" fill="none" stroke="'+s1+'" stroke-width="3" stroke-linejoin="miter"/>');
+
+  function Sat(d){ var v=1; for(var q=0;q<KM.length;q++){ if(KM[q][0]<=d) v=KM[q][1]; } return v; }
+  CENSOR.forEach(function(d){ var yy=py(Sat(d));
+    o.push('<line x1="'+px(d)+'" y1="'+(yy-6)+'" x2="'+px(d)+'" y2="'+(yy+6)+'" stroke="'+s1+'" stroke-width="2"/>'); });
+
+  var y50=py(.5);
+  o.push('<rect x="'+px(3.4)+'" y="'+(y50-9)+'" width="'+(px(5.6)-px(3.4))+'" height="18" fill="'+acid+'"/>');
+  o.push('<rect x="'+px(3.4)+'" y="'+(y50-9)+'" width="'+(px(5.6)-px(3.4))+'" height="18" fill="none" stroke="'+edge+'" stroke-width="1.5"/>');
+  o.push('<circle cx="'+px(4.3)+'" cy="'+y50+'" r="4.5" fill="'+edge+'" stroke="'+surf+'" stroke-width="1.5"/>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(y50-3)+'" font-size="12" font-weight="700" fill="'+ink+'">4.3 d</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(y50+11)+'" font-size="10" fill="'+ink3+'">CI 3.4–5.6</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(.119)+4)+'" font-size="11" font-weight="700" fill="'+s1+'">11.9%</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(.119)+17)+'" font-size="10" fill="'+ink3+'">day 35</text>');
+
+  o.push('<line x1="'+L+'" y1="'+py(0)+'" x2="'+(W-R)+'" y2="'+py(0)+'" stroke="'+axis+'" stroke-width="1.5"/>');
+  o.push('<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+py(0)+'" stroke="'+axis+'" stroke-width="1.5"/>');
+  svg.innerHTML=o.join('');
+}
+function paint(){ plate(); }
+
+var items=[].slice.call(document.querySelectorAll('.rv'));
+if(!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  items.forEach(function(el){ el.classList.add('in'); });
+}else{
+  var io=new IntersectionObserver(function(es){
+    var i=0;
+    es.forEach(function(e){ if(!e.isIntersecting) return;
+      e.target.style.transitionDelay=(Math.min(i,5)*85)+'ms'; i++;
+      e.target.classList.add('in'); io.unobserve(e.target); });
+  },{threshold:.12,rootMargin:'0px 0px -7% 0px'});
+  items.forEach(function(el){ io.observe(el); });
+  [].slice.call(document.querySelectorAll('.hero .rv')).forEach(function(el,i){
+    el.style.transitionDelay=(90+i*110)+'ms'; el.classList.add('in'); io.unobserve(el); });
+}
+if(document.fonts && document.fonts.ready){ document.fonts.ready.then(paint); }
+paint();
+})();
+</script>
+</body>
+</html>

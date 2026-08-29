@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quorum — enough data to conclude</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12.5' fill='none' stroke='%231A1714' stroke-width='2.5'/%3E%3Cpath d='M4.6 19.6a12.5 12.5 0 0 0 22.8 0Z' fill='%2313594A'/%3E%3Crect x='0' y='18.2' width='32' height='2.6' rx='1.3' fill='%23E07A3F'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   QUORUM — house direction
+   Graticule's instrument geometry · Almanac's spacing comfort
+   Warm limestone + spruce + apricot · Bricolage / Inter Tight / JB Mono
+   Every colour on bare :root for light, redefined for dark twice.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  /* surfaces — warm limestone, never grey, never cream-yellow */
+  --canvas:#FAF7F2;
+  --canvas-2:#F3EFE8;
+  --panel:#FFFFFF;
+  --panel-2:#F7F4EE;
+  /* ink — warm black, not #000, not blue-grey */
+  --ink:#1A1714;
+  --ink-2:#544E47;
+  --ink-3:#8A8278;
+  --ink-4:#B8AFA3;
+  /* brand */
+  --brand:#13594A;
+  --brand-hi:#1B7561;
+  --brand-soft:#DDEBE4;
+  --accent:#E07A3F;
+  --accent-soft:#FBE8DA;
+  /* hairlines */
+  --hair:#E6DFD4;
+  --hair-2:#D3C9BA;
+  /* status */
+  --ok:#1C7A47; --warn:#8A6209; --warn-bg:#F8EFD9;
+  --stop:#A33327; --stop-bg:#F9E4E0;
+  /* dataviz — a separate system from brand colour */
+  --s1:#2F6F9F; --s2:#C0562F; --s3:#7A5AA8; --s4:#B58500;
+  --chart:#FFFFFF; --grid:#EDE7DC; --axis:#CFC5B6; --limit:#C0562F;
+  /* spacing — 8pt, Almanac-comfortable */
+  --sp1:4px; --sp2:8px; --sp3:12px; --sp4:16px; --sp5:24px;
+  --sp6:32px; --sp7:48px; --sp8:64px; --sp9:96px; --sp10:128px;
+  --r-sm:6px; --r:10px; --r-lg:16px;
+  /* motion — cubic-bézier only */
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-snap:cubic-bezier(.4,0,.2,1);
+  --t-fill:520ms; --t-hover:220ms; --t-reveal:640ms;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --canvas:#12100E; --canvas-2:#0C0A09; --panel:#1B1815; --panel-2:#211D19;
+  --ink:#F4F0EA; --ink-2:#B5ADA2; --ink-3:#877F74; --ink-4:#5E574E;
+  --brand:#3DA88C; --brand-hi:#54C0A2; --brand-soft:#123028;
+  --accent:#F09155; --accent-soft:#332013;
+  --hair:#2C2722; --hair-2:#403830;
+  --ok:#43B573; --warn:#D3A544; --warn-bg:#2B2210;
+  --stop:#E0705F; --stop-bg:#2E1A16;
+  --s1:#4C90CB; --s2:#D4703F; --s3:#9A7AD8; --s4:#C79A22;
+  --chart:#1B1815; --grid:#26221D; --axis:#403830; --limit:#D4703F;
+}}
+:root[data-theme="dark"]{
+  --canvas:#12100E; --canvas-2:#0C0A09; --panel:#1B1815; --panel-2:#211D19;
+  --ink:#F4F0EA; --ink-2:#B5ADA2; --ink-3:#877F74; --ink-4:#5E574E;
+  --brand:#3DA88C; --brand-hi:#54C0A2; --brand-soft:#123028;
+  --accent:#F09155; --accent-soft:#332013;
+  --hair:#2C2722; --hair-2:#403830;
+  --ok:#43B573; --warn:#D3A544; --warn-bg:#2B2210;
+  --stop:#E0705F; --stop-bg:#2E1A16;
+  --s1:#4C90CB; --s2:#D4703F; --s3:#9A7AD8; --s4:#C79A22;
+  --chart:#1B1815; --grid:#26221D; --axis:#403830; --limit:#D4703F;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--canvas); color:var(--ink);
+  font-family:'Inter Tight',ui-sans-serif,system-ui,sans-serif;
+  font-size:16.5px; line-height:1.62; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+h1,h2,h3,.disp{ font-family:'Bricolage Grotesque',ui-sans-serif,sans-serif; font-weight:600; letter-spacing:-.032em; line-height:1.04 }
+a{color:inherit}
+.mono{ font-family:'JetBrains Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums }
+.wrap{ width:min(1200px,90vw); margin-inline:auto }
+.lbl{ font:500 10.5px/1 'JetBrains Mono',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3) }
+::selection{ background:var(--accent-soft); color:var(--ink) }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:3px }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ transition-duration:.01ms !important; animation-duration:.01ms !important; scroll-behavior:auto !important }
+  .rv{ opacity:1 !important; transform:none !important }
+}
+.rv{ opacity:0; transform:translateY(14px); transition:opacity var(--t-reveal) var(--ease), transform var(--t-reveal) var(--ease) }
+.rv.in{ opacity:1; transform:none }
+
+/* ─── buttons: the fill sweeps, the label does not move ─── */
+.btn{
+  position:relative; isolation:isolate; overflow:hidden;
+  display:inline-flex; align-items:center; gap:10px;
+  min-height:50px; padding:0 26px; border-radius:var(--r-sm);
+  font:600 12.5px/1 'JetBrains Mono',monospace; letter-spacing:.07em; text-transform:uppercase;
+  text-decoration:none; border:1px solid transparent; cursor:pointer;
+  transition:color var(--t-hover) var(--ease-snap), border-color var(--t-hover) var(--ease-snap);
+}
+.btn::before{
+  content:''; position:absolute; inset:0; z-index:-1;
+  transform:translateY(102%); transition:transform var(--t-fill) var(--ease);
+}
+.btn:hover::before{ transform:translateY(0) }
+.btn .arw{ display:inline-block; transition:transform var(--t-hover) var(--ease) }
+.btn:hover .arw{ transform:translateX(5px) }
+.btn-fill{ background:var(--ink); color:var(--canvas) }
+.btn-fill::before{ background:var(--brand) }
+.btn-fill:hover{ color:#fff }
+.btn-line{ border-color:var(--hair-2); color:var(--ink-2) }
+.btn-line::before{ background:var(--accent-soft) }
+.btn-line:hover{ color:var(--ink); border-color:var(--accent) }
+.btn-brand{ background:var(--brand); color:#fff }
+.btn-brand::before{ background:var(--ink) }
+.btn-brand:hover{ color:var(--canvas) }
+.btn:active{ transform:translateY(1px) }
+
+/* text link with a drawn underline */
+.tl{ text-decoration:none; position:relative; color:var(--brand); font-weight:500 }
+.tl::after{ content:''; position:absolute; left:0; right:0; bottom:-2px; height:1.5px; background:currentColor;
+  transform:scaleX(0); transform-origin:right; transition:transform var(--t-hover) var(--ease) }
+.tl:hover::after{ transform:scaleX(1); transform-origin:left }
+
+/* ─── nav ─── */
+nav{ position:sticky; top:0; z-index:60; background:color-mix(in srgb,var(--canvas) 88%,transparent);
+  backdrop-filter:blur(12px) saturate(1.4); border-bottom:1px solid var(--hair) }
+.nav-in{ display:flex; align-items:center; gap:var(--sp5); height:68px }
+.brand{ display:flex; align-items:center; gap:10px; text-decoration:none;
+  font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:19px; letter-spacing:-.03em }
+.brand svg{ display:block }
+.navlinks{ margin-left:auto; display:flex; align-items:center; gap:var(--sp5) }
+.navlinks a.nl{ font:500 11.5px/1 'JetBrains Mono',monospace; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-3); text-decoration:none; position:relative; padding-block:6px;
+  transition:color var(--t-hover) var(--ease-snap) }
+.navlinks a.nl::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:1.5px; background:var(--accent);
+  transform:scaleX(0); transform-origin:right; transition:transform var(--t-hover) var(--ease) }
+.navlinks a.nl:hover{ color:var(--ink) }
+.navlinks a.nl:hover::after{ transform:scaleX(1); transform-origin:left }
+@media(max-width:900px){ .navlinks a.nl{ display:none } }
+.tgl{ font:500 11px/1 'JetBrains Mono',monospace; letter-spacing:.1em; text-transform:uppercase;
+  background:transparent; border:1px solid var(--hair-2); color:var(--ink-2);
+  padding:10px 14px; border-radius:var(--r-sm); cursor:pointer; min-height:38px;
+  transition:border-color var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap) }
+.tgl:hover{ border-color:var(--accent); color:var(--accent) }
+.btn.sm{ min-height:40px; padding:0 18px; font-size:11.5px }
+
+/* ─── hero ─── */
+.hero{ position:relative; padding:var(--sp10) 0 var(--sp9); overflow:hidden }
+.hero-grid{ position:absolute; inset:0; z-index:0; pointer-events:none;
+  background-image:linear-gradient(var(--hair) 1px,transparent 1px),linear-gradient(90deg,var(--hair) 1px,transparent 1px);
+  background-size:64px 64px; background-position:center top;
+  -webkit-mask-image:radial-gradient(ellipse 78% 62% at 50% 34%,#000 0%,transparent 72%);
+  mask-image:radial-gradient(ellipse 78% 62% at 50% 34%,#000 0%,transparent 72%); opacity:.85 }
+.hero-in{ position:relative; z-index:2; text-align:center }
+.eyebrow{ display:inline-flex; align-items:center; gap:9px; padding:7px 14px; border-radius:999px;
+  border:1px solid var(--hair-2); background:var(--panel);
+  font:500 11px/1 'JetBrains Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-2) }
+.eyebrow i{ width:6px; height:6px; border-radius:999px; background:var(--brand); display:block }
+h1{ font-size:clamp(2.9rem,7.2vw,6.2rem); line-height:.96; letter-spacing:-.045em;
+  max-width:15ch; margin:var(--sp6) auto 0 }
+h1 em{ font-style:normal; color:var(--brand) }
+.hero p.lead{ color:var(--ink-2); max-width:56ch; margin:var(--sp5) auto 0; font-size:clamp(1.02rem,1.3vw,1.18rem) }
+.btnrow{ margin-top:var(--sp7); display:flex; gap:var(--sp3); justify-content:center; flex-wrap:wrap }
+
+/* readout strip — the instrument's own face, on the 8pt grid */
+.readout{ position:relative; z-index:2; margin-top:var(--sp9); display:grid;
+  grid-template-columns:repeat(4,1fr); gap:1px; background:var(--hair);
+  border:1px solid var(--hair); border-radius:var(--r); overflow:hidden }
+@media(max-width:820px){ .readout{ grid-template-columns:1fr 1fr } }
+.readout > div{ background:var(--panel); padding:var(--sp5); text-align:left;
+  transition:background var(--t-hover) var(--ease-snap) }
+.readout > div:hover{ background:var(--panel-2) }
+.readout .v{ font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums;
+  font-size:clamp(1.6rem,2.6vw,2.1rem); font-weight:600; letter-spacing:-.04em; margin:var(--sp3) 0 var(--sp2) }
+.readout .n{ font:400 11px/1.5 'JetBrains Mono',monospace; color:var(--ink-3) }
+
+/* ─── section system ─── */
+.sec{ padding:var(--sp10) 0; border-top:1px solid var(--hair) }
+.sec.alt{ background:var(--canvas-2) }
+.sec-head{ display:flex; flex-direction:column; align-items:start; align-content:start;
+  gap:var(--sp5); margin-bottom:var(--sp8) }
+.sec-no{ padding-top:0; display:flex; align-items:center; gap:10px }
+.sec-no::after{ content:''; width:56px; height:1px; background:var(--hair-2) }
+.sec-head h2{ font-size:clamp(1.9rem,3.6vw,3.1rem); max-width:19ch }
+.sec-head p{ color:var(--ink-2); margin-top:var(--sp4); max-width:62ch }
+
+/* six streams — even 6-col bento, no orphan cells */
+.bento{ display:grid; grid-template-columns:repeat(6,1fr); gap:1px; background:var(--hair);
+  border:1px solid var(--hair); border-radius:var(--r); overflow:hidden }
+.cell{ background:var(--panel); padding:var(--sp6) var(--sp5); grid-column:span 2; position:relative;
+  transition:background var(--t-hover) var(--ease-snap) }
+.cell::after{ content:''; position:absolute; left:0; right:0; top:0; height:2px; background:var(--accent);
+  transform:scaleX(0); transform-origin:left; transition:transform var(--t-fill) var(--ease) }
+.cell:hover{ background:var(--panel-2) }
+.cell:hover::after{ transform:scaleX(1) }
+.cell.wide{ grid-column:span 3 }
+@media(max-width:980px){ .bento{ grid-template-columns:1fr 1fr } .cell,.cell.wide{ grid-column:span 1 } }
+@media(max-width:620px){ .bento{ grid-template-columns:1fr } }
+.cell .idx{ font:500 10.5px/1 'JetBrains Mono',monospace; letter-spacing:.16em; color:var(--brand); text-transform:uppercase }
+.cell h3{ font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:600; letter-spacing:-.01em; margin:var(--sp4) 0 var(--sp3) }
+.cell p{ color:var(--ink-2); font-size:15px; line-height:1.6 }
+.tags{ margin-top:var(--sp4); display:flex; flex-wrap:wrap; gap:6px }
+.tags span{ font:400 10.5px/1 'JetBrains Mono',monospace; color:var(--ink-3);
+  border:1px solid var(--hair-2); border-radius:999px; padding:6px 10px }
+
+/* uncertainty — the thesis, shown not told */
+.uncert{ display:grid; grid-template-columns:1.05fr .95fr; gap:var(--sp8); align-items:center }
+@media(max-width:940px){ .uncert{ grid-template-columns:1fr } }
+.plate{ background:var(--chart); border:1px solid var(--hair); border-radius:var(--r-lg); padding:var(--sp5) }
+.plate svg{ width:100%; height:auto; display:block }
+.plate figcaption{ font:400 11.5px/1.6 'JetBrains Mono',monospace; color:var(--ink-3);
+  margin-top:var(--sp4); border-top:1px solid var(--hair); padding-top:var(--sp3) }
+.uncert h3{ font-size:clamp(1.5rem,2.6vw,2.15rem); margin-bottom:var(--sp4) }
+.uncert p{ color:var(--ink-2); margin-bottom:var(--sp4); max-width:50ch }
+.pull{ border-left:2px solid var(--accent); padding:var(--sp3) 0 var(--sp3) var(--sp5); margin:var(--sp5) 0 }
+.pull b{ color:var(--ink); font-weight:600 }
+
+/* packs table */
+.packs{ width:100%; border-collapse:collapse }
+.packs th{ text-align:left; padding:0 var(--sp5) var(--sp4) 0; border-bottom:1px solid var(--hair-2);
+  font:500 10.5px/1 'JetBrains Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3) }
+.packs td{ padding:var(--sp6) var(--sp5) var(--sp6) 0; border-bottom:1px solid var(--hair); vertical-align:top }
+.packs tr:last-child td{ border-bottom:0 }
+.packs tr{ transition:background var(--t-hover) var(--ease-snap) }
+.packs tbody tr:hover{ background:var(--panel-2) }
+.pk{ font-family:'Bricolage Grotesque',sans-serif; font-weight:600; font-size:17px; letter-spacing:-.02em; white-space:nowrap }
+.pk small{ display:block; font:400 11px/1.6 'JetBrains Mono',monospace; color:var(--ink-3); margin-top:6px; letter-spacing:0 }
+.q{ color:var(--ink-2); max-width:42ch; font-size:15px }
+.ship{ font:500 10.5px/1 'JetBrains Mono',monospace; letter-spacing:.1em; text-transform:uppercase; white-space:nowrap; color:var(--brand) }
+.ship.late{ color:var(--ink-4) }
+@media(max-width:820px){ .packs thead{ display:none } .packs td{ display:block; padding:var(--sp3) 0; border:0 }
+  .packs tbody tr{ display:block; padding:var(--sp5) 0; border-bottom:1px solid var(--hair) } }
+
+/* steps */
+.steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--sp6) }
+@media(max-width:860px){ .steps{ grid-template-columns:1fr } }
+.step{ padding-top:var(--sp5); border-top:2px solid var(--ink); position:relative }
+.step:nth-child(2){ border-top-color:var(--brand) } .step:nth-child(3){ border-top-color:var(--accent) }
+.step .n{ font:600 11px/1 'JetBrains Mono',monospace; letter-spacing:.16em; color:var(--ink-3) }
+.step h3{ font-size:1.35rem; margin:var(--sp4) 0 var(--sp3) }
+.step p{ color:var(--ink-2); font-size:15px }
+
+/* metric bar */
+.mbar{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--hair);
+  border:1px solid var(--hair); border-radius:var(--r); overflow:hidden }
+@media(max-width:820px){ .mbar{ grid-template-columns:1fr 1fr } }
+.mbar > div{ background:var(--panel); padding:var(--sp6) var(--sp5) }
+.mbar .v{ font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums;
+  font-size:clamp(1.8rem,3vw,2.5rem); font-weight:600; letter-spacing:-.045em }
+.mbar .l{ font-size:14.5px; color:var(--ink-2); margin-top:var(--sp3) }
+.mbar .n{ font:400 11px/1.5 'JetBrains Mono',monospace; color:var(--ink-4); margin-top:var(--sp2) }
+
+/* cta */
+.cta-band{ background:var(--ink); color:var(--canvas); border-radius:var(--r-lg); padding:var(--sp9) var(--sp7); text-align:center; position:relative; overflow:hidden }
+.cta-band h2{ font-size:clamp(1.9rem,4vw,3.2rem); max-width:18ch; margin-inline:auto; color:var(--canvas) }
+.cta-band p{ color:color-mix(in srgb,var(--canvas) 68%,transparent); max-width:48ch; margin:var(--sp4) auto var(--sp7) }
+.cta-band .btn-fill{ background:var(--canvas); color:var(--ink) }
+.cta-band .btn-fill::before{ background:var(--accent) }
+.cta-band .btn-fill:hover{ color:var(--ink) }
+.cta-band .btn-line{ border-color:color-mix(in srgb,var(--canvas) 30%,transparent); color:color-mix(in srgb,var(--canvas) 80%,transparent) }
+.cta-band .btn-line::before{ background:color-mix(in srgb,var(--canvas) 14%,transparent) }
+.cta-band .btn-line:hover{ color:var(--canvas); border-color:var(--canvas) }
+
+/* footer */
+footer{ border-top:1px solid var(--hair); padding:var(--sp8) 0 var(--sp7) }
+.foot{ display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr; gap:var(--sp6) }
+@media(max-width:820px){ .foot{ grid-template-columns:1fr 1fr } }
+.foot h4{ font:500 10.5px/1 'JetBrains Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin-bottom:var(--sp4) }
+.foot ul{ list-style:none; display:flex; flex-direction:column; gap:var(--sp3) }
+.foot a{ text-decoration:none; color:var(--ink-2); font-size:14.5px; transition:color var(--t-hover) var(--ease-snap) }
+.foot a:hover{ color:var(--brand) }
+.foot p{ color:var(--ink-3); font-size:14px; max-width:34ch; margin-top:var(--sp4) }
+.colophon{ margin-top:var(--sp7); padding-top:var(--sp5); border-top:1px solid var(--hair);
+  display:flex; justify-content:space-between; gap:var(--sp4); flex-wrap:wrap;
+  font:400 11px/1.6 'JetBrains Mono',monospace; color:var(--ink-4) }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-in">
+    <a class="brand" href="#">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="12.5" fill="none" stroke="currentColor" stroke-width="2.4"/>
+        <path d="M4.6 19.6a12.5 12.5 0 0 0 22.8 0Z" fill="var(--brand)"/>
+        <rect x="0" y="18.3" width="32" height="2.6" rx="1.3" fill="var(--accent)"/>
+      </svg>
+      Quorum
+    </a>
+    <div class="navlinks">
+      <a class="nl" href="#spine">Spine</a>
+      <a class="nl" href="#uncertainty">Uncertainty</a>
+      <a class="nl" href="#packs">Packs</a>
+      <a class="nl" href="dashboard.html">Dashboard</a>
+      <button class="tgl" id="tgl">Dark</button>
+      <a class="btn btn-brand sm" href="dashboard.html">Start <span class="arw">→</span></a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="wrap hero-in">
+    <span class="eyebrow rv"><i></i> Community operations · statistically honest</span>
+    <h1 class="rv">Numbers your community can <em>actually act on.</em></h1>
+    <p class="lead rv">Quorum runs a housing society, a campus club or an NGO — and unlike every other tool in the category, it tells you how much to trust each number it shows you.</p>
+    <div class="btnrow rv">
+      <a class="btn btn-fill" href="dashboard.html">See the dashboard <span class="arw">→</span></a>
+      <a class="btn btn-line" href="#uncertainty">Why intervals</a>
+    </div>
+    <div class="readout rv">
+      <div><span class="lbl">Median resolution</span><div class="v">4.3<span style="font-size:.5em;color:var(--ink-3)">d</span></div><div class="n">n 187 · CI 3.4–5.6 · 44 censored</div></div>
+      <div><span class="lbl">ETA coverage</span><div class="v">91.4<span style="font-size:.5em;color:var(--ink-3)">%</span></div><div class="n">n 39,118 · target 90%</div></div>
+      <div><span class="lbl">Communities</span><div class="v">41</div><div class="n">7 verticals · one codebase</div></div>
+      <div><span class="lbl">Statistics shipped</span><div class="v">34</div><div class="n">each with a method card</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="sec" id="spine">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-no lbl">§ 01 · Spine</div>
+      <div>
+        <h2>Six streams. Every statistic written once.</h2>
+        <p>A society's complaint, a club's task and an NGO's volunteer request are one shape wearing three names. Quorum maps every vertical onto six canonical streams, so survival analysis is implemented once rather than once per community type.</p>
+      </div>
+    </div>
+    <div class="bento rv">
+      <div class="cell wide"><span class="idx">Stream 02 · load-bearing</span><h3>request_flow</h3><p>Anything that opens, gets assigned, progresses and closes — with a category, an owner and timestamps. Complaints, maintenance jobs, club task boards, membership applications.</p><div class="tags"><span>survival</span><span>spc</span><span>queueing</span><span>changepoint</span><span>conformal eta</span></div></div>
+      <div class="cell wide"><span class="idx">Stream 03</span><h3>ledger</h3><p>Signed money movements with a category and a counterparty. Maintenance dues, festival contributions, vendor payments, event budgets.</p><div class="tags"><span>forecast</span><span>runway</span><span>benford</span><span>dp aggregates</span></div></div>
+      <div class="cell"><span class="idx">Stream 01</span><h3>member_lifecycle</h3><p>Join, activate, lapse, exit.</p><div class="tags"><span>retention</span><span>churn risk</span></div></div>
+      <div class="cell"><span class="idx">Stream 04</span><h3>participation</h3><p>Attendance, RSVPs, volunteer hours, upvotes.</p><div class="tags"><span>segmentation</span><span>network</span></div></div>
+      <div class="cell"><span class="idx">Stream 05</span><h3>signal</h3><p>Free text and ordinal ratings.</p><div class="tags"><span>topics</span><span>near-dup</span><span>ordinal</span></div></div>
+      <div class="cell wide"><span class="idx">Stream 06</span><h3>decision</h3><p>Polls, ballots and budget allocations — with the social-choice disclosure most tools skip. When a poll contains a Condorcet cycle, the “winner” was chosen by the counting rule rather than by the community, and Quorum says so on the result page.</p><div class="tags"><span>voting</span><span>participatory budgeting</span><span>representativeness</span></div></div>
+      <div class="cell wide"><span class="idx">Privacy floor</span><h3>k_anonymity</h3><p>Small communities are small. A per-block average over three households identifies those households, so any cell under five members is suppressed — including from the admin who asked for it.</p><div class="tags"><span>k = 5</span><span>laplace noise</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec alt" id="uncertainty">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-no lbl">§ 02 · Thesis</div>
+      <div>
+        <h2>Every other tool shows you a number. We show you how much of one it is.</h2>
+        <p>“Average resolution: 3.2 days” is not a fact, it is a summary of a choice. Which tickets were counted, which were quietly dropped, and how wide the honest answer really is.</p>
+      </div>
+    </div>
+    <div class="uncert">
+      <figure class="plate rv">
+        <svg viewBox="0 0 560 300" role="img" aria-label="Kaplan-Meier curve with a 95% Greenwood confidence band">
+          <defs><pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+            <line x1="0" y="0" x2="0" y2="6" stroke="var(--s1)" stroke-width="1.4" opacity=".28"/></pattern></defs>
+          <g stroke="var(--grid)" stroke-width="1">
+            <line x1="52" y1="30" x2="536" y2="30"/><line x1="52" y1="90" x2="536" y2="90"/>
+            <line x1="52" y1="150" x2="536" y2="150"/><line x1="52" y1="210" x2="536" y2="210"/>
+            <line x1="52" y1="258" x2="536" y2="258"/>
+          </g>
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--ink-4)">
+            <text x="44" y="34" text-anchor="end">100%</text><text x="44" y="94" text-anchor="end">75</text>
+            <text x="44" y="154" text-anchor="end">50</text><text x="44" y="214" text-anchor="end">25</text>
+            <text x="52" y="278">0 d</text><text x="292" y="278" text-anchor="middle">7 d</text><text x="536" y="278" text-anchor="end">14 d</text>
+          </g>
+          <path d="M52,30 L86,30 L86,44 L120,44 L120,66 L155,66 L155,88 L190,88 L190,104 L224,104 L224,126 L258,126 L258,142 L292,142 L292,158 L327,158 L327,172 L361,172 L361,186 L396,186 L396,196 L430,196 L430,206 L465,206 L465,214 L500,214 L500,220 L536,220 L536,254 L52,254 Z" fill="url(#hatch)" opacity=".55"/>
+          <path d="M52,30 L86,30 L86,37 L120,37 L120,55 L155,55 L155,77 L190,77 L190,96 L224,96 L224,115 L258,115 L258,134 L292,134 L292,151 L327,151 L327,166 L361,166 L361,179 L396,179 L396,190 L430,190 L430,199 L465,199 L465,208 L500,208 L500,214 L536,214"
+            fill="none" stroke="var(--s1)" stroke-width="2.6" stroke-linejoin="round"/>
+          <g stroke="var(--ink-3)" stroke-width="1.4" opacity=".8">
+            <line x1="206" y1="101" x2="206" y2="111"/><line x1="311" y1="153" x2="311" y2="163"/>
+            <line x1="413" y1="189" x2="413" y2="199"/><line x1="482" y1="203" x2="482" y2="213"/>
+          </g>
+          <g><line x1="212" y1="134" x2="292" y2="134" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="3 3"/>
+            <circle cx="252" cy="134" r="4" fill="var(--accent)"/>
+            <text x="258" y="128" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--ink-2)">median 4.3 d</text></g>
+        </svg>
+        <figcaption>survival.kaplan_meier · n 187 requests · 44 still open and censored, not dropped · band = greenwood-95 · ticks mark censoring</figcaption>
+      </figure>
+      <div class="rv">
+        <h3>The bug is in every dashboard you have used.</h3>
+        <p>Average resolution time is usually computed over closed tickets only. But a ticket that is still open has an <em>unknown</em> resolution time — and the ones still open are exactly the slow ones. Dropping them does not make the number neutral. It biases it downward, every single time.</p>
+        <div class="pull"><b>Quorum censors instead of dropping.</b> The 44 open requests above contribute what is known about them — that they have already exceeded their current age — and the curve is honest as a result.</div>
+        <p>Same discipline everywhere else. A vendor at 3-for-3 does not outrank one at 47-for-52. A forecast that cannot beat a seasonal-naive baseline does not ship. A “30% risk” bucket is checked against whether 30% of it actually defaulted.</p>
+        <a class="tl" href="dashboard.html">See it running in the dashboard →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="packs">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-no lbl">§ 03 · Packs</div>
+      <div>
+        <h2>Four packs, each answering one committee question.</h2>
+        <p>A tenant switches on what it needs. A housing society starts with Operations; a campus club starts with Voice. The mathematics underneath is the same code.</p>
+      </div>
+    </div>
+    <table class="packs rv">
+      <thead><tr><th>Pack</th><th>The question it answers</th><th>Modules</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">01 · Operations<small>request_flow</small></td>
+          <td class="q">Is this getting better or worse — and is last week's dip a real shift or just noise?</td>
+          <td><div class="tags"><span>survival</span><span>spc</span><span>queueing</span><span>changepoint</span></div></td>
+          <td class="ship">Ships first</td></tr>
+        <tr><td class="pk">03 · Foresight<small>ledger · request_flow</small></td>
+          <td class="q">What is coming, how sure are we, and was our last forecast actually any good?</td>
+          <td><div class="tags"><span>forecast</span><span>calibration</span><span>conformal</span><span>drift</span></div></td>
+          <td class="ship">Ships second</td></tr>
+        <tr><td class="pk">04 · Voice<small>decision · participation · signal</small></td>
+          <td class="q">What does the community actually want, and whose voice is missing from the answer?</td>
+          <td><div class="tags"><span>voting</span><span>budgeting</span><span>survey</span><span>network</span><span>privacy</span></div></td>
+          <td class="ship">Ships third</td></tr>
+        <tr><td class="pk">02 · Comparison<small>all streams</small></td>
+          <td class="q">Is the new vendor actually better, or did it just have a lucky month?</td>
+          <td><div class="tags"><span>bayes</span><span>experiments</span><span>bandits</span></div></td>
+          <td class="ship late">Last — needs history</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-no lbl">§ 04 · How</div>
+      <div><h2>Three steps, and the third one is the product.</h2></div>
+    </div>
+    <div class="steps rv">
+      <div class="step"><div class="n">01</div><h3>Onboard by slug</h3><p>Pick a vertical. <span class="mono">t/vaikunth-heights</span> gets a housing society's labels, categories and roles; <span class="mono">t/aavartan-robotics</span> gets a club's. Same schema, different manifest.</p></div>
+      <div class="step"><div class="n">02</div><h3>Run the community</h3><p>Requests, dues, events, announcements, polls. Ordinary operations software that people will actually open — because the boring part has to work before the clever part matters.</p></div>
+      <div class="step"><div class="n">03</div><h3>Read what it means</h3><p>Every figure arrives with its sample size, its interval and its assumption checks. When a method cannot yet speak, it says what it is waiting for instead of guessing.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="mbar rv">
+      <div><div class="v">41</div><div class="l">Communities running</div><div class="n">7 verticals</div></div>
+      <div><div class="v">218,406</div><div class="l">Requests in request_flow</div><div class="n">across all tenants</div></div>
+      <div><div class="v">4.3 d</div><div class="l">Median resolution</div><div class="n">CI 3.4–5.6 · n 187</div></div>
+      <div><div class="v">91.4%</div><div class="l">ETA intervals that held</div><div class="n">target 90% · n 39,118</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" style="border-top:0;padding-top:0">
+  <div class="wrap">
+    <div class="cta-band rv">
+      <h2>Bring a quorum. We will bring the confidence intervals.</h2>
+      <p>Open the sample dashboard — a real housing society in Baner, Pune, with 187 requests and every number carrying its own evidence.</p>
+      <div class="btnrow">
+        <a class="btn btn-fill" href="dashboard.html">Open the dashboard <span class="arw">→</span></a>
+        <a class="btn btn-line" href="#spine">Read the spine</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="brand" href="#" style="font-size:18px">
+          <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="12.5" fill="none" stroke="currentColor" stroke-width="2.4"/>
+            <path d="M4.6 19.6a12.5 12.5 0 0 0 22.8 0Z" fill="var(--brand)"/>
+            <rect x="0" y="18.3" width="32" height="2.6" rx="1.3" fill="var(--accent)"/>
+          </svg> Quorum</a>
+        <p>Enough people to decide. Enough data to conclude.</p>
+      </div>
+      <div><h4>Product</h4><ul><li><a href="#spine">The spine</a></li><li><a href="#packs">Insight packs</a></li><li><a href="dashboard.html">Dashboard</a></li><li><a href="#">Method cards</a></li></ul></div>
+      <div><h4>Verticals</h4><ul><li><a href="#">Housing society</a></li><li><a href="#">Campus club</a></li><li><a href="#">NGO</a></li><li><a href="#">Alumni chapter</a></li></ul></div>
+      <div><h4>Rigour</h4><ul><li><a href="#uncertainty">Censoring</a></li><li><a href="#">Calibration</a></li><li><a href="#">Conformal ETA</a></li><li><a href="#">Privacy floor</a></li></ul></div>
+    </div>
+    <div class="colophon"><span>Quorum · community operations, statistically honest</span><span>bricolage grotesque · inter tight · jetbrains mono</span></div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var root=document.documentElement, tgl=document.getElementById('tgl');
+  var saved=null; try{ saved=localStorage.getItem('quorum-theme'); }catch(e){}
+  if(saved){ root.setAttribute('data-theme',saved); }
+  function label(){
+    var dark = root.getAttribute('data-theme')==='dark' ||
+      (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    tgl.textContent = dark ? 'Light' : 'Dark';
+  }
+  label();
+  tgl.addEventListener('click',function(){
+    var dark = root.getAttribute('data-theme')==='dark' ||
+      (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var next = dark ? 'light' : 'dark';
+    root.setAttribute('data-theme',next);
+    try{ localStorage.setItem('quorum-theme',next); }catch(e){}
+    label();
+  });
+
+  var els=[].slice.call(document.querySelectorAll('.rv'));
+  if(!('IntersectionObserver' in window)||window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    els.forEach(function(e){ e.classList.add('in'); }); return;
+  }
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(en,i){
+      if(en.isIntersecting){ setTimeout(function(){ en.target.classList.add('in'); }, i*70); io.unobserve(en.target); }
+    });
+  },{rootMargin:'0px 0px -8% 0px',threshold:.08});
+  els.forEach(function(e){ io.observe(e); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quorum — Graticule direction</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5.2 19a12 12 0 0 0 21.6 0Z' fill='%230E6A62'/%3E%3Ccircle cx='16' cy='16' r='12' fill='none' stroke='%23111417' stroke-width='2.5'/%3E%3Crect x='1' y='17.6' width='30' height='2.4' fill='%230E6A62'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   QUORUM — direction B: GRATICULE (precise instrument)
+   Every colour on bare :root for light; redefined for dark under
+   BOTH the media query and [data-theme="dark"].
+   ============================================================ */
+:root{
+  --bg:#F7F8F7;
+  --bg-2:#EFF1F0;
+  --panel:#FFFFFF;
+  --panel-2:#F3F5F4;
+  --ink:#111417;
+  --ink-2:#454C52;
+  --ink-3:#7B848B;
+  --ink-4:#A9B1B6;
+  --teal:#0E6A62;
+  --teal-soft:#DCEAE7;
+  --indigo:#243B55;
+  --hair:#DCE0DF;
+  --hair-2:#C3C9C7;
+  --st-good:#0B7A33; --st-warn:#8A6300; --st-serious:#9C4E1C; --st-crit:#A22A2A;
+  --st-warn-bg:#F6EFDC; --st-crit-bg:#F7E3E1;
+  /* dataviz — separate system from brand colour, validated light + dark */
+  --s1:#2E6E9E; --s2:#C0562F; --s3:#7A5AA8; --s4:#B58500;
+  --chart-surface:#FFFFFF; --grid:#E6EAE9; --axis:#C3C9C7; --limit:#9C4E1C;
+  /* motion — SURGICAL. cubic-bézier only, no keywords, no overshoot. */
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+  --ease-snap:cubic-bezier(0.4,0,0.2,1);
+  --ease-constant:cubic-bezier(0,0,1,1); /* constant velocity, expressed as a curve — never the `linear` keyword */
+  --t-reveal:420ms;
+  --t-hover:150ms;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1113;
+    --bg-2:#0A0C0E;
+    --panel:#161A1C;
+    --panel-2:#121618;
+    --ink:#EDF1F0;
+    --ink-2:#AFB8BC;
+    --ink-3:#7C868C;
+    --ink-4:#5A6469;
+    --teal:#2FA396;
+    --teal-soft:#0E2A28;
+    --indigo:#8FA9C4;
+    --hair:#252B2E;
+    --hair-2:#384145;
+    --st-good:#3FB35F; --st-warn:#D2A238; --st-serious:#DA8352; --st-crit:#E06A63;
+    --st-warn-bg:#2A2210; --st-crit-bg:#2C1917;
+    --s1:#3D87C4; --s2:#CF6636; --s3:#8E6FD0; --s4:#B58500;
+    --chart-surface:#161A1C; --grid:#222829; --axis:#384145; --limit:#DA8352;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1113;
+  --bg-2:#0A0C0E;
+  --panel:#161A1C;
+  --panel-2:#121618;
+  --ink:#EDF1F0;
+  --ink-2:#AFB8BC;
+  --ink-3:#7C868C;
+  --ink-4:#5A6469;
+  --teal:#2FA396;
+  --teal-soft:#0E2A28;
+  --indigo:#8FA9C4;
+  --hair:#252B2E;
+  --hair-2:#384145;
+  --st-good:#3FB35F; --st-warn:#D2A238; --st-serious:#DA8352; --st-crit:#E06A63;
+  --st-warn-bg:#2A2210; --st-crit-bg:#2C1917;
+  --s1:#3D87C4; --s2:#CF6636; --s3:#8E6FD0; --s4:#B58500;
+  --chart-surface:#161A1C; --grid:#222829; --axis:#384145; --limit:#DA8352;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Archivo',ui-sans-serif,system-ui,sans-serif;
+  font-size:15.5px; line-height:1.55; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+h1,h2,h3{ font-family:'Archivo',sans-serif; font-weight:600; letter-spacing:-.035em; line-height:1.02 }
+a{color:inherit}
+.mono{ font-family:'IBM Plex Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums }
+.wrap{ width:min(1240px,92vw); margin-inline:auto }
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ transition-duration:.01ms !important; animation-duration:.01ms !important; scroll-behavior:auto !important }
+  .rv{ opacity:1 !important; transform:none !important }
+}
+.rv{ opacity:0; transform:translateY(12px); transition:opacity var(--t-reveal) var(--ease-out), transform var(--t-reveal) var(--ease-out) }
+.rv.in{ opacity:1; transform:none }
+
+/* ---------- nav: an instrument bezel ---------- */
+nav{ position:sticky; top:0; z-index:50; background:color-mix(in srgb,var(--bg) 92%,transparent); backdrop-filter:blur(8px); border-bottom:1px solid var(--hair) }
+.nav-in{ display:flex; align-items:center; gap:26px; height:60px }
+.brand{ display:flex; align-items:center; gap:9px; font-size:17px; font-weight:700; letter-spacing:-.03em; text-decoration:none }
+.navspace{ margin-left:auto; display:flex; align-items:center; gap:22px }
+.navspace a{ font:500 12px/1 'IBM Plex Mono',monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); text-decoration:none; transition:color var(--t-hover) var(--ease-snap) }
+.navspace a:hover{ color:var(--ink) }
+@media(max-width:860px){ .navspace a:not(.cta){ display:none } }
+.toggle{
+  font:500 11px/1 'IBM Plex Mono',monospace; letter-spacing:.08em; text-transform:uppercase;
+  background:var(--panel); border:1px solid var(--hair-2); color:var(--ink-2);
+  padding:8px 12px; border-radius:3px; cursor:pointer; transition:border-color var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap);
+}
+.toggle:hover{ border-color:var(--teal); color:var(--teal) }
+a.cta{
+  background:var(--teal); color:#fff !important; padding:10px 18px; border-radius:3px;
+  font:600 12px/1 'IBM Plex Mono',monospace !important; letter-spacing:.06em; text-transform:uppercase;
+  transition:transform var(--t-hover) var(--ease-snap), filter var(--t-hover) var(--ease-snap);
+}
+a.cta:hover{ filter:brightness(1.08) }
+a.cta:active{ transform:translateY(1px) }
+
+/* ---------- hero: Architecture A, cinematic centre ---------- */
+.hero{ position:relative; min-height:88vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:80px 0 64px; overflow:hidden }
+.hero-bg{ position:absolute; inset:0; pointer-events:none; z-index:0 }
+.hero-bg svg{ width:100%; height:100%; display:block }
+.hero-in{ position:relative; z-index:2; width:min(1000px,92vw) }
+.eyebrow{ font:500 11px/1 'IBM Plex Mono',monospace; letter-spacing:.2em; text-transform:uppercase; color:var(--teal); margin-bottom:26px }
+h1{ font-size:clamp(2.7rem,7.4vw,6.6rem); letter-spacing:-.05em; line-height:.94; max-width:14ch; margin-inline:auto }
+.hero p{ color:var(--ink-2); max-width:52ch; margin:24px auto 0; font-size:clamp(1rem,1.15vw,1.15rem) }
+.hero .btnrow{ margin-top:34px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap }
+.btn{ display:inline-flex; align-items:center; min-height:46px; padding:13px 24px; border-radius:3px; text-decoration:none;
+  font:600 12px/1 'IBM Plex Mono',monospace; letter-spacing:.08em; text-transform:uppercase;
+  transition:transform var(--t-hover) var(--ease-snap), background var(--t-hover) var(--ease-snap), border-color var(--t-hover) var(--ease-snap) }
+.btn-1{ background:var(--ink); color:var(--bg) } .btn-1:hover{ transform:translateY(-1px) } .btn-1:active{ transform:translateY(1px) }
+.btn-2{ border:1px solid var(--hair-2); color:var(--ink-2) } .btn-2:hover{ border-color:var(--teal); color:var(--teal) }
+
+/* readout strip under the hero — the instrument's own face */
+.readout{
+  position:relative; z-index:2; margin-top:52px; width:min(1000px,92vw);
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--hair);
+  border:1px solid var(--hair); border-radius:4px; overflow:hidden; text-align:left;
+}
+@media(max-width:760px){ .readout{ grid-template-columns:1fr 1fr } }
+.readout > div{ background:var(--panel); padding:16px 16px 14px }
+.readout dt{ font:500 10px/1 'IBM Plex Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
+.readout dd{ font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; font-size:1.5rem; font-weight:600; letter-spacing:-.03em; margin:8px 0 4px }
+.readout small{ display:block; font:400 10.5px/1.45 'IBM Plex Mono',monospace; color:var(--ink-3) }
+
+/* ---------- sections ---------- */
+.sec{ padding:clamp(64px,8vw,112px) 0; border-top:1px solid var(--hair) }
+.sec.alt{ background:var(--bg-2) }
+.sec-head{ display:grid; grid-template-columns:auto 1fr; gap:clamp(20px,4vw,60px); align-items:start; margin-bottom:clamp(32px,4vw,54px) }
+@media(max-width:800px){ .sec-head{ grid-template-columns:1fr } }
+.sec-no{ font:500 11px/1 'IBM Plex Mono',monospace; letter-spacing:.16em; color:var(--ink-4); padding-top:8px; white-space:nowrap }
+.sec-head h2{ font-size:clamp(1.7rem,3.4vw,2.9rem); max-width:20ch }
+.sec-head p{ color:var(--ink-2); margin-top:14px; max-width:60ch; font-size:15px }
+
+/* bento — six streams */
+.bento{ display:grid; grid-template-columns:repeat(6,1fr); gap:1px; background:var(--hair); border:1px solid var(--hair); border-radius:5px; overflow:hidden }
+.cell{ background:var(--panel); padding:24px 22px; grid-column:span 2; transition:background var(--t-hover) var(--ease-snap) }
+.cell:hover{ background:var(--panel-2) }
+.cell.wide{ grid-column:span 3 }
+@media(max-width:900px){ .bento{ grid-template-columns:1fr } .cell,.cell.wide{ grid-column:span 1 } }
+.cell h3{ font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:600; letter-spacing:0; margin-bottom:10px }
+.cell p{ color:var(--ink-2); font-size:14px }
+.cell .tags{ margin-top:14px; display:flex; flex-wrap:wrap; gap:5px }
+.cell .tags span{ font:400 10.5px/1 'IBM Plex Mono',monospace; color:var(--ink-3); border:1px solid var(--hair-2); border-radius:2px; padding:5px 7px }
+.cell .idx{ font:500 10px/1 'IBM Plex Mono',monospace; color:var(--teal); letter-spacing:.14em; display:block; margin-bottom:12px }
+
+/* uncertainty explainer — the direction's thesis, shown not told */
+.uncert{ display:grid; grid-template-columns:1.15fr 1fr; gap:clamp(24px,4vw,56px); align-items:center }
+@media(max-width:900px){ .uncert{ grid-template-columns:1fr } }
+.plate{ background:var(--chart-surface); border:1px solid var(--hair); border-radius:5px; padding:18px 16px 12px }
+.plate svg{ width:100%; height:auto; display:block; font-family:'IBM Plex Mono',monospace }
+.plate figcaption{ font:400 11px/1.5 'IBM Plex Mono',monospace; color:var(--ink-3); margin-top:12px; border-top:1px solid var(--hair); padding-top:10px }
+.uncert h3{ font-size:clamp(1.4rem,2.4vw,2rem); margin-bottom:14px }
+.uncert p{ color:var(--ink-2); margin-bottom:14px; max-width:52ch }
+.uncert .mono{ color:var(--ink) }
+
+/* packs — comparison table */
+table.packs{ width:100%; border-collapse:collapse; font-size:14.5px }
+table.packs th{ text-align:left; font:500 10.5px/1 'IBM Plex Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); padding:0 14px 12px 0; border-bottom:1px solid var(--hair-2) }
+table.packs td{ padding:20px 14px 20px 0; border-bottom:1px solid var(--hair); vertical-align:top }
+table.packs tr:last-child td{ border-bottom:0 }
+.pk{ font-weight:600; font-size:15.5px } .pk small{ display:block; font:400 11px/1.5 'IBM Plex Mono',monospace; color:var(--ink-3); margin-top:5px }
+.q{ color:var(--ink-2); max-width:44ch }
+.mods{ display:flex; flex-wrap:wrap; gap:5px }
+.mods span{ font:400 10.5px/1 'IBM Plex Mono',monospace; color:var(--ink-3); border:1px solid var(--hair-2); border-radius:2px; padding:5px 7px }
+.ship{ font:500 10.5px/1 'IBM Plex Mono',monospace; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; color:var(--st-good) }
+.ship.late{ color:var(--ink-3) }
+
+/* proof — metric bar */
+.mbar{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--hair); border-block:1px solid var(--hair) }
+@media(max-width:800px){ .mbar{ grid-template-columns:1fr 1fr } }
+.mbar > div{ background:var(--bg); padding:30px 22px }
+.mbar .v{ font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; font-size:clamp(1.7rem,3vw,2.5rem); font-weight:600; letter-spacing:-.04em }
+.mbar .l{ font-size:13.5px; color:var(--ink-2); margin-top:8px }
+.mbar .n{ font:400 10.5px/1.5 'IBM Plex Mono',monospace; color:var(--ink-4); margin-top:8px }
+.testi{ display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(20px,3vw,40px); margin-top:clamp(40px,5vw,64px) }
+@media(max-width:840px){ .testi{ grid-template-columns:1fr } }
+.testi blockquote{ border:1px solid var(--hair); border-radius:5px; background:var(--panel); padding:26px 24px }
+.testi p{ font-size:1.05rem; line-height:1.5; letter-spacing:-.015em }
+.testi footer{ margin-top:16px; padding-top:14px; border-top:1px solid var(--hair); font:400 11.5px/1.55 'IBM Plex Mono',monospace; color:var(--ink-3) }
+.testi footer b{ display:block; color:var(--ink); font-weight:600; font-family:'Archivo',sans-serif; font-size:13.5px; letter-spacing:0 }
+
+/* how — horizontal flow */
+.flow{ display:grid; grid-template-columns:repeat(4,1fr); gap:0; border:1px solid var(--hair); border-radius:5px; overflow:hidden; background:var(--hair) }
+@media(max-width:920px){ .flow{ grid-template-columns:1fr 1fr } }
+@media(max-width:600px){ .flow{ grid-template-columns:1fr } }
+.node{ background:var(--panel); padding:26px 22px 24px; position:relative }
+.node + .node{ box-shadow:-1px 0 0 var(--hair) }
+.node .k{ font:500 10px/1 'IBM Plex Mono',monospace; letter-spacing:.14em; color:var(--teal); margin-bottom:14px; display:flex; align-items:center; gap:8px }
+.node .k::after{ content:''; height:1px; flex:1; background:var(--hair-2) }
+.node h3{ font-size:1.05rem; margin-bottom:9px; letter-spacing:-.02em }
+.node p{ font-size:13.5px; color:var(--ink-2) }
+
+/* marquee break */
+.marq{ border-block:1px solid var(--hair); background:var(--bg-2); overflow:hidden; padding:20px 0 }
+.marq-track{ display:flex; gap:44px; white-space:nowrap; animation:slide 44s var(--ease-constant) infinite; will-change:transform }
+.marq-track span{ font:400 12px/1 'IBM Plex Mono',monospace; color:var(--ink-3) }
+.marq-track b{ color:var(--teal); font-weight:500 }
+@keyframes slide{ from{ transform:translateX(0) } to{ transform:translateX(-50%) } }
+@media (prefers-reduced-motion: reduce){ .marq-track{ animation:none } }
+
+/* split CTA */
+.splitcta{ display:grid; grid-template-columns:1.1fr 1fr; border:1px solid var(--hair); border-radius:5px; overflow:hidden }
+@media(max-width:820px){ .splitcta{ grid-template-columns:1fr } }
+.splitcta > div{ padding:clamp(30px,4vw,56px) }
+.splitcta .left{ background:var(--ink); color:var(--bg) }
+.splitcta .left h2{ font-size:clamp(1.8rem,3.4vw,2.8rem); max-width:16ch }
+.splitcta .left p{ color:color-mix(in srgb,var(--bg) 72%,transparent); margin-top:16px; max-width:40ch; font-size:15px }
+.splitcta .right{ background:var(--panel); display:flex; flex-direction:column; justify-content:center; gap:16px }
+.splitcta .right .btn{ justify-content:center }
+.splitcta .right p{ font:400 11.5px/1.6 'IBM Plex Mono',monospace; color:var(--ink-3) }
+
+/* footer */
+footer.site{ border-top:1px solid var(--hair); padding:52px 0 30px; background:var(--bg-2) }
+.f-grid{ display:grid; grid-template-columns:1.7fr repeat(3,1fr); gap:30px }
+@media(max-width:800px){ .f-grid{ grid-template-columns:1fr 1fr } }
+.f-grid h4{ font:500 10px/1 'IBM Plex Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin-bottom:14px }
+.f-grid ul{ list-style:none; display:grid; gap:9px }
+.f-grid a{ font-size:13.5px; color:var(--ink-2); text-decoration:none }
+.f-grid a:hover{ color:var(--teal) }
+.f-bottom{ margin-top:40px; padding-top:18px; border-top:1px solid var(--hair); display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; font:400 11px/1.5 'IBM Plex Mono',monospace; color:var(--ink-4) }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-in">
+    <a class="brand" href="#top">
+      <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
+        <clipPath id="m1"><circle cx="16" cy="16" r="12"/></clipPath>
+        <g clip-path="url(#m1)"><rect x="0" y="19" width="32" height="13" fill="var(--teal)"/></g>
+        <circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2"/>
+        <rect x="1" y="18" width="30" height="2" fill="var(--teal)"/>
+      </svg>
+      Quorum
+    </a>
+    <div class="navspace">
+      <a href="#spine">Spine</a>
+      <a href="#uncertainty">Uncertainty</a>
+      <a href="#packs">Packs</a>
+      <a href="dashboard.html">Dashboard</a>
+      <button class="toggle" id="tt">Dark</button>
+      <a class="cta" href="#start">Start</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO — cinematic centre over a live graticule ============ -->
+<header class="hero" id="top">
+  <div class="hero-bg" aria-hidden="true"><svg id="herobg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"></svg></div>
+  <div class="hero-in">
+    <div class="eyebrow rv">Community operations · calibrated, not asserted</div>
+    <h1 class="rv">The number, and how sure it is.</h1>
+    <p class="rv">Quorum measures a community the way an instrument measures anything else — with a
+      scale, a reading, and the width of the reading's uncertainty printed beside it.</p>
+    <div class="btnrow rv">
+      <a class="btn btn-1" href="#start">Open a community</a>
+      <a class="btn btn-2" href="dashboard.html">Inspect the dashboard</a>
+    </div>
+  </div>
+
+  <dl class="readout rv">
+    <div><dt>median resolution</dt><dd>4.3 d</dd><small>95% CI 3.4–5.6 · n 187 · 44 censored</small></div>
+    <div><dt>ETA, RQ-2214</dt><dd>2–9 d</dd><small>conformal-90 · n 143 calibration</small></div>
+    <div><dt>EWMA first response</dt><dd>19.3 h</dd><small>UCL 22.3 · LCL 13.7 · 24 periods</small></div>
+    <div><dt>tanker cycle</dt><dd style="color:var(--ink-3)">— </dd><small>not enough data yet · has 11 of 30</small></div>
+  </dl>
+</header>
+
+<!-- ============ SPINE — bento ============ -->
+<section class="sec" id="spine">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-no">§ 01 / spine</div>
+      <div>
+        <h2>Six streams. Every statistic written once.</h2>
+        <p>A society's complaint, a club's task and an NGO's volunteer request are one shape wearing
+        three names. Quorum maps every vertical onto six canonical streams, so survival analysis is
+        implemented once rather than once per community type.</p>
+      </div>
+    </div>
+    <div class="bento">
+      <div class="cell wide rv"><span class="idx">STREAM 02 · the load-bearing one</span>
+        <h3>request_flow</h3>
+        <p>Anything that opens, gets assigned, progresses and closes — with a category, an owner and
+        timestamps. Complaints, maintenance jobs, club task boards, membership applications.</p>
+        <div class="tags"><span>survival</span><span>spc</span><span>queueing</span><span>changepoint</span><span>conformal eta</span></div>
+      </div>
+      <div class="cell wide rv"><span class="idx">STREAM 03</span>
+        <h3>ledger</h3>
+        <p>Signed money movements with a category and a counterparty. Maintenance dues, contributions,
+        vendor payments, event budgets.</p>
+        <div class="tags"><span>forecast</span><span>runway</span><span>benford</span><span>dp aggregates</span></div>
+      </div>
+      <div class="cell rv"><span class="idx">STREAM 01</span><h3>member_lifecycle</h3>
+        <p>Join, activate, lapse, exit.</p><div class="tags"><span>retention</span><span>churn risk</span></div></div>
+      <div class="cell rv"><span class="idx">STREAM 04</span><h3>participation</h3>
+        <p>Attendance, RSVPs, volunteer hours, upvotes.</p><div class="tags"><span>segmentation</span><span>network</span></div></div>
+      <div class="cell rv"><span class="idx">STREAM 05</span><h3>signal</h3>
+        <p>Free text and ordinal ratings.</p><div class="tags"><span>topics</span><span>near-dup</span><span>ordinal</span></div></div>
+      <div class="cell rv" style="grid-column:span 6"><span class="idx">STREAM 06</span><h3>decision</h3>
+        <p>Polls, ballots, budget allocations — and the social-choice disclosure that most tools skip:
+        when a poll contains a Condorcet cycle, the “winner” was chosen by the counting rule rather
+        than by the community, and Quorum says so on the result page instead of in a help article.</p>
+        <div class="tags"><span>voting</span><span>participatory budgeting</span><span>representativeness</span><span>k-anonymity</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE UNCERTAINTY THESIS ============ -->
+<section class="sec alt" id="uncertainty">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-no">§ 02 / reading</div>
+      <div>
+        <h2>Most of this product is uncertainty, so most of the design is too.</h2>
+        <p>A survival curve is mostly its band. A control chart is mostly its limits. A conformal ETA
+        <em>is</em> an interval — there is no point estimate at all. And for a community in its first
+        months, the most common tile on the screen says <span class="mono">not enough data yet</span>.</p>
+      </div>
+    </div>
+    <div class="uncert">
+      <figure class="plate rv">
+        <svg id="plate" viewBox="0 0 760 330" role="img" aria-label="Kaplan-Meier survival curve with a ruled 95 percent confidence band and tick-capped interval on the median."></svg>
+        <figcaption>survival.kaplan_meier · n 187 · 44 censored · greenwood-95 · as of 29 Aug 2026 06:15 IST</figcaption>
+      </figure>
+      <div class="rv">
+        <h3>Uncertainty you can read off a scale.</h3>
+        <p>In this direction a confidence band is bounded by hairlines and filled with a fine rule,
+        never a soft wash. Every interval terminates in real tick caps against a real graticule. You
+        can put a straightedge on it.</p>
+        <p>Control limits are drawn in a <b>different</b> language from confidence bands, because they
+        are a different object: a decision boundary, not an estimate. Confusing the two is how a
+        committee ends up 95%-confident about a threshold.</p>
+        <p class="mono" style="font-size:12.5px;color:var(--ink-3)">
+          interval_kind ∈ { greenwood-95 · bootstrap-bca-95 · credible-95 · conformal-90 ·
+          predictive-80 · control-limits · none }
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PACKS — comparison table ============ -->
+<section class="sec" id="packs">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-no">§ 03 / packs</div>
+      <div><h2>Four packs, each answering one committee question.</h2></div>
+    </div>
+    <table class="packs">
+      <thead><tr><th>Pack</th><th>The question it answers</th><th class="hide">Modules</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr class="rv"><td class="pk">01 · Operations<small>request_flow</small></td>
+          <td class="q">Is this getting better or worse — and is last week's dip a real shift or just noise?</td>
+          <td><div class="mods"><span>survival</span><span>spc</span><span>queueing</span><span>changepoint</span></div></td>
+          <td class="ship">Ships first</td></tr>
+        <tr class="rv"><td class="pk">03 · Foresight<small>ledger · request_flow</small></td>
+          <td class="q">What is coming, how sure are we, and was our last forecast actually any good?</td>
+          <td><div class="mods"><span>forecast</span><span>calibration</span><span>conformal</span><span>drift</span></div></td>
+          <td class="ship">Ships second</td></tr>
+        <tr class="rv"><td class="pk">04 · Voice<small>decision · participation · signal</small></td>
+          <td class="q">What does the community actually want, and whose voice is missing from the answer?</td>
+          <td><div class="mods"><span>voting</span><span>budgeting</span><span>survey</span><span>network</span><span>privacy</span></div></td>
+          <td class="ship">Ships third</td></tr>
+        <tr class="rv"><td class="pk">02 · Comparison<small>all streams</small></td>
+          <td class="q">Is the new vendor actually better, or did it just have a lucky month? A vendor at 3-for-3 does not outrank one at 47-for-52.</td>
+          <td><div class="mods"><span>bayes</span><span>experiments</span><span>bandits</span></div></td>
+          <td class="ship late">Last — needs history</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ MARQUEE BREAK ============ -->
+<div class="marq" aria-hidden="true">
+  <div class="marq-track" id="marq"></div>
+</div>
+
+<!-- ============ PROOF — metric bar + testimonials ============ -->
+<section class="sec" style="padding-top:0;border-top:0">
+  <div class="mbar">
+    <div><div class="v">41</div><div class="l">communities</div><div class="n">exact count · interval_kind: none</div></div>
+    <div><div class="v">218,406</div><div class="l">requests in request_flow</div><div class="n">exact count · interval_kind: none</div></div>
+    <div><div class="v">4.3 d</div><div class="l">median resolution, all tenants</div><div class="n">95% CI 4.1–4.6 · n 218,406 · 11,204 censored</div></div>
+    <div><div class="v">91.4%</div><div class="l">ETA intervals that contained the truth</div><div class="n">target 90% · n 39,118 · 95% CI 91.1–91.7</div></div>
+  </div>
+  <div class="wrap">
+    <div class="testi">
+      <blockquote class="rv">
+        <p>“I stopped arguing about whether the plumber was better and started showing the curve, the
+        band, and the fact that it rests on 52 jobs. The meeting took four minutes.”</p>
+        <footer><b>Meenakshi Deshpande</b>Hon. Secretary · Vaikunth Heights CHS, Baner, Pune · 214 flats, wings A–F</footer>
+      </blockquote>
+      <blockquote class="rv">
+        <p>“For two months it just told us how much more data it needed before it would say anything.
+        That is the reason I trust the third month.”</p>
+        <footer><b>Kavya Iyer</b>Coordinator · Aavartan Robotics &amp; Automation Club · 96 members, 14 project teams</footer>
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW — horizontal flow ============ -->
+<section class="sec alt">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-no">§ 04 / method</div>
+      <div><h2>From your record to a number you can defend.</h2></div>
+    </div>
+    <div class="flow">
+      <div class="node rv"><div class="k">01 MAP</div><h3>Streams, not schemas</h3>
+        <p>A vertical manifest maps your entities onto the six streams. Nothing is rewritten per community type.</p></div>
+      <div class="node rv"><div class="k">02 GATE</div><h3>Minimum n, declared up front</h3>
+        <p>Each method states its floor — 30 events for a survival curve, 20 periods for control limits, 5 members for any published cell.</p></div>
+      <div class="node rv"><div class="k">03 WRAP</div><h3>Every figure in an envelope</h3>
+        <p>Value, n, interval, interval kind, method id, and the assumption checks the service ran on its own output.</p></div>
+      <div class="node rv"><div class="k">04 NARRATE</div><h3>The model reads, never computes</h3>
+        <p>The assistant's tools return envelopes. It may quote and explain; it may not do arithmetic. Enforced by a grounding test.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="sec" id="start">
+  <div class="wrap">
+    <div class="splitcta rv">
+      <div class="left">
+        <h2>Instrument your community.</h2>
+        <p>Onboard by slug, map your streams, enable the packs you need. Expect honest silence before
+        you get honest answers — that order is the point.</p>
+      </div>
+      <div class="right">
+        <a class="btn btn-1" href="dashboard.html">Open the sample dashboard</a>
+        <a class="btn btn-2" href="../index.html">Compare the three directions</a>
+        <p>No figure renders without its n and its interval. That is a type constraint in the API, not a style guideline.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="f-grid">
+      <div>
+        <a class="brand" href="#top" style="margin-bottom:14px">
+          <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true">
+            <clipPath id="m2"><circle cx="16" cy="16" r="12"/></clipPath>
+            <g clip-path="url(#m2)"><rect x="0" y="19" width="32" height="13" fill="var(--teal)"/></g>
+            <circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2"/>
+            <rect x="1" y="18" width="30" height="2" fill="var(--teal)"/>
+          </svg> Quorum
+        </a>
+        <p style="color:var(--ink-2);font-size:13.5px;max-width:36ch">Enough people to decide. Enough data to conclude.</p>
+      </div>
+      <div><h4>Product</h4><ul><li><a href="#spine">Data spine</a></li><li><a href="#packs">Insight packs</a></li><li><a href="dashboard.html">Dashboard</a></li></ul></div>
+      <div><h4>Method</h4><ul><li><a href="#">Method cards</a></li><li><a href="#uncertainty">Evidence contract</a></li><li><a href="#">Minimum-n policy</a></li></ul></div>
+      <div><h4>Verticals</h4><ul><li><a href="#">Housing societies</a></li><li><a href="#">Campus clubs</a></li><li><a href="#">Co-operatives</a></li></ul></div>
+    </div>
+    <div class="f-bottom">
+      <span>Direction B — Graticule · precise instrument</span>
+      <span>Every figure on this page carries its n and its interval.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+var root=document.documentElement, tt=document.getElementById('tt');
+function isDark(){ return root.getAttribute('data-theme')==='dark' ||
+  (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+try{ var st=localStorage.getItem('quorum-theme'); if(st) root.setAttribute('data-theme',st); }catch(e){}
+function label(){ tt.textContent=isDark()?'Light':'Dark'; } label();
+tt.addEventListener('click',function(){
+  var n=isDark()?'light':'dark'; root.setAttribute('data-theme',n);
+  try{ localStorage.setItem('quorum-theme',n); }catch(e){} label(); paint();
+});
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){ label(); paint(); });
+function cv(n){ return getComputedStyle(root).getPropertyValue(n).trim(); }
+
+var KM=[[0,1,1,1],[1,.861,.808,.902],[2,.744,.678,.799],[3,.615,.543,.680],[4,.521,.448,.589],
+        [5,.447,.375,.516],[6,.392,.322,.461],[8,.321,.254,.390],[10,.268,.204,.336],
+        [14,.212,.152,.279],[18,.176,.119,.242],[21,.158,.103,.224],[28,.131,.079,.196],[35,.119,.068,.184]];
+
+/* hero background: a full-bleed graticule with the curve drawn faintly across it */
+function heroBG(){
+  var svg=document.getElementById('herobg'); if(!svg) return;
+  var W=1600,H=900,o=[];
+  var hair=cv('--hair'), s1=cv('--s1'), teal=cv('--teal');
+  for(var x=0;x<=W;x+=50) o.push('<line x1="'+x+'" y1="0" x2="'+x+'" y2="'+H+'" stroke="'+hair+'" stroke-width="1" opacity="'+(x%250===0?'0.9':'0.42')+'"/>');
+  for(var y=0;y<=H;y+=50) o.push('<line x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'" stroke="'+hair+'" stroke-width="1" opacity="'+(y%250===0?'0.9':'0.42')+'"/>');
+  var L=140,R=140,T=180,B=170;
+  var px=function(d){ return L+d/36*(W-L-R); }, py=function(s){ return T+(1-s)*(H-T-B); };
+  var up=[],dn=[],ln='M '+px(0)+' '+py(1);
+  for(var i=0;i<KM.length;i++){
+    var d=KM[i][0], nx=(i+1<KM.length)?KM[i+1][0]:36;
+    up.push(px(d)+','+py(KM[i][3]), px(nx)+','+py(KM[i][3]));
+    ln+=' L '+px(d)+' '+py(KM[i][1])+' L '+px(nx)+' '+py(KM[i][1]);
+  }
+  for(var j=KM.length-1;j>=0;j--){
+    var d2=KM[j][0], nx2=(j+1<KM.length)?KM[j+1][0]:36;
+    dn.push(px(nx2)+','+py(KM[j][2]), px(d2)+','+py(KM[j][2]));
+  }
+  o.push('<polygon points="'+up.concat(dn).join(' ')+'" fill="'+s1+'" opacity="0.07"/>');
+  o.push('<path d="'+ln+'" fill="none" stroke="'+s1+'" stroke-width="2.5" opacity="0.20"/>');
+  o.push('<line x1="'+px(3.4)+'" y1="'+py(.5)+'" x2="'+px(5.6)+'" y2="'+py(.5)+'" stroke="'+teal+'" stroke-width="3" opacity="0.28"/>');
+  svg.innerHTML=o.join('');
+}
+
+/* the plate: a graticule-language survival plate with ruled band and tick caps */
+function plate(){
+  var svg=document.getElementById('plate'); if(!svg) return;
+  var W=760,H=330,L=54,R=22,T=18,B=48, o=[];
+  var px=function(d){ return L+d/36*(W-L-R); }, py=function(s){ return T+(1-s)*(H-T-B); };
+  var grid=cv('--grid'), axis=cv('--axis'), ink3=cv('--ink-3'), ink=cv('--ink'), ink2=cv('--ink-2'),
+      s1=cv('--s1'), teal=cv('--teal'), surf=cv('--chart-surface');
+
+  o.push('<defs><pattern id="rule" width="6" height="4" patternUnits="userSpaceOnUse">'+
+         '<rect width="6" height="4" fill="'+s1+'" opacity="0.06"/>'+
+         '<line x1="0" y1="0.5" x2="6" y2="0.5" stroke="'+s1+'" stroke-width="0.8" opacity="0.4"/></pattern></defs>');
+
+  // graticule: minor every 10%, major every 20%, plus minor x every day
+  for(var d=0;d<=36;d++){
+    if(d%1===0) o.push('<line x1="'+px(d)+'" y1="'+py(0)+'" x2="'+px(d)+'" y2="'+(py(0)+(d%5===0?7:3.5))+'" stroke="'+axis+'" stroke-width="1"/>');
+  }
+  for(var g=0;g<=10;g++){
+    var yy=py(g/10);
+    o.push('<line x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'" stroke="'+grid+'" stroke-width="1" opacity="'+(g%2===0?1:.55)+'"/>');
+    if(g%2===0) o.push('<text x="'+(L-9)+'" y="'+(yy+4)+'" text-anchor="end" font-size="10.5" fill="'+ink3+'">'+(g*10)+'</text>');
+  }
+  for(var d2=0;d2<=35;d2+=5) o.push('<text x="'+px(d2)+'" y="'+(py(0)+22)+'" text-anchor="middle" font-size="10.5" fill="'+ink3+'">'+d2+'</text>');
+  o.push('<text x="'+(L-9)+'" y="'+(T-4)+'" text-anchor="end" font-size="9.5" fill="'+ink3+'">%</text>');
+  o.push('<text x="'+((L+W-R)/2)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10.5" fill="'+ink3+'">days since raised</text>');
+
+  var up=[],dn=[],ln='M '+px(0)+' '+py(1);
+  for(var i=0;i<KM.length;i++){
+    var d3=KM[i][0], nx=(i+1<KM.length)?KM[i+1][0]:36;
+    up.push(px(d3)+','+py(KM[i][3]), px(nx)+','+py(KM[i][3]));
+    ln+=' L '+px(d3)+' '+py(KM[i][1])+' L '+px(nx)+' '+py(KM[i][1]);
+  }
+  for(var j=KM.length-1;j>=0;j--){
+    var d4=KM[j][0], nx2=(j+1<KM.length)?KM[j+1][0]:36;
+    dn.push(px(nx2)+','+py(KM[j][2]), px(d4)+','+py(KM[j][2]));
+  }
+  o.push('<polygon points="'+up.concat(dn).join(' ')+'" fill="url(#rule)" stroke="'+s1+'" stroke-width="1" stroke-opacity=".6"/>');
+  o.push('<path d="'+ln+'" fill="none" stroke="'+s1+'" stroke-width="2" stroke-linejoin="round"/>');
+
+  // median with tick caps — an interval you can put a straightedge on
+  var y50=py(.5);
+  o.push('<line x1="'+L+'" y1="'+y50+'" x2="'+px(5.6)+'" y2="'+y50+'" stroke="'+ink3+'" stroke-width="1" stroke-dasharray="1 3"/>');
+  o.push('<line x1="'+px(3.4)+'" y1="'+y50+'" x2="'+px(5.6)+'" y2="'+y50+'" stroke="'+teal+'" stroke-width="2"/>');
+  [3.4,5.6].forEach(function(v){ o.push('<line x1="'+px(v)+'" y1="'+(y50-7)+'" x2="'+px(v)+'" y2="'+(y50+7)+'" stroke="'+teal+'" stroke-width="2"/>'); });
+  o.push('<circle cx="'+px(4.3)+'" cy="'+y50+'" r="4.5" fill="'+teal+'" stroke="'+surf+'" stroke-width="2"/>');
+  o.push('<text x="'+(px(5.6)+12)+'" y="'+(y50-6)+'" font-size="11.5" font-weight="600" fill="'+ink+'">median 4.3 d</text>');
+  o.push('<text x="'+(px(5.6)+12)+'" y="'+(y50+9)+'" font-size="10.5" fill="'+ink2+'">95% CI 3.4 – 5.6</text>');
+
+  o.push('<line x1="'+L+'" y1="'+py(0)+'" x2="'+(W-R)+'" y2="'+py(0)+'" stroke="'+axis+'" stroke-width="1"/>');
+  o.push('<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+py(0)+'" stroke="'+axis+'" stroke-width="1"/>');
+  svg.innerHTML=o.join('');
+}
+
+function paint(){ heroBG(); plate(); }
+
+/* marquee content — method ids, doubled for a seamless loop */
+(function(){
+  var m=document.getElementById('marq'); if(!m) return;
+  var ids=['survival.kaplan_meier','spc.ewma_first_response','queueing.erlang_c_roster',
+    'conformal.split_eta','forecast.dues_collection','calibration.pit_histogram',
+    'bayes.beta_binomial_shrinkage','voting.condorcet_disclosure','budgeting.fairness_report',
+    'privacy.k_anonymity_floor','changepoint.pelt','drift.population_stability'];
+  var html=ids.map(function(i){ return '<span><b>▸</b> '+i+'</span>'; }).join('');
+  m.innerHTML=html+html;
+})();
+
+/* reveals — surgical: short, no overshoot, tight stagger */
+var items=[].slice.call(document.querySelectorAll('.rv'));
+if(!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  items.forEach(function(el){ el.classList.add('in'); });
+}else{
+  var io=new IntersectionObserver(function(es){
+    var i=0;
+    es.forEach(function(e){ if(!e.isIntersecting) return;
+      e.target.style.transitionDelay=(Math.min(i,5)*60)+'ms'; i++;
+      e.target.classList.add('in'); io.unobserve(e.target); });
+  },{threshold:.1,rootMargin:'0px 0px -6% 0px'});
+  items.forEach(function(el){ io.observe(el); });
+  [].slice.call(document.querySelectorAll('.hero .rv, .readout')).forEach(function(el,i){
+    el.style.transitionDelay=(60+i*70)+'ms'; el.classList.add('in'); io.unobserve(el);
+  });
+}
+if(document.fonts && document.fonts.ready){ document.fonts.ready.then(paint); }
+paint();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quorum — Operations</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12.5' fill='none' stroke='%231A1714' stroke-width='2.5'/%3E%3Cpath d='M4.6 19.6a12.5 12.5 0 0 0 22.8 0Z' fill='%2313594A'/%3E%3Crect x='0' y='18.2' width='32' height='2.6' rx='1.3' fill='%23E07A3F'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   QUORUM — house direction
+   Graticule's instrument geometry · Almanac's spacing comfort
+   Warm limestone + spruce + apricot · Bricolage / Inter Tight / JB Mono
+   Every colour on bare :root for light, redefined for dark twice.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  /* surfaces — warm limestone, never grey, never cream-yellow */
+  --canvas:#FAF7F2;
+  --canvas-2:#F3EFE8;
+  --panel:#FFFFFF;
+  --panel-2:#F7F4EE;
+  /* ink — warm black, not #000, not blue-grey */
+  --ink:#1A1714;
+  --ink-2:#544E47;
+  --ink-3:#8A8278;
+  --ink-4:#B8AFA3;
+  /* brand */
+  --brand:#13594A;
+  --brand-hi:#1B7561;
+  --brand-soft:#DDEBE4;
+  --accent:#E07A3F;
+  --accent-soft:#FBE8DA;
+  /* hairlines */
+  --hair:#E6DFD4;
+  --hair-2:#D3C9BA;
+  /* status */
+  --ok:#1C7A47; --warn:#8A6209; --warn-bg:#F8EFD9;
+  --stop:#A33327; --stop-bg:#F9E4E0;
+  /* dataviz — a separate system from brand colour */
+  --s1:#2F6F9F; --s2:#C0562F; --s3:#7A5AA8; --s4:#B58500;
+  --chart:#FFFFFF; --grid:#EDE7DC; --axis:#CFC5B6; --limit:#C0562F;
+  /* spacing — 8pt, Almanac-comfortable */
+  --sp1:4px; --sp2:8px; --sp3:12px; --sp4:16px; --sp5:24px;
+  --sp6:32px; --sp7:48px; --sp8:64px; --sp9:96px; --sp10:128px;
+  --r-sm:6px; --r:10px; --r-lg:16px;
+  /* motion — cubic-bézier only */
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-snap:cubic-bezier(.4,0,.2,1);
+  --t-fill:520ms; --t-hover:220ms; --t-reveal:640ms;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --canvas:#12100E; --canvas-2:#0C0A09; --panel:#1B1815; --panel-2:#211D19;
+  --ink:#F4F0EA; --ink-2:#B5ADA2; --ink-3:#877F74; --ink-4:#5E574E;
+  --brand:#3DA88C; --brand-hi:#54C0A2; --brand-soft:#123028;
+  --accent:#F09155; --accent-soft:#332013;
+  --hair:#2C2722; --hair-2:#403830;
+  --ok:#43B573; --warn:#D3A544; --warn-bg:#2B2210;
+  --stop:#E0705F; --stop-bg:#2E1A16;
+  --s1:#4C90CB; --s2:#D4703F; --s3:#9A7AD8; --s4:#C79A22;
+  --chart:#1B1815; --grid:#26221D; --axis:#403830; --limit:#D4703F;
+}}
+:root[data-theme="dark"]{
+  --canvas:#12100E; --canvas-2:#0C0A09; --panel:#1B1815; --panel-2:#211D19;
+  --ink:#F4F0EA; --ink-2:#B5ADA2; --ink-3:#877F74; --ink-4:#5E574E;
+  --brand:#3DA88C; --brand-hi:#54C0A2; --brand-soft:#123028;
+  --accent:#F09155; --accent-soft:#332013;
+  --hair:#2C2722; --hair-2:#403830;
+  --ok:#43B573; --warn:#D3A544; --warn-bg:#2B2210;
+  --stop:#E0705F; --stop-bg:#2E1A16;
+  --s1:#4C90CB; --s2:#D4703F; --s3:#9A7AD8; --s4:#C79A22;
+  --chart:#1B1815; --grid:#26221D; --axis:#403830; --limit:#D4703F;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--canvas); color:var(--ink);
+  font-family:'Inter Tight',ui-sans-serif,system-ui,sans-serif;
+  font-size:16.5px; line-height:1.62; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+h1,h2,h3,.disp{ font-family:'Bricolage Grotesque',ui-sans-serif,sans-serif; font-weight:600; letter-spacing:-.032em; line-height:1.04 }
+a{color:inherit}
+.mono{ font-family:'JetBrains Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums }
+.wrap{ width:min(1200px,90vw); margin-inline:auto }
+.lbl{ font:500 10.5px/1 'JetBrains Mono',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3) }
+::selection{ background:var(--accent-soft); color:var(--ink) }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:3px }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ transition-duration:.01ms !important; animation-duration:.01ms !important; scroll-behavior:auto !important }
+  .rv{ opacity:1 !important; transform:none !important }
+}
+.rv{ opacity:0; transform:translateY(14px); transition:opacity var(--t-reveal) var(--ease), transform var(--t-reveal) var(--ease) }
+.rv.in{ opacity:1; transform:none }
+
+
+
+/* ═══ dashboard shell ═══ */
+body{ font-size:16px }
+.app{ display:grid; grid-template-columns:264px 1fr; min-height:100vh }
+@media(max-width:1080px){ .app{ grid-template-columns:1fr } }
+
+/* ─── sidebar ─── */
+.side{ background:var(--panel); border-right:1px solid var(--hair); padding:var(--sp5);
+  display:flex; flex-direction:column; gap:var(--sp6); position:sticky; top:0; height:100vh; overflow-y:auto }
+@media(max-width:1080px){ .side{ position:static; height:auto; border-right:0; border-bottom:1px solid var(--hair) } }
+.brand{ display:flex; align-items:center; gap:10px; text-decoration:none;
+  font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:19px; letter-spacing:-.03em; color:var(--ink) }
+.tenant{ display:flex; flex-direction:column; gap:var(--sp2) }
+.tn{ display:flex; align-items:center; gap:var(--sp3); padding:var(--sp3) var(--sp4); border-radius:var(--r);
+  border:1px solid transparent; cursor:pointer; text-align:left; background:transparent; width:100%;
+  transition:background var(--t-hover) var(--ease-snap), border-color var(--t-hover) var(--ease-snap) }
+.tn:hover{ background:var(--panel-2) }
+.tn.on{ background:var(--brand-soft); border-color:color-mix(in srgb,var(--brand) 26%,transparent) }
+.tn .dot{ width:26px; height:26px; border-radius:8px; flex:none; display:grid; place-items:center;
+  background:var(--brand); color:#fff; font:600 11px/1 'JetBrains Mono',monospace }
+.tn .nm{ font-weight:600; font-size:14.5px; letter-spacing:-.01em; color:var(--ink) }
+.tn .sub{ font:400 11px/1.4 'JetBrains Mono',monospace; color:var(--ink-3) }
+.navgrp{ display:flex; flex-direction:column; gap:2px }
+.navgrp > .lbl{ padding:0 var(--sp4) var(--sp3) }
+.ni{ display:flex; align-items:center; gap:var(--sp3); padding:11px var(--sp4); border-radius:var(--r-sm);
+  text-decoration:none; color:var(--ink-2); font-size:14.5px; font-weight:500; position:relative;
+  transition:background var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap) }
+.ni:hover{ background:var(--panel-2); color:var(--ink) }
+.ni.on{ background:var(--panel-2); color:var(--ink); font-weight:600 }
+.ni.on::before{ content:''; position:absolute; left:0; top:9px; bottom:9px; width:2.5px; border-radius:2px; background:var(--accent) }
+.ni .c{ margin-left:auto; font:400 11px/1 'JetBrains Mono',monospace; color:var(--ink-4) }
+.side-foot{ margin-top:auto; padding-top:var(--sp5); border-top:1px solid var(--hair) }
+
+/* ─── main ─── */
+.main{ min-width:0; display:flex; flex-direction:column }
+.topbar{ position:sticky; top:0; z-index:40; background:color-mix(in srgb,var(--canvas) 90%,transparent);
+  backdrop-filter:blur(12px); border-bottom:1px solid var(--hair);
+  padding:var(--sp5) var(--sp7); display:flex; align-items:center; gap:var(--sp5); flex-wrap:wrap }
+@media(max-width:720px){ .topbar{ padding:var(--sp5) var(--sp5) } }
+.topbar h1{ font-size:clamp(1.45rem,2.4vw,1.95rem); letter-spacing:-.035em }
+.topbar .sub{ font:400 12px/1.5 'JetBrains Mono',monospace; color:var(--ink-3); margin-top:5px }
+.topbar .right{ margin-left:auto; display:flex; align-items:center; gap:var(--sp3) }
+.asof{ text-align:right; font:400 11px/1.6 'JetBrains Mono',monospace; color:var(--ink-4) }
+.tgl{ font:500 11px/1 'JetBrains Mono',monospace; letter-spacing:.1em; text-transform:uppercase;
+  background:transparent; border:1px solid var(--hair-2); color:var(--ink-2);
+  padding:10px 14px; border-radius:var(--r-sm); cursor:pointer; min-height:38px;
+  transition:border-color var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap) }
+.tgl:hover{ border-color:var(--accent); color:var(--accent) }
+.content{ padding:var(--sp7); display:flex; flex-direction:column; gap:var(--sp5) }
+@media(max-width:720px){ .content{ padding:var(--sp5) } }
+
+/* ─── grid ─── */
+.row{ display:grid; gap:var(--sp5) }
+.r-4{ grid-template-columns:repeat(4,1fr) }
+.r-32{ grid-template-columns:2fr 1fr }
+.r-23{ grid-template-columns:1fr 2fr }
+@media(max-width:1240px){ .r-4{ grid-template-columns:repeat(2,1fr) } }
+@media(max-width:1080px){ .r-32,.r-23{ grid-template-columns:1fr } }
+@media(max-width:620px){ .r-4{ grid-template-columns:1fr } }
+
+/* ─── card ─── */
+.card{ background:var(--panel); border:1px solid var(--hair); border-radius:var(--r-lg);
+  padding:var(--sp5); display:flex; flex-direction:column; gap:var(--sp4); min-width:0;
+  transition:border-color var(--t-hover) var(--ease-snap), box-shadow var(--t-hover) var(--ease-snap) }
+.card:hover{ border-color:var(--hair-2); box-shadow:0 1px 2px rgba(0,0,0,.02),0 8px 28px -12px rgba(0,0,0,.10) }
+.card.muted{ background:var(--panel-2) }
+.chead{ display:flex; align-items:flex-start; gap:var(--sp3) }
+.chead h3{ font-size:1.05rem; letter-spacing:-.025em; line-height:1.25 }
+.chead .sub{ font:400 11.5px/1.5 'JetBrains Mono',monospace; color:var(--ink-3); margin-top:5px }
+.chead .pill{ margin-left:auto; flex:none }
+
+/* state pills — small, quiet, never shouty */
+.pill{ font:500 10px/1 'JetBrains Mono',monospace; letter-spacing:.1em; text-transform:uppercase;
+  padding:6px 9px; border-radius:999px; border:1px solid; white-space:nowrap }
+.p-est{ color:var(--brand); border-color:color-mix(in srgb,var(--brand) 32%,transparent); background:var(--brand-soft) }
+.p-qual{ color:var(--warn); border-color:color-mix(in srgb,var(--warn) 34%,transparent); background:var(--warn-bg) }
+.p-hold{ color:var(--stop); border-color:color-mix(in srgb,var(--stop) 34%,transparent); background:var(--stop-bg) }
+.p-wait{ color:var(--ink-3); border-color:var(--hair-2); background:transparent }
+
+/* the number — big, tabular, unmissable */
+.big{ font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-weight:600;
+  font-size:clamp(2.6rem,4.4vw,3.4rem); letter-spacing:-.05em; line-height:1 }
+.big .u{ font-size:.38em; color:var(--ink-3); margin-left:6px; letter-spacing:0 }
+.big.range{ display:flex; align-items:baseline; gap:14px }
+.big.range i{ font-style:normal; width:22px; height:2px; background:var(--ink-4); display:inline-block; margin-bottom:.28em }
+
+/* meta strip — replaces paragraphs of prose */
+.meta{ display:flex; flex-wrap:wrap; gap:var(--sp2) var(--sp5); font:400 12px/1.5 'JetBrains Mono',monospace; color:var(--ink-3) }
+.meta b{ color:var(--ink-2); font-weight:500 }
+
+/* progressive disclosure — the prose lives here, closed by default */
+details.why{ border-top:1px solid var(--hair); padding-top:var(--sp4); margin-top:auto }
+details.why summary{ list-style:none; cursor:pointer; display:flex; align-items:center; gap:8px;
+  font:500 11px/1 'JetBrains Mono',monospace; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+  transition:color var(--t-hover) var(--ease-snap) }
+details.why summary::-webkit-details-marker{ display:none }
+details.why summary:hover{ color:var(--accent) }
+details.why summary::after{ content:'+'; margin-left:auto; font-size:14px; line-height:1;
+  transition:transform var(--t-hover) var(--ease) }
+details.why[open] summary::after{ transform:rotate(45deg) }
+details.why .body{ font-size:14.5px; line-height:1.65; color:var(--ink-2); padding-top:var(--sp4) }
+details.why .body p + p{ margin-top:var(--sp3) }
+details.why .body b{ color:var(--ink); font-weight:600 }
+
+/* footer of a card: the audit line */
+.audit{ display:flex; align-items:center; gap:var(--sp4); flex-wrap:wrap;
+  font:400 11px/1 'JetBrains Mono',monospace; color:var(--ink-4) }
+.audit a{ color:var(--ink-3); text-decoration:none; border-bottom:1px solid var(--hair-2);
+  transition:color var(--t-hover) var(--ease-snap), border-color var(--t-hover) var(--ease-snap) }
+.audit a:hover{ color:var(--accent); border-color:var(--accent) }
+.audit .sp{ margin-left:auto }
+
+/* charts */
+.chart{ width:100%; display:block; overflow:visible }
+.chart text{ font-family:'JetBrains Mono',monospace; font-size:10.5px; fill:var(--ink-4) }
+.legend{ display:flex; gap:var(--sp5); flex-wrap:wrap; font:400 11.5px/1 'JetBrains Mono',monospace; color:var(--ink-3) }
+.legend i{ width:14px; height:3px; border-radius:2px; display:inline-block; margin-right:7px; vertical-align:middle }
+
+/* waiting state — calm, deliberate, never an error */
+.wait-bar{ height:6px; border-radius:999px; background:var(--hair); overflow:hidden }
+.wait-bar > i{ display:block; height:100%; border-radius:999px; background:var(--brand);
+  width:37%; transition:width 900ms var(--ease) }
+.wait-num{ font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums;
+  font-size:2.6rem; font-weight:600; letter-spacing:-.05em; line-height:1 }
+.wait-num span{ font-size:.42em; color:var(--ink-3); letter-spacing:0 }
+
+/* withheld state */
+.withheld{ border:1px dashed var(--hair-2); border-radius:var(--r); padding:var(--sp6) var(--sp5);
+  text-align:center; color:var(--ink-4); font:500 11.5px/1 'JetBrains Mono',monospace;
+  letter-spacing:.1em; text-transform:uppercase;
+  background:repeating-linear-gradient(45deg,transparent,transparent 7px,var(--panel-2) 7px,var(--panel-2) 14px) }
+
+/* table */
+.tbl{ width:100%; border-collapse:collapse; font-size:14.5px }
+.tbl th{ text-align:left; padding:0 var(--sp4) var(--sp3) 0; border-bottom:1px solid var(--hair-2);
+  font:500 10px/1 'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap }
+.tbl th.r,.tbl td.r{ text-align:right }
+.tbl td{ padding:var(--sp4) var(--sp4) var(--sp4) 0; border-bottom:1px solid var(--hair); vertical-align:middle }
+.tbl tbody tr{ transition:background var(--t-hover) var(--ease-snap) }
+.tbl tbody tr:hover{ background:var(--panel-2) }
+.tbl tbody tr:last-child td{ border-bottom:0 }
+.tbl .rk{ font:600 13px/1 'JetBrains Mono',monospace; color:var(--ink-3); width:28px }
+.tbl .nm{ font-weight:600; letter-spacing:-.01em }
+.tbl .num{ font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-weight:500 }
+.tbl .dim{ color:var(--ink-3); font-family:'JetBrains Mono',monospace; font-size:12.5px }
+.flag{ display:inline-block; margin-left:8px; font:500 9.5px/1 'JetBrains Mono',monospace;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--accent);
+  border:1px solid color-mix(in srgb,var(--accent) 40%,transparent); border-radius:999px; padding:4px 7px }
+/* the shrinkage bar: raw as a tick, posterior as a bar */
+.shr{ position:relative; height:22px; min-width:150px }
+.shr .track{ position:absolute; inset:9px 0 auto; height:4px; border-radius:2px; background:var(--hair) }
+.shr .ci{ position:absolute; top:8px; height:6px; border-radius:3px; background:color-mix(in srgb,var(--s1) 34%,transparent) }
+.shr .pt{ position:absolute; top:5px; width:3px; height:12px; border-radius:2px; background:var(--s1) }
+.shr .raw{ position:absolute; top:2px; width:1.5px; height:18px; background:var(--ink-4) }
+
+@media (prefers-reduced-motion: no-preference){
+  .draw{ stroke-dasharray:var(--len); stroke-dashoffset:var(--len); animation:draw 1100ms var(--ease) .15s forwards }
+  @keyframes draw{ to{ stroke-dashoffset:0 } }
+  .fade{ opacity:0; animation:fade 700ms var(--ease) .6s forwards }
+  @keyframes fade{ to{ opacity:1 } }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="side">
+    <a class="brand" href="landing.html">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="12.5" fill="none" stroke="currentColor" stroke-width="2.4"/>
+        <path d="M4.6 19.6a12.5 12.5 0 0 0 22.8 0Z" fill="var(--brand)"/>
+        <rect x="0" y="18.3" width="32" height="2.6" rx="1.3" fill="var(--accent)"/>
+      </svg> Quorum
+    </a>
+
+    <div class="tenant">
+      <span class="lbl" style="padding:0 var(--sp4) 4px">Tenant</span>
+      <button class="tn on"><span class="dot">VH</span><span><span class="nm">Vaikunth Heights</span><br><span class="sub">housing society · 214 flats</span></span></button>
+      <button class="tn"><span class="dot" style="background:var(--s3)">AR</span><span><span class="nm">Aavartan Robotics</span><br><span class="sub">campus club · 96 members</span></span></button>
+    </div>
+
+    <div class="navgrp">
+      <span class="lbl">Pack 01 · Operations</span>
+      <a class="ni on" href="#">Resolution <span class="c">187</span></a>
+      <a class="ni" href="#">First response <span class="c">24w</span></a>
+      <a class="ni" href="#">Queue &amp; roster <span class="c">erlang-c</span></a>
+      <a class="ni" href="#">Changepoints <span class="c">2</span></a>
+    </div>
+    <div class="navgrp">
+      <span class="lbl">Pack 03 · Foresight</span>
+      <a class="ni" href="#">Dues forecast <span class="c">80%</span></a>
+      <a class="ni" href="#">ETA calibration <span class="c">91.4%</span></a>
+    </div>
+    <div class="navgrp">
+      <span class="lbl">Pack 02 · Comparison</span>
+      <a class="ni" href="#">Vendor board <span class="c">7</span></a>
+    </div>
+    <div class="navgrp">
+      <span class="lbl">Pack 04 · Voice</span>
+      <a class="ni" href="#">Poll results <span class="c">—</span></a>
+      <a class="ni" href="#">Budget fairness <span class="c">—</span></a>
+    </div>
+
+    <div class="side-foot navgrp">
+      <a class="ni" href="#">Method cards <span class="c">34</span></a>
+      <a class="ni" href="landing.html">Back to site</a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1>Resolution</h1>
+        <div class="sub">request_flow · wings A–F · 01 Mar – 29 Aug 2026</div>
+      </div>
+      <div class="right">
+        <div class="asof">insight_run · contract v1<br>as of 29 Aug 2026, 06:15 IST</div>
+        <button class="tgl" id="tgl">Dark</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- KPI row -->
+      <div class="row r-4">
+        <div class="card">
+          <div class="chead"><div><h3>Median time to resolution</h3><div class="sub">all categories</div></div><span class="pill p-qual chead-pill">Qualified</span></div>
+          <div class="big">4.3<span class="u">days</span></div>
+          <div class="meta"><span><b>n</b> 187</span><span><b>CI</b> 3.4–5.6</span><span><b>censored</b> 44</span></div>
+          <details class="why"><summary>Why qualified</summary><div class="body">
+            <p>Requests still open past 30 days skew towards plumbing (censoring test <b>p = 0.04</b>). The median may be optimistic.</p>
+            <p>The reading is <b>qualified, not withheld</b> — a non-blocking check never hides a value.</p>
+          </div></details>
+          <div class="audit"><a href="#">survival.median_resolution_days</a><span class="sp">e3f1a9c2</span></div>
+        </div>
+
+        <div class="card">
+          <div class="chead"><div><h3>ETA · RQ-2214</h3><div class="sub">leaking tap, C-704</div></div><span class="pill p-est">Conformal 90</span></div>
+          <div class="big range">2<i></i>9<span class="u">days</span></div>
+          <div class="meta"><span><b>coverage</b> 90% guaranteed</span><span><b>observed</b> 91.4%</span><span><b>n</b> 143</span></div>
+          <details class="why"><summary>No single day, on purpose</summary><div class="body">
+            <p>A conformal interval guarantees marginal coverage: across many requests like this one, <b>90% resolve inside it</b>.</p>
+            <p>Collapsing that to “about 5 days” would discard the guarantee and keep only the confidence.</p>
+          </div></details>
+          <div class="audit"><a href="#">conformal.split_eta</a><span class="sp">7b2c0d41</span></div>
+        </div>
+
+        <div class="card">
+          <div class="chead"><div><h3>Open right now</h3><div class="sub">unresolved, all wings</div></div><span class="pill p-est">Estimate</span></div>
+          <div class="big">44</div>
+          <div class="meta"><span><b>backlog wait</b> 6.1 d</span><span><b>Little's law</b> L = λW</span></div>
+          <details class="why"><summary>How this becomes a wait</summary><div class="body">
+            <p>Arrivals run at <b>7.2/week</b>. With 44 in the queue, Little's Law puts the expected wait at <b>6.1 days</b> — no model fitting required.</p>
+          </div></details>
+          <div class="audit"><a href="#">queueing.littles_law</a><span class="sp">4d90ba17</span></div>
+        </div>
+
+        <div class="card">
+          <div class="chead"><div><h3>Resolvers needed</h3><div class="sub">for 90% closed in 5 days</div></div><span class="pill p-est">Erlang-C</span></div>
+          <div class="big">4<span class="u">have 2</span></div>
+          <div class="meta"><span><b>λ</b> 7.2/wk</span><span><b>service</b> 3.1 d</span><span><b>n</b> 187</span></div>
+          <details class="why"><summary>What two more would buy</summary><div class="body">
+            <p>At the current arrival and service rate, two active resolvers reach the 5-day target <b>61%</b> of the time. Four reach it <b>90%</b>.</p>
+            <p>A fifth adds <b>1.8 points</b> — past the knee of the curve.</p>
+          </div></details>
+          <div class="audit"><a href="#">queueing.erlang_c</a><span class="sp">c1e7f430</span></div>
+        </div>
+      </div>
+
+      <!-- KM + waiting state -->
+      <div class="row r-32">
+        <div class="card">
+          <div class="chead"><div><h3>Requests still unresolved, by day</h3><div class="sub">kaplan–meier · greenwood 95% band · open requests censored, not dropped</div></div><span class="pill p-est">Estimate</span></div>
+          <svg class="chart" id="km" viewBox="0 0 760 300" preserveAspectRatio="none" role="img" aria-label="Kaplan-Meier survival curve with 95% confidence band"></svg>
+          <div class="legend">
+            <span><i style="background:var(--s1)"></i>survival</span>
+            <span><i style="background:color-mix(in srgb,var(--s1) 30%,transparent)"></i>95% band</span>
+            <span><i style="background:var(--ink-4)"></i>censoring tick</span>
+            <span><i style="background:var(--accent)"></i>median 4.3 d</span>
+          </div>
+          <div class="audit"><a href="#">survival.kaplan_meier</a><span>n 187 · 44 censored</span><span class="sp">e3f1a9c2</span></div>
+        </div>
+
+        <div class="card muted">
+          <div class="chead"><div><h3>Water-tanker call-out cycle</h3><div class="sub">kaplan–meier · tanker category</div></div><span class="pill p-wait">Waiting</span></div>
+          <div class="wait-num">11 <span>/ 30 closed</span></div>
+          <div class="wait-bar"><i id="wb" style="width:0"></i></div>
+          <div class="meta"><span><b>min_n</b> 30 events</span><span><b>7</b> more still open</span></div>
+          <p style="font-size:14.5px;line-height:1.6;color:var(--ink-2)">The scale is drawn. There is no reading on it yet — at the current rate, around <b style="color:var(--ink)">mid-November</b>.</p>
+          <details class="why"><summary>Why nothing is shown</summary><div class="body">
+            <p>A curve over 11 observations is a staircase of single events, not an estimate. Quorum will not draw one, and will not report a median whose interval is wider than the range of plausible answers.</p>
+            <p>This is the minimum-n policy doing exactly what it is for. <b>It is not an error and not a permission problem.</b></p>
+          </div></details>
+          <div class="audit"><a href="#">survival.kaplan_meier</a><span class="sp">insufficient_data</span></div>
+        </div>
+      </div>
+
+      <!-- EWMA + assumption failure -->
+      <div class="row r-32">
+        <div class="card">
+          <div class="chead"><div><h3>Weekly request rate</h3><div class="sub">ewma control chart · λ 0.3 · limits tuned to ARL 370</div></div><span class="pill p-est">1 signal</span></div>
+          <svg class="chart" id="ewma" viewBox="0 0 760 260" preserveAspectRatio="none" role="img" aria-label="EWMA control chart with one point above the upper control limit"></svg>
+          <div class="legend">
+            <span><i style="background:var(--s1)"></i>ewma</span>
+            <span><i style="background:var(--ink-4)"></i>centre 18.0</span>
+            <span><i style="background:var(--limit)"></i>limits 12.6 / 23.4</span>
+            <span><i style="background:var(--accent)"></i>week 16 signal</span>
+          </div>
+          <div class="audit"><a href="#">spc.ewma</a><span>n 20 weeks</span><span class="sp">9a4c2e88</span></div>
+        </div>
+
+        <div class="card">
+          <div class="chead"><div><h3>Resolution speed by wing</h3><div class="sub">cox proportional hazards · wings A–F</div></div><span class="pill p-hold">Withheld</span></div>
+          <div class="withheld">value suppressed</div>
+          <div class="meta"><span><b>check</b> proportional hazards</span><span><b>p</b> 0.003</span><span><b>blocking</b> yes</span></div>
+          <p style="font-size:14.5px;line-height:1.6;color:var(--ink-2)">The hazard ratios were computed. They are <b style="color:var(--ink)">not interpretable</b>, so they are not shown.</p>
+          <details class="why"><summary>What failed</summary><div class="body">
+            <p>Schoenfeld residual test: global <b>p = 0.003</b>, wing D alone <b>p &lt; 0.001</b>.</p>
+            <p>Wing D was slow for six weeks after its pump replacement and ordinary afterwards. A single hazard ratio would average two different regimes into one number that reads as decisive and is not.</p>
+            <p><b>Remedies on the method card:</b> stratify by wing, or fit a time-varying coefficient. Neither is chosen automatically, because that choice changes what the number means.</p>
+          </div></details>
+          <div class="audit"><a href="#">survival.cox_ph</a><span class="sp">blocking check failed</span></div>
+        </div>
+      </div>
+
+      <!-- shrunk leaderboard -->
+      <div class="row" style="grid-template-columns:1fr">
+        <div class="card">
+          <div class="chead">
+            <div><h3>Vendor resolution rate</h3><div class="sub">empirical-bayes shrunk · ranked by posterior lower bound, not raw rate</div></div>
+            <span class="pill p-est">Beta-binomial</span>
+          </div>
+          <table class="tbl">
+            <thead><tr><th></th><th>Vendor</th><th class="r">Raw</th><th class="r">Shrunk</th><th>Posterior 95%</th><th class="r">n</th></tr></thead>
+            <tbody id="lb"></tbody>
+          </table>
+          <details class="why"><summary>Why 100% ranks fourth</summary><div class="body">
+            <p>Nashik Elevator Services resolved <b>3 of 3</b>. That is a perfect record and almost no evidence — its posterior runs from 55% to 95%, so its <b>lower bound is 55.1%</b>.</p>
+            <p>Shreeya Plumbing resolved <b>47 of 52</b>. A slightly lower point estimate, but a far narrower posterior, so its lower bound is <b>79.2%</b> — and it ranks first.</p>
+            <p>Ranking by raw rate would put a three-job vendor above a fifty-job one. That is the single most common ranking bug in community software, and it is why this table exists.</p>
+          </div></details>
+          <div class="audit"><a href="#">bayes.beta_binomial_shrinkage</a><span>prior α 6.4 β 1.9 · pooled across 41 tenants</span><span class="sp">b7e21c05</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* ── theme ── */
+  var root=document.documentElement, tgl=document.getElementById('tgl');
+  try{ var sv=localStorage.getItem('quorum-theme'); if(sv) root.setAttribute('data-theme',sv); }catch(e){}
+  function isDark(){ return root.getAttribute('data-theme')==='dark' ||
+    (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches); }
+  function label(){ tgl.textContent = isDark()?'Light':'Dark'; }
+  label();
+  tgl.addEventListener('click',function(){
+    var next=isDark()?'light':'dark'; root.setAttribute('data-theme',next);
+    try{ localStorage.setItem('quorum-theme',next); }catch(e){}
+    label();
+  });
+
+  var NS='http://www.w3.org/2000/svg';
+  function el(n,a){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); return e; }
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── Kaplan–Meier ── */
+  (function(){
+    var svg=document.getElementById('km'); if(!svg) return;
+    var W=760,H=300,L=54,R=16,T=14,B=40;
+    var t=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+    var s =[1,.95,.86,.71,.53,.43,.36,.30,.26,.23,.20,.18,.16,.15,.14];
+    var lo=[1,.89,.76,.60,.35,.28,.23,.19,.16,.13,.11,.10,.09,.08,.07];
+    var hi=[1,.99,.94,.82,.68,.56,.46,.40,.36,.33,.30,.28,.26,.25,.24];
+    var X=function(v){ return L+(v/14)*(W-L-R); }, Y=function(v){ return T+(1-v)*(H-T-B); };
+
+    // gridlines + axes
+    [1,.75,.5,.25,0].forEach(function(v){
+      svg.appendChild(el('line',{x1:L,y1:Y(v),x2:W-R,y2:Y(v),stroke:'var(--grid)','stroke-width':1}));
+      var tx=el('text',{x:L-10,y:Y(v)+4,'text-anchor':'end'}); tx.textContent=(v*100)+(v===1?'%':''); svg.appendChild(tx);
+    });
+    [0,7,14].forEach(function(v){
+      var tx=el('text',{x:X(v),y:H-14,'text-anchor':v===0?'start':(v===14?'end':'middle')}); tx.textContent=v+' d'; svg.appendChild(tx);
+    });
+
+    // band as a step polygon
+    var up='',dn='';
+    for(var i=0;i<t.length;i++){
+      if(i){ up+=' L'+X(t[i])+','+Y(hi[i-1]); }
+      up+=(i?' L':'M')+X(t[i])+','+Y(hi[i]);
+    }
+    for(var j=t.length-1;j>=0;j--){
+      dn+=' L'+X(t[j])+','+Y(lo[j]);
+      if(j){ dn+=' L'+X(t[j])+','+Y(lo[j-1]); }
+    }
+    svg.appendChild(el('path',{d:up+dn+' Z',fill:'var(--s1)','fill-opacity':.16,class:reduce?'':'fade'}));
+
+    // step curve
+    var d='';
+    for(var k=0;k<t.length;k++){
+      if(k){ d+=' L'+X(t[k])+','+Y(s[k-1]); }
+      d+=(k?' L':'M')+X(t[k])+','+Y(s[k]);
+    }
+    var path=el('path',{d:d,fill:'none',stroke:'var(--s1)','stroke-width':2.6,'stroke-linejoin':'round',class:reduce?'':'draw'});
+    svg.appendChild(path);
+    if(!reduce){ try{ path.style.setProperty('--len', path.getTotalLength()+'px'); }catch(e){} }
+
+    // censoring ticks
+    [2.4,5.6,8.3,10.9,12.6].forEach(function(v){
+      var idx=Math.floor(v), sv=s[idx];
+      svg.appendChild(el('line',{x1:X(v),y1:Y(sv)-6,x2:X(v),y2:Y(sv)+6,stroke:'var(--ink-4)','stroke-width':1.6,class:reduce?'':'fade'}));
+    });
+
+    // median crosshair
+    var g=el('g',{class:reduce?'':'fade'});
+    g.appendChild(el('line',{x1:L,y1:Y(.5),x2:X(4.3),y2:Y(.5),stroke:'var(--accent)','stroke-width':1.4,'stroke-dasharray':'4 4'}));
+    g.appendChild(el('line',{x1:X(4.3),y1:Y(.5),x2:X(4.3),y2:Y(0),stroke:'var(--accent)','stroke-width':1.4,'stroke-dasharray':'4 4'}));
+    g.appendChild(el('circle',{cx:X(4.3),cy:Y(.5),r:4.5,fill:'var(--accent)'}));
+    var mt=el('text',{x:X(4.3)+10,y:Y(.5)-9,fill:'var(--ink-2)'}); mt.textContent='median 4.3 d  (3.4–5.6)'; g.appendChild(mt);
+    svg.appendChild(g);
+  })();
+
+  /* ── EWMA control chart ── */
+  (function(){
+    var svg=document.getElementById('ewma'); if(!svg) return;
+    var W=760,H=260,L=48,R=16,T=18,B=38;
+    var v=[17.8,18.4,17.9,18.8,19.2,18.6,17.4,16.9,17.6,18.3,19.1,20.2,21.0,21.8,22.6,24.1,23.2,22.0,20.8,19.6];
+    var CL=18, UCL=23.4, LCL=12.6, lo=10, hi=26;
+    var X=function(i){ return L+(i/(v.length-1))*(W-L-R); };
+    var Y=function(y){ return T+(1-(y-lo)/(hi-lo))*(H-T-B); };
+
+    [12,16,20,24].forEach(function(y){
+      svg.appendChild(el('line',{x1:L,y1:Y(y),x2:W-R,y2:Y(y),stroke:'var(--grid)','stroke-width':1}));
+      var tx=el('text',{x:L-10,y:Y(y)+4,'text-anchor':'end'}); tx.textContent=y; svg.appendChild(tx);
+    });
+    // limits
+    svg.appendChild(el('line',{x1:L,y1:Y(UCL),x2:W-R,y2:Y(UCL),stroke:'var(--limit)','stroke-width':1.6,'stroke-dasharray':'6 4'}));
+    svg.appendChild(el('line',{x1:L,y1:Y(LCL),x2:W-R,y2:Y(LCL),stroke:'var(--limit)','stroke-width':1.6,'stroke-dasharray':'6 4'}));
+    svg.appendChild(el('line',{x1:L,y1:Y(CL),x2:W-R,y2:Y(CL),stroke:'var(--ink-4)','stroke-width':1.4}));
+    var ul=el('text',{x:W-R,y:Y(UCL)-8,'text-anchor':'end',fill:'var(--limit)'}); ul.textContent='UCL 23.4'; svg.appendChild(ul);
+    var ll=el('text',{x:W-R,y:Y(LCL)+16,'text-anchor':'end',fill:'var(--limit)'}); ll.textContent='LCL 12.6'; svg.appendChild(ll);
+
+    var d=v.map(function(y,i){ return (i?'L':'M')+X(i)+','+Y(y); }).join(' ');
+    var p=el('path',{d:d,fill:'none',stroke:'var(--s1)','stroke-width':2.4,'stroke-linejoin':'round','stroke-linecap':'round',class:reduce?'':'draw'});
+    svg.appendChild(p);
+    if(!reduce){ try{ p.style.setProperty('--len', p.getTotalLength()+'px'); }catch(e){} }
+
+    v.forEach(function(y,i){
+      var sig = y>UCL||y<LCL;
+      svg.appendChild(el('circle',{cx:X(i),cy:Y(y),r:sig?6:3.2,
+        fill:sig?'var(--accent)':'var(--chart)',stroke:sig?'var(--accent)':'var(--s1)','stroke-width':2,class:reduce?'':'fade'}));
+      if(sig){
+        var tx=el('text',{x:X(i),y:Y(y)-14,'text-anchor':'middle',fill:'var(--ink-2)',class:reduce?'':'fade'});
+        tx.textContent='wk 16 · 24.1'; svg.appendChild(tx);
+      }
+    });
+    [0,4,9,14,19].forEach(function(i){
+      var tx=el('text',{x:X(i),y:H-12,'text-anchor':i===0?'start':(i===19?'end':'middle')});
+      tx.textContent='wk '+(i+1); svg.appendChild(tx);
+    });
+  })();
+
+  /* ── shrunk vendor board ── */
+  (function(){
+    var tb=document.getElementById('lb'); if(!tb) return;
+    var rows=[
+      {n:'Shreeya Plumbing Works',   c:47, t:52, sh:.881, lo:.792, hi:.940},
+      {n:'Sai Electricals',          c:32, t:38, sh:.824, lo:.710, hi:.906},
+      {n:'Pune Civil Co.',           c:30, t:39, sh:.761, lo:.634, hi:.861},
+      {n:'Nashik Elevator Services', c:3,  t:3,  sh:.798, lo:.551, hi:.952, flag:'3 of 3'},
+      {n:'Green STP Solutions',      c:16, t:26, sh:.639, lo:.478, hi:.782}
+    ];
+    var pc=function(x){ return (x*100).toFixed(1)+'%'; };
+    rows.forEach(function(r,i){
+      var raw=r.c/r.t;
+      var tr=document.createElement('tr');
+      tr.innerHTML =
+        '<td class="rk">'+(i+1)+'</td>'+
+        '<td class="nm">'+r.n+(r.flag?'<span class="flag">'+r.flag+'</span>':'')+'</td>'+
+        '<td class="r dim">'+pc(raw)+'</td>'+
+        '<td class="r num">'+pc(r.sh)+'</td>'+
+        '<td><div class="shr"><span class="track"></span>'+
+          '<span class="ci" style="left:'+(r.lo*100)+'%;width:'+((r.hi-r.lo)*100)+'%"></span>'+
+          '<span class="pt" style="left:'+(r.sh*100)+'%"></span>'+
+          '<span class="raw" style="left:'+(raw*100)+'%"></span></div></td>'+
+        '<td class="r dim">'+r.c+'/'+r.t+'</td>';
+      tb.appendChild(tr);
+    });
+  })();
+
+  /* waiting bar fills to the rule */
+  setTimeout(function(){ var w=document.getElementById('wb'); if(w) w.style.width='36.7%'; }, 260);
+})();
+</script>
+</body>
+</html>

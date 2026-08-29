@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quorum — Signal dashboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23131210'/%3E%3Cpath d='M5.2 19a12 12 0 0 0 21.6 0Z' fill='%23C8F031'/%3E%3Ccircle cx='16' cy='16' r='12' fill='none' stroke='%23C8F031' stroke-width='2.5'/%3E%3Crect x='1' y='17.6' width='30' height='2.6' fill='%23C8F031'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400;12..96,75..100,700;12..96,75..100,800&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   QUORUM — direction C: SIGNAL · product surface
+   Uncertainty language: THE SHADOW. An interval is a solid offset
+   block behind its estimate — the number casts the width of its
+   own doubt, legible from the back of a general body meeting.
+   ============================================================ */
+:root{
+  --bg:#F2F0E9; --bg-2:#E7E4DA; --panel:#FFFDF6;
+  --ink:#141310; --ink-2:#45423A; --ink-3:#75705F; --ink-4:#A29C89;
+  --acid:#C8F031; --acid-ink:#131210; --acid-line:#6E8000;
+  --ember:#D2541C; --edge:#141310; --hair:#CFCABA;
+  --st-good:#0B7A33; --st-warn:#8A6300; --st-serious:#9C4E1C; --st-crit:#A8221F;
+  --st-crit-bg:#F6DEDA; --st-warn-bg:#F5EDD6; --st-good-bg:#E2EFE5;
+  --s1:#1E7ACC; --s2:#D95E2B; --s3:#159C86; --s4:#B98A00;
+  --chart-surface:#FFFDF6; --grid:#DFDACA; --axis:#A29C89; --limit:#9C4E1C;
+  --ease-phys:cubic-bezier(0.34,1.26,0.44,1);
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+  --ease-snap:cubic-bezier(0.4,0,0.2,1);
+  --t-hover:200ms;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131210; --bg-2:#0C0B0A; --panel:#1C1A17;
+    --ink:#F4F2EA; --ink-2:#BDB9AC; --ink-3:#8A8578; --ink-4:#5E5A50;
+    --acid:#C8F031; --acid-ink:#131210; --acid-line:#C8F031;
+    --ember:#F2823F; --edge:#F4F2EA; --hair:#332F29;
+    --st-good:#4CBB68; --st-warn:#D9AC3E; --st-serious:#E08B5A; --st-crit:#E9645C;
+    --st-crit-bg:#2E1917; --st-warn-bg:#2C2311; --st-good-bg:#14251A;
+    --s1:#2E93E0; --s2:#E06B2E; --s3:#1FA07C; --s4:#C08A00;
+    --chart-surface:#1C1A17; --grid:#2A2723; --axis:#4A4640; --limit:#E08B5A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131210; --bg-2:#0C0B0A; --panel:#1C1A17;
+  --ink:#F4F2EA; --ink-2:#BDB9AC; --ink-3:#8A8578; --ink-4:#5E5A50;
+  --acid:#C8F031; --acid-ink:#131210; --acid-line:#C8F031;
+  --ember:#F2823F; --edge:#F4F2EA; --hair:#332F29;
+  --st-good:#4CBB68; --st-warn:#D9AC3E; --st-serious:#E08B5A; --st-crit:#E9645C;
+  --st-crit-bg:#2E1917; --st-warn-bg:#2C2311; --st-good-bg:#14251A;
+  --s1:#2E93E0; --s2:#E06B2E; --s3:#1FA07C; --s4:#C08A00;
+  --chart-surface:#1C1A17; --grid:#2A2723; --axis:#4A4640; --limit:#E08B5A;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{ background:var(--bg); color:var(--ink); font-family:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased }
+h1,h2,h3{ font-family:'Bricolage Grotesque','Space Grotesk',sans-serif; font-weight:800; font-stretch:82%;
+  letter-spacing:-.04em; line-height:.95; text-transform:uppercase }
+a{color:inherit}
+.mono{ font-family:'Space Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums }
+.wrap{ width:min(1400px,95vw); margin-inline:auto }
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{ transition-duration:.01ms !important } }
+
+/* ---------- chrome ---------- */
+.topbar{ border-bottom:2px solid var(--edge); background:var(--bg); position:sticky; top:0; z-index:40 }
+.topbar-in{ display:flex; align-items:center; gap:18px; height:62px; flex-wrap:wrap }
+.brand{ display:flex; align-items:center; gap:9px; font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:19px; text-transform:uppercase; letter-spacing:-.04em; text-decoration:none }
+.tenant{ display:flex; border:2px solid var(--edge) }
+.tenant button{ font:700 10.5px/1 'Space Mono',monospace; letter-spacing:.06em; text-transform:uppercase;
+  border:0; background:transparent; color:var(--ink-2); padding:9px 13px; cursor:pointer;
+  transition:background var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap) }
+.tenant button + button{ border-left:2px solid var(--edge) }
+.tenant button[aria-pressed="true"]{ background:var(--acid); color:var(--acid-ink) }
+.top-right{ margin-left:auto; display:flex; align-items:center; gap:14px }
+.stamp{ font:400 10.5px/1.4 'Space Mono',monospace; color:var(--ink-3); text-align:right }
+.toggle{ font:700 10.5px/1 'Space Mono',monospace; letter-spacing:.1em; text-transform:uppercase;
+  background:transparent; border:2px solid var(--edge); color:var(--ink); padding:9px 12px; cursor:pointer;
+  transition:background var(--t-hover) var(--ease-snap), transform var(--t-hover) var(--ease-phys) }
+.toggle:hover{ background:var(--acid); color:var(--acid-ink) }
+.toggle:active{ transform:translate(2px,2px) }
+
+.head{ padding:30px 0 24px; border-bottom:2px solid var(--edge) }
+.head .no{ font:700 11px/1 'Space Mono',monospace; letter-spacing:.16em; color:var(--acid-line); margin-bottom:14px }
+.head h1{ font-size:clamp(1.9rem,4.2vw,3.4rem) }
+.head p{ color:var(--ink-2); max-width:78ch; margin-top:12px; font-size:14.5px }
+
+/* ---------- grid of hard boxes ---------- */
+.grid{ display:grid; grid-template-columns:repeat(12,1fr); gap:16px; padding:24px 0 64px; align-items:start }
+.c4{grid-column:span 4} .c5{grid-column:span 5} .c7{grid-column:span 7} .c8{grid-column:span 8} .c12{grid-column:span 12}
+@media(max-width:1180px){ .c4,.c5{grid-column:span 6} .c7,.c8{grid-column:span 12} }
+@media(max-width:760px){ .c4,.c5,.c7,.c8{grid-column:span 12} }
+
+.box{ border:2px solid var(--edge); background:var(--panel); box-shadow:6px 6px 0 var(--edge);
+  height:100%; display:flex; flex-direction:column;
+  transition:transform var(--t-hover) var(--ease-phys), box-shadow var(--t-hover) var(--ease-phys) }
+.box:hover{ transform:translate(-2px,-2px); box-shadow:8px 8px 0 var(--edge) }
+.b-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:14px 16px; border-bottom:2px solid var(--edge) }
+.b-t{ font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:-.02em; line-height:1.15 }
+.b-s{ font:400 10.5px/1.45 'Space Mono',monospace; color:var(--ink-3); margin-top:5px; text-transform:none; letter-spacing:0 }
+.b-body{ padding:18px 16px; flex:1; display:flex; flex-direction:column }
+.b-foot{ border-top:1px solid var(--hair); padding:9px 16px; font:400 10px/1.5 'Space Mono',monospace;
+  color:var(--ink-4); display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap }
+.b-foot a{ color:var(--acid-line); text-decoration:none; border-bottom:1px solid currentColor }
+
+.tag{ font:700 9.5px/1 'Space Mono',monospace; letter-spacing:.1em; text-transform:uppercase;
+  border:2px solid var(--edge); padding:5px 7px; white-space:nowrap }
+.tag.ok{ background:var(--acid); color:var(--acid-ink) }
+.tag.warn{ background:var(--st-warn-bg); color:var(--st-warn); border-color:var(--st-warn) }
+.tag.stop{ background:var(--st-crit-bg); color:var(--st-crit); border-color:var(--st-crit) }
+.tag.wait{ border-style:dashed; color:var(--ink-3) }
+
+/* THE SHADOW — the figure and its doubt */
+.fig{ position:relative; padding:6px 0 2px }
+.fig .doubt{ position:absolute; left:0; top:2px; height:calc(100% - 12px); background:var(--acid); z-index:0; border:2px solid var(--edge) }
+.fig .num{ position:relative; z-index:1; display:inline-block; padding:2px 10px;
+  font-family:'Space Mono',monospace; font-weight:700; font-variant-numeric:tabular-nums;
+  font-size:clamp(2.1rem,3.6vw,3rem); letter-spacing:-.055em; line-height:1.1 }
+.fig .num u{ text-decoration:none; font-size:.34em; font-weight:400; letter-spacing:0; color:var(--ink-2) }
+.doubtcap{ font:700 10.5px/1 'Space Mono',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); margin-top:12px }
+.doubtcap b{ color:var(--ink) }
+
+.kv{ display:grid; grid-template-columns:auto 1fr; gap:4px 14px; margin-top:14px; font:400 11px/1.55 'Space Mono',monospace }
+.kv dt{ color:var(--ink-4); text-transform:uppercase; letter-spacing:.06em; font-size:10px }
+.kv dd{ color:var(--ink-2) }
+
+.slab{ margin-top:16px; border:2px solid var(--edge); padding:12px 13px; background:var(--st-warn-bg) }
+.slab b{ display:block; font:700 11px/1.3 'Space Mono',monospace; letter-spacing:.05em; text-transform:uppercase; margin-bottom:6px; color:var(--ink) }
+.slab p{ font-size:12.5px; color:var(--ink-2); line-height:1.5 }
+.slab.plain{ background:var(--bg-2) }
+
+/* NOT INTERPRETABLE — the box keeps its footprint; the value is struck out of it */
+.void{ border:2px solid var(--st-crit) }
+.void .bar{ background:var(--st-crit); color:var(--panel); padding:8px 12px;
+  font:700 10px/1 'Space Mono',monospace; letter-spacing:.14em; text-transform:uppercase }
+.void .in{ padding:14px 13px }
+.void .struck{ height:56px; display:flex; align-items:center; justify-content:center; margin-bottom:14px;
+  border:2px dashed var(--hair);
+  background:repeating-linear-gradient(135deg,transparent 0 8px,color-mix(in srgb,var(--st-crit) 12%,transparent) 8px 9px);
+  font:700 11px/1 'Space Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--st-crit) }
+.void p{ font-size:12.5px; color:var(--ink-2); line-height:1.55 }
+.void p + p{ margin-top:9px }
+
+/* NOT ENOUGH DATA — the loudest direction saying the quietest thing */
+.hold{ display:flex; flex-direction:column; gap:16px }
+.hold .say{ font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:clamp(1.25rem,2.3vw,1.75rem);
+  text-transform:uppercase; letter-spacing:-.035em; line-height:1.02; color:var(--ink-2) }
+.hold .tal{ display:flex; align-items:baseline; gap:12px; font-family:'Space Mono',monospace; font-variant-numeric:tabular-nums }
+.hold .tal b{ font-size:2.4rem; font-weight:700; letter-spacing:-.05em; color:var(--ink-2) }
+.hold .tal span{ font-size:12px; color:var(--ink-3) }
+.hold .bar2{ height:14px; border:2px solid var(--hair); position:relative }
+.hold .bar2 i{ position:absolute; inset:0 auto 0 0; background:var(--ink-4) }
+.hold .bar2 u{ position:absolute; top:-6px; bottom:-6px; width:2px; background:var(--ink-3); right:0 }
+.hold p{ font-size:12.5px; color:var(--ink-3); line-height:1.55 }
+
+/* charts */
+.chartwrap{ overflow-x:auto; margin:0 -4px }
+svg.chart{ display:block; width:100%; height:auto; min-width:480px; font-family:'Space Mono',monospace }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:14px; padding-top:12px; border-top:1px solid var(--hair);
+  font:400 10.5px/1 'Space Mono',monospace; color:var(--ink-2) }
+.legend i{ display:inline-block; width:16px; height:0; border-top:3px solid; margin-right:6px; vertical-align:middle }
+.legend .blk{ display:inline-block; width:16px; height:10px; margin-right:6px; vertical-align:middle; border:1.5px solid }
+.risk{ margin-top:10px; font:400 10px/1 'Space Mono',monospace; color:var(--ink-3) }
+.risk table{ width:100%; border-collapse:collapse } .risk td{ padding:3px 0; text-align:center }
+.risk td:first-child{ text-align:left; color:var(--ink-4) }
+
+/* leaderboard */
+table.board{ width:100%; border-collapse:collapse; font-size:13px }
+table.board th{ text-align:left; font:700 9.5px/1 'Space Mono',monospace; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); padding:0 10px 10px 0; border-bottom:2px solid var(--edge) }
+table.board td{ padding:12px 10px; border-bottom:1px solid var(--hair); vertical-align:middle }
+table.board tr:last-child td{ border-bottom:0 }
+table.board tr.hero td{ background:var(--acid); color:var(--acid-ink) }
+table.board tr.hero .vn small,table.board tr.hero .num small{ color:color-mix(in srgb,var(--acid-ink) 70%,transparent) }
+.num{ text-align:right; font-family:'Space Mono',monospace; font-variant-numeric:tabular-nums }
+.rk{ width:26px; font:700 12px/1 'Space Mono',monospace; color:var(--ink-4) }
+.vn{ font-weight:700 } .vn small{ display:block; font:400 10.5px/1.4 'Space Mono',monospace; color:var(--ink-3); font-weight:400 }
+.ivcell svg{ display:block; width:100%; height:30px; min-width:160px }
+.note{ margin-top:16px; border:2px solid var(--edge); padding:14px 15px; background:var(--bg-2); font-size:12.8px; color:var(--ink-2); line-height:1.55 }
+.note b{ color:var(--ink) }
+@media(max-width:920px){ .hidecol{ display:none } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="landing.html">
+      <svg width="23" height="23" viewBox="0 0 32 32" aria-hidden="true">
+        <clipPath id="k1"><circle cx="16" cy="16" r="12"/></clipPath>
+        <g clip-path="url(#k1)"><rect x="0" y="19" width="32" height="13" fill="var(--acid-line)"/></g>
+        <circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2.4"/>
+        <rect x="1" y="18" width="30" height="2.2" fill="var(--acid-line)"/>
+      </svg> Quorum
+    </a>
+    <div class="tenant" role="group" aria-label="Tenant">
+      <button aria-pressed="true">Vaikunth Heights</button>
+      <button aria-pressed="false">Aavartan Robotics</button>
+    </div>
+    <div class="top-right">
+      <div class="stamp">insight_run · contract v1<br>as of 29 AUG 2026 06:15 IST</div>
+      <button class="toggle" id="tt">Dark</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap head">
+  <div class="no">PACK 01 — OPERATIONS / REQUEST_FLOW</div>
+  <h1>How maintenance actually moves</h1>
+  <p>Vaikunth Heights CHS, Baner, Pune · 214 flats, wings A–F · 01 Mar – 29 Aug 2026 · 7 categories,
+  7 vendors. Every figure below carries the sample it rests on and the width of its own doubt. Where a
+  method cannot yet speak, it says so and says what it is waiting for.</p>
+</div>
+
+<div class="wrap grid">
+
+  <!-- QUALIFIED -->
+  <section class="box c4">
+    <div class="b-head">
+      <div><div class="b-t">Median time to resolution</div><div class="b-s">all categories · censored properly</div></div>
+      <span class="tag warn">Qualified</span>
+    </div>
+    <div class="b-body">
+      <div class="fig"><span class="doubt" id="d-median"></span><span class="num">4.3<u> days</u></span></div>
+      <div class="doubtcap">Doubt: <b>3.4 – 5.6 d</b> · greenwood-95</div>
+      <dl class="kv">
+        <dt>n</dt><dd>187 requests</dd>
+        <dt>censored</dt><dd>44 still open (23.5%)</dd>
+        <dt>excluded</dt><dd>0</dd>
+      </dl>
+      <div class="slab">
+        <b>WARN · censoring may be informative</b>
+        <p>Requests open past 30 days skew to plumbing (p = 0.04). The median may be optimistic. The
+        figure stays at full weight — a non-blocking check qualifies a number, it never hides one.</p>
+      </div>
+    </div>
+    <div class="b-foot"><a href="#">survival.median_resolution_days</a><span>e3f1a9c2</span></div>
+  </section>
+
+  <!-- ESTIMATE: conformal ETA -->
+  <section class="box c4">
+    <div class="b-head">
+      <div><div class="b-t">ETA · RQ-2214 leaking tap C-704</div><div class="b-s">raised 27 aug · shreeya plumbing works</div></div>
+      <span class="tag ok">conformal-90</span>
+    </div>
+    <div class="b-body">
+      <div class="fig"><span class="doubt" id="d-eta"></span><span class="num">2 – 9<u> days</u></span></div>
+      <div class="doubtcap">Coverage <b>90%</b> guaranteed · observed <b>91.4%</b></div>
+      <dl class="kv">
+        <dt>n</dt><dd>143 calibration requests</dd>
+        <dt>kind</dt><dd>distribution-free, marginal</dd>
+        <dt>point est.</dt><dd>deliberately none</dd>
+      </dl>
+      <div class="slab plain">
+        <b>Why there is no single day</b>
+        <p>Across many requests like this one, 90% resolve inside the interval. Collapsing it to
+        “about five days” would throw away the guarantee and keep only the confidence — which is the
+        wrong half.</p>
+      </div>
+    </div>
+    <div class="b-foot"><a href="#">conformal.split_eta</a><span>7b2c0d41</span></div>
+  </section>
+
+  <!-- NOT ENOUGH DATA -->
+  <section class="box c4">
+    <div class="b-head">
+      <div><div class="b-t">Water-tanker call-out cycle</div><div class="b-s">kaplan–meier · tanker category</div></div>
+      <span class="tag wait">Not enough data yet</span>
+    </div>
+    <div class="b-body">
+      <div class="hold">
+        <div class="say">Not enough data yet.<br>Needs 30 closed. Has 11.</div>
+        <div class="tal"><b>11</b><span>/ 30 CLOSED · 7 MORE STILL OPEN</span></div>
+        <div class="bar2"><i style="width:36.7%"></i><u></u></div>
+        <p>A curve over 11 observations is a staircase of single events. Quorum will not draw one, and
+        will not report a median whose interval is wider than the range of plausible answers. At the
+        current arrival rate this becomes readable around <b>mid-November 2026</b>.</p>
+        <p style="color:var(--ink-2)">This is not an error, and it is not a permissions problem. It is
+        the minimum-n policy doing exactly what it exists for.</p>
+      </div>
+    </div>
+    <div class="b-foot"><a href="#">survival.kaplan_meier</a><span>min_n 30 events · insufficient_data: true</span></div>
+  </section>
+
+  <!-- KM CURVE -->
+  <section class="box c7">
+    <div class="b-head">
+      <div><div class="b-t">Requests still unresolved, by day</div><div class="b-s">kaplan–meier · greenwood 95% band drawn as an offset block</div></div>
+      <span class="tag ok">Estimate</span>
+    </div>
+    <div class="b-body">
+      <div class="chartwrap"><svg class="chart" id="km" viewBox="0 0 780 350" role="img"
+        aria-label="Kaplan-Meier curve of unresolved requests with the 95 percent Greenwood band drawn as a hard-edged offset block, censoring ticks, and the median 4.3 days highlighted."></svg></div>
+      <div class="legend">
+        <span><i style="border-color:var(--s1)"></i>survival estimate</span>
+        <span><span class="blk" id="lgb"></span>95% greenwood band (the doubt block)</span>
+        <span><span class="blk" style="background:var(--acid);border-color:var(--edge)"></span>median 4.3 d, CI 3.4–5.6</span>
+        <span>│ censored (still open)</span>
+      </div>
+      <div class="risk"><table><tbody>
+        <tr><td>AT RISK</td><td>187</td><td>139</td><td>97</td><td>73</td><td>48</td><td>31</td><td>17</td></tr>
+        <tr><td>DAY</td><td>0</td><td>3</td><td>5</td><td>8</td><td>14</td><td>21</td><td>35</td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="b-foot"><a href="#">survival.kaplan_meier</a><span>n 187 · censored 44 · greenwood-95 · e3f1a9c2</span></div>
+  </section>
+
+  <!-- NOT INTERPRETABLE -->
+  <section class="box c5">
+    <div class="b-head">
+      <div><div class="b-t">Resolution speed by wing</div><div class="b-s">cox proportional hazards · wings A–F</div></div>
+      <span class="tag stop">Not interpretable</span>
+    </div>
+    <div class="b-body">
+      <div class="void">
+        <div class="bar">Value withheld · blocking check failed</div>
+        <div class="in">
+          <div class="struck">suppressed</div>
+          <p><b>“Hazards stay proportional over time” — FAIL, blocking.</b> Schoenfeld residual test:
+          global p = 0.003; wing D alone p &lt; 0.001.</p>
+          <p>Wing D was slow for six weeks after its pump replacement and ordinary afterwards. One
+          hazard ratio would average two different regimes into a single number that looks decisive
+          on a slide and is not.</p>
+          <p style="color:var(--ink-3)"><b>Remedies, from the method card:</b> stratify by wing, or fit a
+          time-varying coefficient. Neither is applied automatically, because the choice changes what
+          the number means.</p>
+        </div>
+      </div>
+      <dl class="kv"><dt>n</dt><dd>187 requests</dd><dt>events</dt><dd>143</dd>
+        <dt>covariates</dt><dd>6 wings · 23.8 events per covariate</dd></dl>
+    </div>
+    <div class="b-foot"><a href="#">survival.cox_by_wing</a><span>proportional-hazards · FAIL · blocking: true</span></div>
+  </section>
+
+  <!-- EWMA -->
+  <section class="box c12">
+    <div class="b-head">
+      <div><div class="b-t">First-response time · EWMA control chart</div>
+        <div class="b-s">weekly · λ = 0.30 · σ̂ = 3.4 h · limits from the first 20 in-control weeks</div></div>
+      <span class="tag stop">1 signal · week 19</span>
+    </div>
+    <div class="b-body">
+      <div class="chartwrap"><svg class="chart" id="spc" viewBox="0 0 1280 360" role="img"
+        aria-label="EWMA control chart across 24 weeks with widening control limits and a hatched exceedance zone; week 19 signals above the upper limit at 22.6 hours."></svg></div>
+      <div class="legend">
+        <span><i style="border-color:var(--s1)"></i>EWMA statistic</span>
+        <span><i style="border-color:var(--limit)"></i>control limits (3σ) — a decision boundary, not an estimate</span>
+        <span><i style="border-color:var(--ink-3);border-top-style:dashed"></i>centre 18.0 h</span>
+        <span>◉ signalled point</span>
+      </div>
+      <div class="slab" style="max-width:82ch">
+        <b>Week 19 signalled — 22.6 h against an upper limit of 22.3 h</b>
+        <p>Limits get a hard rule and a hatched exceedance zone rather than a soft band, because
+        crossing them is a decision, not an estimate — they carry no “95%”. The corridor widens at
+        the start because limits estimated from few periods are themselves noisy. Week 19 is the week
+        the day guard's shift was cut. Weeks 20–24 recover but have not returned to centre.</p>
+      </div>
+    </div>
+    <div class="b-foot"><a href="#">spc.ewma_first_response</a><span>n 24 periods · 612 requests · control-limits · 55c1e0af</span></div>
+  </section>
+
+  <!-- LEADERBOARD -->
+  <section class="box c12">
+    <div class="b-head">
+      <div><div class="b-t">Vendor reliability — resolved inside the agreed window</div>
+        <div class="b-s">empirical-bayes shrinkage · beta-binomial prior pooled across 7 vendors · every row carries its own n and interval</div></div>
+      <span class="tag ok">credible-95</span>
+    </div>
+    <div class="b-body">
+      <div style="overflow-x:auto">
+      <table class="board">
+        <thead><tr>
+          <th></th><th>Vendor</th><th class="num">Raw</th><th class="num">n</th><th class="num">Shrunk</th>
+          <th class="hidecol" style="width:32%">95% credible interval</th>
+          <th class="num hidecol">Pull</th><th class="hidecol">vs raw rank</th>
+        </tr></thead>
+        <tbody id="board"></tbody>
+      </table></div>
+      <div class="note">
+        <b>Row three is the entire argument.</b> Vertex Lift Care is 3-for-3 — a raw rate of 1.000 and
+        the top of any naive leaderboard. Three observations cannot separate an excellent vendor from
+        a lucky one, so the estimate is pulled toward the pooled prior of 0.81 and lands third, behind
+        Shreeya's 47-of-52 and Nandan's 61-of-71. Its interval, 0.641 – 0.951, is the widest on the
+        board, and that width is the row's real content.
+      </div>
+    </div>
+    <div class="b-foot"><a href="#">bayes.beta_binomial_shrinkage</a><span>7 groups (min 5) · prior mean 0.81, strength 12.5 · 9f04b7c3</span></div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+var root=document.documentElement, tt=document.getElementById('tt');
+function isDark(){ return root.getAttribute('data-theme')==='dark' ||
+  (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+try{ var st=localStorage.getItem('quorum-theme'); if(st) root.setAttribute('data-theme',st); }catch(e){}
+function label(){ tt.textContent=isDark()?'Light':'Dark'; } label();
+tt.addEventListener('click',function(){ var n=isDark()?'light':'dark'; root.setAttribute('data-theme',n);
+  try{ localStorage.setItem('quorum-theme',n); }catch(e){} label(); paint(); });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){ label(); paint(); });
+function cv(n){ return getComputedStyle(root).getPropertyValue(n).trim(); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+[].forEach.call(document.querySelectorAll('.tenant button'),function(b){
+  b.addEventListener('click',function(){
+    [].forEach.call(document.querySelectorAll('.tenant button'),function(x){ x.setAttribute('aria-pressed','false'); });
+    b.setAttribute('aria-pressed','true');
+  });
+});
+
+var KM=[[0,1,1,1],[1,.861,.808,.902],[2,.744,.678,.799],[3,.615,.543,.680],[4,.521,.448,.589],
+        [5,.447,.375,.516],[6,.392,.322,.461],[8,.321,.254,.390],[10,.268,.204,.336],
+        [14,.212,.152,.279],[18,.176,.119,.242],[21,.158,.103,.224],[28,.131,.079,.196],[35,.119,.068,.184]];
+var CENSOR=[2.4,3.6,6.8,9.2,12.5,16.1,19.8,24.4,30.2,33.1];
+var EW=[17.9,18.3,17.9,17.5,17.8,18.2,18.8,18.5,18.1,17.8,17.6,18.1,
+        18.9,19.6,20.2,21.0,21.6,22.1,22.6,22.0,21.3,20.5,19.8,19.3];
+var CENTRE=18.0, LAM=0.30, SIG=3.4;
+function hw(k){ return 3*SIG*Math.sqrt(LAM/(2-LAM))*Math.sqrt(1-Math.pow(1-LAM,2*k)); }
+var BOARD=[
+ {v:'Shreeya Plumbing Works',   cat:'plumbing',    k:47,n:52, s:.881, lo:.786, hi:.940, raw:2},
+ {v:'Nandan Electricals',       cat:'electrical',  k:61,n:71, s:.848, lo:.760, hi:.909, raw:3},
+ {v:'Vertex Lift Care',         cat:'lifts',       k:3, n:3,  s:.842, lo:.641, hi:.951, raw:1, hero:true},
+ {v:'Mahalaxmi Pest Control',   cat:'pest control',k:5, n:6,  s:.796, lo:.607, hi:.918, raw:4},
+ {v:'Om Sai Housekeeping',      cat:'housekeeping',k:38,n:49, s:.775, lo:.660, hi:.860, raw:5},
+ {v:'Pushpak Water Tankers',    cat:'water supply',k:9, n:14, s:.708, lo:.545, hi:.833, raw:7},
+ {v:'Sunrise Security Services',cat:'security',    k:22,n:34, s:.679, lo:.548, hi:.789, raw:6}
+];
+
+/* the doubt block behind a figure: width ∝ interval width on that figure's own scale */
+function doubt(id,lo,hi,scaleLo,scaleHi){
+  var el=document.getElementById(id); if(!el) return;
+  var frac=(hi-lo)/(scaleHi-scaleLo);
+  el.style.width=Math.max(18,Math.round(frac*100))+'%';
+  el.style.left=Math.round(((lo-scaleLo)/(scaleHi-scaleLo))*22)+'px';
+}
+
+function drawKM(){
+  var svg=document.getElementById('km'); if(!svg) return;
+  var W=780,H=350,L=52,R=104,T=18,B=50, o=[];
+  var px=function(d){ return L+d/36*(W-L-R); }, py=function(s){ return T+(1-s)*(H-T-B); };
+  var grid=cv('--grid'), axis=cv('--axis'), ink=cv('--ink'), ink3=cv('--ink-3'),
+      s1=cv('--s1'), acid=cv('--acid'), edge=cv('--edge'), surf=cv('--chart-surface');
+  for(var g=0;g<=5;g++){
+    var yy=py(g/5);
+    o.push('<line x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'" stroke="'+grid+'" stroke-width="1"/>');
+    o.push('<text x="'+(L-9)+'" y="'+(yy+4)+'" text-anchor="end" font-size="10.5" fill="'+ink3+'">'+(g*20)+'%</text>');
+  }
+  [0,5,10,15,20,25,30,35].forEach(function(d){
+    o.push('<text x="'+px(d)+'" y="'+(py(0)+22)+'" text-anchor="middle" font-size="10.5" fill="'+ink3+'">'+d+'</text>'); });
+  o.push('<text x="'+((L+W-R)/2)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10.5" fill="'+ink3+'">DAYS SINCE THE REQUEST WAS RAISED</text>');
+
+  var up=[],dn=[],ln='M '+px(0)+' '+py(1);
+  for(var i=0;i<KM.length;i++){
+    var d=KM[i][0], nx=(i+1<KM.length)?KM[i+1][0]:36;
+    up.push(px(d)+','+py(KM[i][3]), px(nx)+','+py(KM[i][3]));
+    ln+=' L '+px(d)+' '+py(KM[i][1])+' L '+px(nx)+' '+py(KM[i][1]);
+  }
+  for(var j=KM.length-1;j>=0;j--){
+    var d2=KM[j][0], nx2=(j+1<KM.length)?KM[j+1][0]:36;
+    dn.push(px(nx2)+','+py(KM[j][2]), px(d2)+','+py(KM[j][2]));
+  }
+  var pts=up.concat(dn).join(' ');
+  o.push('<polygon points="'+pts+'" fill="'+s1+'" opacity="0.24" transform="translate(5,5)"/>');
+  o.push('<polygon points="'+pts+'" fill="none" stroke="'+s1+'" stroke-width="1.8"/>');
+  o.push('<path d="'+ln+'" fill="none" stroke="'+s1+'" stroke-width="3.2" stroke-linejoin="miter"/>');
+
+  function Sat(d){ var v=1; for(var q=0;q<KM.length;q++){ if(KM[q][0]<=d) v=KM[q][1]; } return v; }
+  CENSOR.forEach(function(d){ var yy=py(Sat(d));
+    o.push('<line x1="'+px(d)+'" y1="'+(yy-6)+'" x2="'+px(d)+'" y2="'+(yy+6)+'" stroke="'+s1+'" stroke-width="2"/>'); });
+
+  var y50=py(.5);
+  o.push('<rect x="'+px(3.4)+'" y="'+(y50-10)+'" width="'+(px(5.6)-px(3.4))+'" height="20" fill="'+acid+'"/>');
+  o.push('<rect x="'+px(3.4)+'" y="'+(y50-10)+'" width="'+(px(5.6)-px(3.4))+'" height="20" fill="none" stroke="'+edge+'" stroke-width="1.6"/>');
+  o.push('<circle cx="'+px(4.3)+'" cy="'+y50+'" r="4.5" fill="'+edge+'" stroke="'+surf+'" stroke-width="1.5"/>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(y50-3)+'" font-size="12.5" font-weight="700" fill="'+ink+'">4.3 d</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(y50+11)+'" font-size="10" fill="'+ink3+'">CI 3.4–5.6</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(.119)+4)+'" font-size="11.5" font-weight="700" fill="'+s1+'">11.9%</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(.119)+17)+'" font-size="10" fill="'+ink3+'">at day 35</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(.119)+30)+'" font-size="10" fill="'+ink3+'">n 187 · 44 cens.</text>');
+
+  o.push('<line x1="'+L+'" y1="'+py(0)+'" x2="'+(W-R)+'" y2="'+py(0)+'" stroke="'+axis+'" stroke-width="2"/>');
+  o.push('<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+py(0)+'" stroke="'+axis+'" stroke-width="2"/>');
+  svg.innerHTML=o.join('');
+  var lgb=document.getElementById('lgb');
+  if(lgb){ lgb.style.background=s1; lgb.style.opacity='1'; lgb.style.borderColor=s1;
+           lgb.style.filter='none'; lgb.style.backgroundColor=s1; lgb.style.opacity='.32'; }
+}
+
+function drawSPC(){
+  var svg=document.getElementById('spc'); if(!svg) return;
+  var W=1280,H=360,L=56,R=130,T=22,B=52,n=EW.length, o=[];
+  var y0=12,y1=25.5;
+  var px=function(i){ return L+i/(n-1)*(W-L-R); }, py=function(v){ return T+(y1-v)/(y1-y0)*(H-T-B); };
+  var grid=cv('--grid'), axis=cv('--axis'), ink=cv('--ink'), ink3=cv('--ink-3'),
+      s1=cv('--s1'), lim=cv('--limit'), crit=cv('--st-crit'), surf=cv('--chart-surface'), edge=cv('--edge');
+
+  o.push('<defs><pattern id="exceed" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'+
+    '<rect width="8" height="8" fill="'+crit+'" opacity="0.05"/>'+
+    '<line x1="0" y1="0" x2="0" y2="8" stroke="'+crit+'" stroke-width="1.4" opacity="0.35"/></pattern></defs>');
+
+  for(var g=y0;g<=y1;g+=1.5){
+    var yy=py(g);
+    o.push('<line x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'" stroke="'+grid+'" stroke-width="1"/>');
+    o.push('<text x="'+(L-9)+'" y="'+(yy+4)+'" text-anchor="end" font-size="10.5" fill="'+ink3+'">'+g.toFixed(0)+'</text>');
+  }
+  o.push('<text x="'+(L-9)+'" y="'+(T-6)+'" text-anchor="end" font-size="9.5" fill="'+ink3+'">HOURS</text>');
+
+  var upper=[],lower=[];
+  for(var i=0;i<n;i++){ var h=hw(i+1); upper.push([px(i),py(CENTRE+h)]); lower.push([px(i),py(CENTRE-h)]); }
+  // exceedance zone above the upper limit — hatched, hard-edged, unmistakably not a band
+  var ex=upper.map(function(p){return p[0]+','+p[1];}).concat([px(n-1)+','+T, px(0)+','+T]);
+  o.push('<polygon points="'+ex.join(' ')+'" fill="url(#exceed)"/>');
+  o.push('<path d="M '+upper.map(function(p){return p[0]+' '+p[1];}).join(' L ')+'" fill="none" stroke="'+lim+'" stroke-width="2.4"/>');
+  o.push('<path d="M '+lower.map(function(p){return p[0]+' '+p[1];}).join(' L ')+'" fill="none" stroke="'+lim+'" stroke-width="2.4"/>');
+  o.push('<line x1="'+L+'" y1="'+py(CENTRE)+'" x2="'+(W-R)+'" y2="'+py(CENTRE)+'" stroke="'+ink3+'" stroke-width="1.4" stroke-dasharray="8 5"/>');
+
+  o.push('<path d="M '+EW.map(function(v,i){return px(i)+' '+py(v);}).join(' L ')+'" fill="none" stroke="'+s1+'" stroke-width="3" stroke-linejoin="miter"/>');
+  EW.forEach(function(v,i){
+    var sig=v>CENTRE+hw(i+1);
+    if(sig){
+      o.push('<rect x="'+(px(i)-13)+'" y="'+(py(v)-13)+'" width="26" height="26" fill="'+crit+'"/>');
+      o.push('<circle cx="'+px(i)+'" cy="'+py(v)+'" r="5" fill="'+surf+'"/>');
+      o.push('<line x1="'+px(i)+'" y1="'+(py(v)-13)+'" x2="'+px(i)+'" y2="'+(py(v)-40)+'" stroke="'+crit+'" stroke-width="2"/>');
+      o.push('<text x="'+px(i)+'" y="'+(py(v)-48)+'" text-anchor="middle" font-size="13" font-weight="700" fill="'+crit+'">SIGNAL · W19</text>');
+      o.push('<text x="'+px(i)+'" y="'+(py(v)-34)+'" text-anchor="middle" font-size="10.5" fill="'+ink+'">22.6 h &gt; UCL 22.3</text>');
+    }else{
+      o.push('<circle cx="'+px(i)+'" cy="'+py(v)+'" r="4" fill="'+s1+'" stroke="'+surf+'" stroke-width="2"/>');
+    }
+  });
+  for(var w=0;w<n;w++){
+    if(w%3===0||w===n-1) o.push('<text x="'+px(w)+'" y="'+(py(y0)+22)+'" text-anchor="middle" font-size="10" fill="'+ink3+'">W'+(w+1<10?'0':'')+(w+1)+'</text>');
+  }
+  o.push('<text x="'+((L+W-R)/2)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10.5" fill="'+ink3+'">WEEK OF 2026 · 09 MAR → 24 AUG</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(CENTRE+hw(n))+4)+'" font-size="11" font-weight="700" fill="'+lim+'">UCL 22.3</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(CENTRE)+4)+'" font-size="11" fill="'+ink3+'">CENTRE 18.0</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(CENTRE-hw(n))+4)+'" font-size="11" font-weight="700" fill="'+lim+'">LCL 13.7</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(EW[n-1])-6)+'" font-size="11" font-weight="700" fill="'+ink+'">19.3 h</text>');
+  o.push('<text x="'+(W-R+10)+'" y="'+(py(EW[n-1])+8)+'" font-size="10" fill="'+ink3+'">week 24 · n 612</text>');
+  o.push('<line x1="'+L+'" y1="'+py(y0)+'" x2="'+(W-R)+'" y2="'+py(y0)+'" stroke="'+axis+'" stroke-width="2"/>');
+  o.push('<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+py(y0)+'" stroke="'+axis+'" stroke-width="2"/>');
+  svg.innerHTML=o.join('');
+}
+
+function drawBoard(){
+  var tb=document.getElementById('board'); if(!tb) return;
+  var s1=cv('--s1'), axis=cv('--axis'), ink4=cv('--ink-4'), edge=cv('--edge'), surf=cv('--panel');
+  var lo=0.50,hi=1.0;
+  tb.innerHTML=BOARD.map(function(r,i){
+    var W=280,H=30,L=4,R=4,y=15;
+    var px=function(v){ return L+(v-lo)/(hi-lo)*(W-L-R); };
+    var g=['<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'" stroke="'+axis+'" stroke-width="1"/>'];
+    [0.5,0.6,0.7,0.8,0.9,1.0].forEach(function(v){
+      g.push('<line x1="'+px(v)+'" y1="'+(y-4)+'" x2="'+px(v)+'" y2="'+(y+4)+'" stroke="'+ink4+'" stroke-width="1"/>'); });
+    // the doubt block, offset — width IS the message
+    g.push('<rect x="'+(px(r.lo)+3)+'" y="'+(y-6)+'" width="'+(px(r.hi)-px(r.lo))+'" height="12" fill="'+s1+'" opacity="0.3"/>');
+    g.push('<rect x="'+px(r.lo)+'" y="'+(y-9)+'" width="'+(px(r.hi)-px(r.lo))+'" height="12" fill="none" stroke="'+s1+'" stroke-width="1.8"/>');
+    g.push('<circle cx="'+px(r.s)+'" cy="'+(y-3)+'" r="4" fill="'+s1+'" stroke="'+surf+'" stroke-width="1.8"/>');
+    var pull=r.s-(r.k/r.n), move=r.raw-(i+1);
+    return '<tr'+(r.hero?' class="hero"':'')+'>'+
+      '<td class="rk">'+(i+1)+'</td>'+
+      '<td class="vn">'+esc(r.v)+'<small>'+esc(r.cat)+'</small></td>'+
+      '<td class="num">'+r.k+'/'+r.n+'<br><small style="font-size:10.5px;color:var(--ink-3)">'+(r.k/r.n).toFixed(3)+'</small></td>'+
+      '<td class="num">'+r.n+'</td>'+
+      '<td class="num" style="font-weight:700;font-size:14px">'+r.s.toFixed(3)+'</td>'+
+      '<td class="hidecol ivcell"><svg viewBox="0 0 280 30" preserveAspectRatio="none">'+g.join('')+'</svg>'+
+        '<div style="font:400 10px/1 \'Space Mono\',monospace;">'+r.lo.toFixed(3)+' – '+r.hi.toFixed(3)+
+        '  (width '+(r.hi-r.lo).toFixed(3)+')</div></td>'+
+      '<td class="num hidecol" style="font-size:11px">'+(pull>0?'+':'')+pull.toFixed(3)+'</td>'+
+      '<td class="hidecol" style="font:400 10.5px/1 \'Space Mono\',monospace">'+
+        (move===0?'—':(move>0?'UP '+move:'DOWN '+Math.abs(move)))+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function paint(){
+  doubt('d-median',3.4,5.6,0,12);
+  doubt('d-eta',2,9,0,21);
+  drawKM(); drawSPC(); drawBoard();
+}
+if(document.fonts && document.fonts.ready){ document.fonts.ready.then(paint); }
+paint();
+})();
+</script>
+</body>
+</html>

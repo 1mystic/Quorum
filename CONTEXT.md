@@ -10,9 +10,10 @@
 
 Name is **locked: Quorum** — settled when the user created `github.com/1mystic/Quorum`.
 
-Currently in flight: **B.2 / B.2a** — the brand identity plus three style directions with a sample
-landing page and dashboard page each, for the user to choose between. Phase A resumes at **A.2**
-(the data spine) once a direction is picked.
+Three directions were built and reviewed. The user picked **Graticule's structure + Almanac's
+spacing**, with fresher colour and type. That synthesis is now the **house direction**, living in
+`design/samples/quorum/`. Next: fold it into `design/tokens.css` (B.4), then resume Phase A at
+**A.2** (the data spine).
 
 ## Done
 
@@ -27,11 +28,13 @@ landing page and dashboard page each, for the user to choose between. Phase A re
 | 2026-08-29 | `git init` on `main`, `.gitignore`, synced to `github.com/1mystic/Quorum` (card 0.4) |
 | 2026-08-29 | `docs/EVIDENCE_CONTRACT.md` — the envelope, four render states, min-n policy, censoring rule (card A.1) |
 | 2026-08-29 | Name locked: **Quorum** (card B.1) |
+| 2026-08-29 | Three directions built — Almanac, Graticule, Signal — with landing + dashboard each (card B.2a) |
+| 2026-08-29 | House direction synthesized into `design/samples/quorum/` after user review |
 
 ## In flight
 
-**B.2 / B.2a** — brand-designer building the identity and three style directions, each with a
-sample landing page and dashboard page for the user to compare.
+**B.3 / B.4** — promote the house direction into `design/brand/logo/*.svg` and
+`design/tokens.css` + `tokens.json`.
 
 ## Blocked
 
@@ -45,6 +48,11 @@ Newest first. Append, never rewrite. Record *why*, not just *what*.
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-08-29 | House direction = Graticule structure + Almanac spacing + new palette/type | User review: Graticule was most appealing but geometrically inconsistent and its dashboard cluttered; Almanac's landing and spacing were right but its cream-and-terracotta read dated; Signal was too loud for the audience |
+| 2026-08-29 | Palette: warm limestone `#FAF7F2` · spruce `#13594A` · apricot `#E07A3F` · warm ink `#1A1714` | Warm and comfortable as asked, without the cream/terracotta cliché. Spruce stays calm for a data product; apricot carries interaction, never status |
+| 2026-08-29 | Type: Bricolage Grotesque display · Inter Tight text · JetBrains Mono numerals | Bricolage has character without gimmick; a mono on every number is the instrument signal that made Graticule work |
+| 2026-08-29 | Dashboard prose moved behind `<details>` disclosure | The chief complaint was clutter and small descriptive text. The Evidence contract still requires the explanation to be present — disclosure keeps it present without it being loud |
+| 2026-08-29 | Buttons use a sweep-fill hover, label static | User asked for modern fill animations rather than colour swaps |
 | 2026-08-29 | Git identity `1mystic <atharvkahre18@gmail.com>`, repo-local | User instruction. Note this differs by one character from the machine's global config (`atharvkhare18@`) — flagged to the user |
 | 2026-08-29 | Name locked: **Quorum** | User created the remote under that name. Double meaning — enough people to decide, enough data to conclude |
 | 2026-08-29 | Phase B pulled ahead of the rest of Phase A | User wants to see and choose a visual direction before more specification work. A.1 was complete, so A.2 resumes after the pick |
