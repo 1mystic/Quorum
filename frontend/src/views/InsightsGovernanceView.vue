@@ -18,7 +18,7 @@ const rows = computed(() => pack.value.isolation.evidence.value.rows)
   <TenantShell title="Segmentation & network" subtitle="Pack 04 · Voice" as-of="insight_run · contract v1">
     <div class="callout callout-info">
       <span>
-        <b>k-anonymity floor: {{ tenant.vertical === 'rwa_society' ? 5 : 5 }}.</b>
+        <b>k-anonymity floor: 5.</b>
         Every per-stratum figure below is suppressed, not noised, when its cell falls under that count.
         See <router-link :to="`/t/${slug}/decisions`">{{ tenant.labels.decision.toLowerCase() }}s</router-link> for the vote-tabulation side of this pack.
       </span>
