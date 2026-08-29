@@ -14,7 +14,7 @@ Status: `TODO` · `WIP` · `BLOCKED` · `DONE`
 | 0.1 | `PLAN.md`, `CLAUDE.md`, `docs/RULES.md` written | supervisor | — | DONE |
 | 0.2 | `docs/WORKPLAN.md`, `CONTEXT.md`, `docs/GLOSSARY.md` written | supervisor | 0.1 | DONE |
 | 0.3 | `.claude/agents/*` roster written | supervisor | 0.2 | DONE |
-| 0.4 | `git init`, first commit, `.gitignore` | supervisor | 0.3 | TODO |
+| 0.4 | `git init`, first commit, `.gitignore` | supervisor | 0.3 | DONE |
 
 **0.4 acceptance:** repo initialised on `main`; `.gitignore` covers `.env`, `node_modules`,
 `__pycache__`, `.venv`, `dist`; commit message is one line with no AI attribution.
@@ -28,7 +28,7 @@ falls out of it.*
 
 | # | Card | Owner | Deps | Status |
 |---|---|---|---|---|
-| A.1 | `docs/EVIDENCE_CONTRACT.md` — the envelope, `Check`, `MethodCard`, `InsufficientData`, min-n policy, serialization shape | statistician | 0.4 | TODO |
+| A.1 | `docs/EVIDENCE_CONTRACT.md` — the envelope, `Check`, `MethodCard`, `InsufficientData`, min-n policy, serialization shape | statistician | 0.4 | WIP |
 | A.2 | `docs/DATA_SPINE.md` — the six canonical streams: field-level schema, event semantics, censoring rules, per-vertical adapter contract | statistician | A.1 | TODO |
 | A.3 | `docs/STATS_CATALOG.md` Pack 1 — Reliability & Service Ops, service by service | statistician | A.2 | TODO |
 | A.4 | `docs/STATS_CATALOG.md` Pack 3 — Forecasting & Calibrated Risk | statistician | A.2 | TODO |
