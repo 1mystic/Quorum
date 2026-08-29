@@ -28,7 +28,7 @@ falls out of it.*
 
 | # | Card | Owner | Deps | Status |
 |---|---|---|---|---|
-| A.1 | `docs/EVIDENCE_CONTRACT.md` — the envelope, `Check`, `MethodCard`, `InsufficientData`, min-n policy, serialization shape | statistician | 0.4 | WIP |
+| A.1 | `docs/EVIDENCE_CONTRACT.md` — the envelope, `Check`, `MethodCard`, `InsufficientData`, min-n policy, serialization shape | statistician | 0.4 | DONE |
 | A.2 | `docs/DATA_SPINE.md` — the six canonical streams: field-level schema, event semantics, censoring rules, per-vertical adapter contract | statistician | A.1 | TODO |
 | A.3 | `docs/STATS_CATALOG.md` Pack 1 — Reliability & Service Ops, service by service | statistician | A.2 | TODO |
 | A.4 | `docs/STATS_CATALOG.md` Pack 3 — Forecasting & Calibrated Risk | statistician | A.2 | TODO |
@@ -55,8 +55,9 @@ answer its test will be checked against.
 
 | # | Card | Owner | Deps | Status |
 |---|---|---|---|---|
-| B.1 | Lock the name (Quorum / Chaupal / Sabha) — user decision | supervisor | A.8 | TODO |
-| B.2 | `design/BRAND.md` — VibeCurb Phase 1 strategy brief + Phase 2 identity architecture | brand-designer | B.1 | TODO |
+| B.1 | Lock the name — **Quorum**, settled by the user creating `github.com/1mystic/Quorum` | supervisor | — | DONE |
+| B.2 | `design/BRAND.md` — VibeCurb Phase 1 strategy brief + Phase 2 identity architecture | brand-designer | B.1 | WIP |
+| B.2a | **3 style directions** + sample landing & dashboard page per direction, for user pick | brand-designer | B.1 | WIP |
 | B.3 | `design/brand/logo/*.svg` — primary, stacked, mark, favicon | brand-designer | B.2 | TODO |
 | B.4 | `design/tokens.css` + `tokens.json` — full light **and** dark roles, type scale, spacing, radii, shadows, motion | brand-designer | B.2 | TODO |
 | B.5 | `design/DATAVIZ.md` — chart palette (separate system from brand), mark specs, axis/legend/tooltip rules, the survival-curve and control-chart specs | brand-designer | B.4 | TODO |

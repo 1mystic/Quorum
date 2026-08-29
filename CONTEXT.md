@@ -6,10 +6,13 @@
 
 ## Where we are
 
-**Phase 0 — Governance.** Nearly complete. Next card is **0.4** (`git init` + first commit), then
-Phase A opens with **A.1** (the Evidence contract).
+**Phase 0 done. Phase A opened, then jumped to Phase B at user request.**
 
-Working name: **Quorum** — provisional, locked in card B.1.
+Name is **locked: Quorum** — settled when the user created `github.com/1mystic/Quorum`.
+
+Currently in flight: **B.2 / B.2a** — the brand identity plus three style directions with a sample
+landing page and dashboard page each, for the user to choose between. Phase A resumes at **A.2**
+(the data spine) once a direction is picked.
 
 ## Done
 
@@ -21,10 +24,14 @@ Working name: **Quorum** — provisional, locked in card B.1.
 | 2026-08-29 | Reviewed sangam-club.com as an adjacent reference |
 | 2026-08-29 | `PLAN.md`, `CLAUDE.md`, `docs/RULES.md`, `docs/WORKPLAN.md`, `docs/GLOSSARY.md`, `CONTEXT.md`, `.claude/agents/*` (cards 0.1–0.3) |
 | 2026-08-29 | Vendored `reference/campus-connect/` and `reference/vibecurb/` into the repo |
+| 2026-08-29 | `git init` on `main`, `.gitignore`, synced to `github.com/1mystic/Quorum` (card 0.4) |
+| 2026-08-29 | `docs/EVIDENCE_CONTRACT.md` — the envelope, four render states, min-n policy, censoring rule (card A.1) |
+| 2026-08-29 | Name locked: **Quorum** (card B.1) |
 
 ## In flight
 
-Nothing. The board is clean — pick up card 0.4.
+**B.2 / B.2a** — brand-designer building the identity and three style directions, each with a
+sample landing page and dashboard page for the user to compare.
 
 ## Blocked
 
@@ -38,6 +45,9 @@ Newest first. Append, never rewrite. Record *why*, not just *what*.
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-08-29 | Git identity `1mystic <atharvkahre18@gmail.com>`, repo-local | User instruction. Note this differs by one character from the machine's global config (`atharvkhare18@`) — flagged to the user |
+| 2026-08-29 | Name locked: **Quorum** | User created the remote under that name. Double meaning — enough people to decide, enough data to conclude |
+| 2026-08-29 | Phase B pulled ahead of the rest of Phase A | User wants to see and choose a visual direction before more specification work. A.1 was complete, so A.2 resumes after the pick |
 | 2026-08-29 | Reference material vendored into `reference/`, read-only | All work stays inside the RWA dir; keeps a record of exactly what we ported from |
 | 2026-08-29 | Campus Connect's `RULES.md` git playbook **not** adopted; direct commits to `main` | Feature branches and mandatory PR review are a five-person course team's process, not ours |
 | 2026-08-29 | Commit messages 1–2 lines; no AI attribution anywhere, ever | User rule, non-negotiable |
