@@ -424,6 +424,16 @@ a{
   border-color:var(--accent);
   color:var(--accent);
 }
+.icon-tgl{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:38px;
+  padding:0;
+}
+.icon-tgl svg{
+  display:block;
+}
 
 /*  10. Pills: the four Evidence render states, not sentiment  */
 .pill{
@@ -924,13 +934,36 @@ details.why .body b{
 
 /*  23. Auth shell and forms  */
 .auth-shell{
+  position:relative;
   min-height:100vh;
   display:grid;
   place-items:center;
   padding:var(--sp6) var(--sp5);
   background:var(--canvas-2);
+  overflow:hidden;
+}
+.auth-shell::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background-image:linear-gradient(var(--hair) 1px,transparent 1px),linear-gradient(90deg,var(--hair) 1px,transparent 1px);
+  background-size:56px 56px;
+  background-position:center top;
+  -webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,#000 0%,transparent 74%);
+  mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,#000 0%,transparent 74%);
+  opacity:.85;
+}
+.auth-shell-toggle{
+  position:absolute;
+  top:var(--sp5);
+  right:var(--sp5);
+  z-index:2;
 }
 .auth-card{
+  position:relative;
+  z-index:1;
   width:min(420px,100%);
   gap:var(--sp5);
 }
@@ -1295,4 +1328,85 @@ a.list-row:hover{
   color:var(--ink);
   font-weight:600;
   box-shadow:var(--shadow-card);
+}
+
+/*  32. Demo role switcher and RBAC mismatch banner  */
+.role-switcher{
+  display:flex;
+  align-items:center;
+  gap:var(--sp2);
+  padding:8px var(--sp3);
+  border-radius:var(--r-sm);
+  border:1px solid var(--hair-2);
+  color:var(--ink-3);
+  cursor:pointer;
+  transition:border-color var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap);
+}
+.role-switcher:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+.role-switcher select{
+  border:0;
+  background:transparent;
+  color:var(--ink-2);
+  font:500 12px/1 var(--font-text);
+  cursor:pointer;
+}
+.role-switcher select:focus-visible{
+  outline:none;
+}
+.role-banner{
+  position:fixed;
+  left:50%;
+  bottom:var(--sp5);
+  transform:translateX(-50%);
+  z-index:120;
+  display:flex;
+  align-items:center;
+  gap:var(--sp3);
+  max-width:min(640px,92vw);
+  padding:var(--sp3) var(--sp4);
+  border-radius:var(--r);
+  background:var(--ink);
+  color:var(--canvas);
+  font-size:13px;
+  line-height:1.5;
+  box-shadow:var(--shadow-pop);
+}
+.role-banner svg{
+  flex:none;
+  color:var(--accent);
+}
+.role-banner-tag{
+  color:color-mix(in srgb,var(--canvas) 62%,transparent);
+  font:500 11px/1 var(--font-mono);
+  letter-spacing:.04em;
+}
+.role-banner-close{
+  flex:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:24px;
+  height:24px;
+  border-radius:var(--r-sm);
+  border:0;
+  background:transparent;
+  color:color-mix(in srgb,var(--canvas) 70%,transparent);
+  cursor:pointer;
+  transition:background var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap);
+}
+.role-banner-close:hover{
+  background:color-mix(in srgb,var(--canvas) 16%,transparent);
+  color:var(--canvas);
+}
+@media(max-width:620px){
+  .role-banner{
+    left:var(--sp4);
+    right:var(--sp4);
+    bottom:var(--sp4);
+    transform:none;
+    max-width:none;
+  }
 }

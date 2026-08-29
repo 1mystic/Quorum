@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { tenantBySlug, demoTenantList } from '../../fixtures/tenants'
 import { coreNav, insightNav, adminNav } from '../../fixtures/nav'
 import { useAuthStore } from '../../stores/auth'
+import RoleSwitcher from '../ui/RoleSwitcher.vue'
+import ThemeToggle from '../ui/ThemeToggle.vue'
 
 // The dashboard shell every tenant-scoped page mounts inside: sidebar with
 // tenant switcher and nav groups, topbar with title/subtitle slots, content
@@ -88,6 +90,8 @@ function switchTenant(nextSlug) {
         <div class="right">
           <div v-if="asOf" class="asof">{{ asOf }}</div>
           <slot name="actions" />
+          <RoleSwitcher :tenant="tenant" />
+          <ThemeToggle />
         </div>
       </div>
 

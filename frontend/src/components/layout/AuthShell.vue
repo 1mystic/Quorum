@@ -1,6 +1,10 @@
 <script setup>
+import ThemeToggle from '../ui/ThemeToggle.vue'
+
 // Centred, sidebar-free shell for the public auth/onboarding flow. Shares
 // tokens with the tenant shell but never assumes a tenant context exists.
+// The faint graticule background (auth-shell::before, style.css section 23)
+// reuses the landing hero's instrument-face motif rather than a new motif.
 
 defineProps({
   title: { type: String, required: true },
@@ -10,6 +14,7 @@ defineProps({
 
 <template>
   <div class="auth-shell">
+    <ThemeToggle class="auth-shell-toggle" />
     <div class="auth-card card">
       <router-link class="brand" to="/">
         <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">

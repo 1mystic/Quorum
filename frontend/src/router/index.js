@@ -1,5 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { startLoading, finishLoading } from '../composables/useLoadingBar'
+import { showRoleMismatch, dismissRoleMismatch } from '../composables/useRoleMismatch'
+import { useAuthStore } from '../stores/auth'
+import { tenantBySlug } from '../fixtures/tenants'
+import { labelForRole } from '../fixtures/roles'
 
 const routes = [
   {
@@ -62,6 +66,33 @@ const router = createRouter({
   scrollBehavior() {
     return { top: 0 }
   }
+})
+
+const TIER_RANK = { public: 0, member: 1, admin: 2 }
+
+// Demo-only RBAC per CLAUDE.md/CONTEXT.md: there is no real backend to
+// authorize against yet, so a mismatch never blocks navigation. It logs and
+// surfaces a dismissible banner, which is the point, not an afterthought.
+router.beforeEach(function checkDemoRole(to) {
+  dismissRoleMismatch()
+
+  const required = to.meta.role || 'public'
+  if (required === 'public') return true
+
+  const auth = useAuthStore()
+  const currentTier = auth.role === 'admin' ? 'admin' : 'member'
+
+  if (TIER_RANK[currentTier] >= TIER_RANK[required]) return true
+
+  const tenant = tenantBySlug(to.params.slug)
+  const roleLabel = labelForRole(tenant ? tenant.vertical : 'rwa_society', auth.demoRole || 'resident')
+  const message = `Viewing as ${roleLabel}. This page is normally ${required === 'admin' ? 'Admin' : 'Member'}-only.`
+
+  // eslint-disable-next-line no-console
+  console.warn(`[demo-rbac] ${to.fullPath} requires "${required}", current demo role is "${roleLabel}" (${currentTier})`)
+  showRoleMismatch(message)
+
+  return true
 })
 
 router.beforeEach(function beginNavigation() {

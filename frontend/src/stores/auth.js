@@ -1,8 +1,15 @@
 import { defineStore } from 'pinia'
+import { tierForRole } from '../fixtures/roles'
 
 // Quorum is multi-tenant: a session belongs to a role inside a tenant
 // (identified by its slug), not to a college. Mirrors campus-connect's
 // auth store shape but renamed per docs/GLOSSARY.md (College -> Tenant).
+//
+// `role` is the coarse tier ('member' | 'admin') that route.meta.role is
+// checked against. `demoRole` is the actual vertical role (e.g. 'treasurer',
+// 'core_team') shown in the role switcher; `role` is derived from it. This
+// is a demo-only mechanism (see docs/VERTICALS.md role lists): nothing here
+// is enforced by a real backend yet, see router.beforeEach.
 
 const defaultUser = {
   name: '',
@@ -20,9 +27,14 @@ function readStoredRole() {
   return 'member'
 }
 
+function readStoredDemoRole() {
+  return localStorage.getItem('qm_demo_role') || ''
+}
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     role: readStoredRole(),
+    demoRole: readStoredDemoRole(),
     token: localStorage.getItem('qm_token') || '',
     user: JSON.parse(localStorage.getItem('qm_user')) || defaultUser
   }),
@@ -50,6 +62,12 @@ export const useAuthStore = defineStore('auth', {
       localStorage.setItem('qm_role', role)
     },
 
+    setDemoRole(roleId, vertical) {
+      this.demoRole = roleId
+      localStorage.setItem('qm_demo_role', roleId)
+      this.setRole(tierForRole(vertical, roleId))
+    },
+
     setToken(token) {
       this.token = token
       localStorage.setItem('qm_token', token)
@@ -62,9 +80,11 @@ export const useAuthStore = defineStore('auth', {
 
     logout() {
       this.role = 'member'
+      this.demoRole = ''
       this.token = ''
       this.user = { ...defaultUser }
       localStorage.removeItem('qm_role')
+      localStorage.removeItem('qm_demo_role')
       localStorage.removeItem('qm_token')
       localStorage.removeItem('qm_user')
     },

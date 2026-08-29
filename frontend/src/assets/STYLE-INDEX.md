@@ -38,6 +38,7 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 29 | Pairwise matrix (`.matrix`): decision head-to-head results |
 | 30 | Callouts (`.callout-info`, `.callout-warn`): privacy-floor and policy notices |
 | 31 | Tabs / segmented toggle (`.segmented`) |
+| 32 | Demo role switcher and RBAC mismatch banner (`.role-switcher`, `.role-banner`) |
 
 ## Quick reference by concern
 
