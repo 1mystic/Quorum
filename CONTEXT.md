@@ -30,11 +30,19 @@ spacing**, with fresher colour and type. That synthesis is now the **house direc
 | 2026-08-29 | Name locked: **Quorum** (card B.1) |
 | 2026-08-29 | Three directions built — Almanac, Graticule, Signal — with landing + dashboard each (card B.2a) |
 | 2026-08-29 | House direction synthesized into `design/samples/quorum/` after user review |
+| 2026-08-29 | `design/tokens.css` + `design/tokens.json`, 76 tokens, light and dark (card B.4) |
+| 2026-08-29 | `design/brand/logo/` mark, mono, favicon cut, two lockups, usage rules (card B.3) |
+| 2026-08-29 | `design/BRAND.md` updated from the provisional terracotta/serif proposal to the shipped palette and type |
 
 ## In flight
 
-**B.3 / B.4** — promote the house direction into `design/brand/logo/*.svg` and
-`design/tokens.css` + `tokens.json`.
+Design and branding are done. Three agents now running in parallel on disjoint paths:
+
+- **statistician** on **A.2 to A.8**, the statistical specification (`docs/` only)
+- **backend-porter** on **C.1 to C.4**, scaffold, rename pass, tenant model, RLS (`backend/` only)
+- **frontend** on the Vue scaffold and the Evidence component set (`frontend/` only)
+
+Each commits only its own paths to avoid racing the others.
 
 ## Blocked
 
@@ -48,6 +56,9 @@ Newest first. Append, never rewrite. Record *why*, not just *what*.
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-08-29 | Prose style: no em dashes anywhere in product copy or docs | User rule. En dashes stay in numeric ranges (`3.4-5.6`) and in `Kaplan-Meier`, where they are the correct mark rather than punctuation |
+| 2026-08-29 | Status colours are mapped to the four Evidence render states, not to sentiment | `--accent` had to stay free for "actionable". A warning that competes with a hover fill is a worse bug than a dull palette |
+| 2026-08-29 | Backend and frontend scaffolding run in parallel with the statistics spec | They touch disjoint paths and C.1 to C.4 only depend on B.4, which is now done. The stats spec is the long pole and should not block the port |
 | 2026-08-29 | House direction = Graticule structure + Almanac spacing + new palette/type | User review: Graticule was most appealing but geometrically inconsistent and its dashboard cluttered; Almanac's landing and spacing were right but its cream-and-terracotta read dated; Signal was too loud for the audience |
 | 2026-08-29 | Palette: warm limestone `#FAF7F2` · spruce `#13594A` · apricot `#E07A3F` · warm ink `#1A1714` | Warm and comfortable as asked, without the cream/terracotta cliché. Spruce stays calm for a data product; apricot carries interaction, never status |
 | 2026-08-29 | Type: Bricolage Grotesque display · Inter Tight text · JetBrains Mono numerals | Bricolage has character without gimmick; a mono on every number is the instrument signal that made Graticule work |

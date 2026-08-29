@@ -1,0 +1,164 @@
+/* ============================================================================
+   Quorum design tokens
+   Card B.4. The single source of truth for colour, type, space, radius,
+   elevation and motion. Nothing in the product may hard-code a value that
+   exists here.
+
+   Rules this file enforces:
+   1. Every colour is defined on bare :root for light, then redefined for dark
+      under BOTH the media query and [data-theme="dark"]. No colour's only
+      definition lives inside a media query.
+   2. Brand colour and chart colour are separate systems. --brand and --accent
+      are never series colours; --s1..--s6 are never brand colours.
+   3. --accent means "actionable", never "warning". Status has its own ramps.
+   4. Easings are cubic-bezier. The `linear` keyword is never used; a constant
+      velocity is expressed as --ease-constant.
+   ========================================================================= */
+
+:root{
+  /* ── surface ───────────────────────────────────────────────────────────
+     Warm limestone. Not cream (dated), not grey (corporate). */
+  --canvas:#FAF7F2;
+  --canvas-2:#F3EFE8;
+  --panel:#FFFFFF;
+  --panel-2:#F7F4EE;
+
+  /* ── ink ──────────────────────────────────────────────────────────────
+     Warm black. Never #000, never blue-grey. */
+  --ink:#1A1714;
+  --ink-2:#544E47;
+  --ink-3:#8A8278;
+  --ink-4:#B8AFA3;
+
+  /* ── brand ────────────────────────────────────────────────────────────
+     --brand carries weight and calm. --accent carries interaction and
+     nothing else: hover fills, focus rings, the median crosshair, a
+     signalled control point. --accent is never a status colour. */
+  --brand:#13594A;
+  --brand-hi:#1B7561;
+  --brand-soft:#DDEBE4;
+  --accent:#E07A3F;
+  --accent-soft:#FBE8DA;
+
+  /* ── hairlines ───────────────────────────────────────────────────────── */
+  --hair:#E6DFD4;
+  --hair-2:#D3C9BA;
+
+  /* ── status ───────────────────────────────────────────────────────────
+     Mapped to the four Evidence render states, not to sentiment.
+     ok    = estimate        (a clean reading)
+     warn  = qualified       (a non-blocking check failed; value still shown)
+     stop  = not interpretable (a blocking check failed; value suppressed)
+     wait  = insufficient data (below min_n; ink-3, deliberately colourless) */
+  --ok:#1C7A47;      --ok-bg:#E2F0E7;
+  --warn:#8A6209;    --warn-bg:#F8EFD9;
+  --stop:#A33327;    --stop-bg:#F9E4E0;
+
+  /* ── dataviz ──────────────────────────────────────────────────────────
+     A separate system. Validated for hue-order and contrast in both modes.
+     --limit is reserved for control limits and thresholds. */
+  --s1:#2F6F9F;
+  --s2:#C0562F;
+  --s3:#7A5AA8;
+  --s4:#B58500;
+  --s5:#2E8B6F;
+  --s6:#9C4F6E;
+  --chart:#FFFFFF;
+  --grid:#EDE7DC;
+  --axis:#CFC5B6;
+  --limit:#C0562F;
+  --band-alpha:.16;
+
+  /* ── type ─────────────────────────────────────────────────────────────
+     Three roles, and the third is not optional: a statistic wears a
+     different face from prose. If it is set in --font-mono, it came out of
+     an Evidence envelope. Nothing else may borrow that face. */
+  --font-display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --font-text:'Inter Tight',ui-sans-serif,system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SFMono-Regular',monospace;
+
+  --fs-micro:10.5px;
+  --fs-label:11.5px;
+  --fs-small:13px;
+  --fs-body:16px;
+  --fs-lead:18px;
+  --fs-h3:1.2rem;
+  --fs-h2:clamp(1.9rem,3.6vw,3.1rem);
+  --fs-h1:clamp(2.9rem,7.2vw,6.2rem);
+  --fs-stat:clamp(2.6rem,4.4vw,3.4rem);
+
+  --lh-tight:1.04;
+  --lh-snug:1.28;
+  --lh-body:1.62;
+  --ls-display:-.045em;
+  --ls-heading:-.032em;
+  --ls-label:.14em;
+
+  /* ── space ─────────────────────────────────────────────────────────────
+     8pt. Everything on the grid; no arbitrary pixel values. */
+  --sp1:4px;  --sp2:8px;   --sp3:12px;  --sp4:16px;  --sp5:24px;
+  --sp6:32px; --sp7:48px;  --sp8:64px;  --sp9:96px;  --sp10:128px;
+
+  /* ── radius ───────────────────────────────────────────────────────────── */
+  --r-sm:6px;
+  --r:10px;
+  --r-lg:16px;
+  --r-pill:999px;
+
+  /* ── elevation ────────────────────────────────────────────────────────
+     Restrained. A card lifts on hover; nothing else floats. */
+  --shadow-card:0 1px 2px rgba(26,23,20,.02),0 8px 28px -12px rgba(26,23,20,.10);
+  --shadow-pop:0 2px 6px rgba(26,23,20,.04),0 18px 48px -16px rgba(26,23,20,.18);
+
+  /* ── motion ───────────────────────────────────────────────────────────── */
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-snap:cubic-bezier(.4,0,.2,1);
+  --ease-constant:cubic-bezier(0,0,1,1);
+  --t-hover:220ms;
+  --t-fill:520ms;
+  --t-reveal:640ms;
+  --t-marquee:58s;
+
+  /* ── layout ───────────────────────────────────────────────────────────── */
+  --wrap:1200px;
+  --wrap-vw:90vw;
+  --sidebar:264px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --canvas:#12100E; --canvas-2:#0C0A09; --panel:#1B1815; --panel-2:#211D19;
+    --ink:#F4F0EA; --ink-2:#B5ADA2; --ink-3:#877F74; --ink-4:#5E574E;
+    --brand:#3DA88C; --brand-hi:#54C0A2; --brand-soft:#123028;
+    --accent:#F09155; --accent-soft:#332013;
+    --hair:#2C2722; --hair-2:#403830;
+    --ok:#43B573;   --ok-bg:#12281B;
+    --warn:#D3A544; --warn-bg:#2B2210;
+    --stop:#E0705F; --stop-bg:#2E1A16;
+    --s1:#4C90CB; --s2:#D4703F; --s3:#9A7AD8; --s4:#C79A22; --s5:#46B394; --s6:#C9748F;
+    --chart:#1B1815; --grid:#26221D; --axis:#403830; --limit:#D4703F;
+    --band-alpha:.22;
+    --shadow-card:0 1px 2px rgba(0,0,0,.24),0 8px 28px -12px rgba(0,0,0,.55);
+    --shadow-pop:0 2px 6px rgba(0,0,0,.3),0 18px 48px -16px rgba(0,0,0,.65);
+  }
+}
+
+:root[data-theme="dark"]{
+  --canvas:#12100E; --canvas-2:#0C0A09; --panel:#1B1815; --panel-2:#211D19;
+  --ink:#F4F0EA; --ink-2:#B5ADA2; --ink-3:#877F74; --ink-4:#5E574E;
+  --brand:#3DA88C; --brand-hi:#54C0A2; --brand-soft:#123028;
+  --accent:#F09155; --accent-soft:#332013;
+  --hair:#2C2722; --hair-2:#403830;
+  --ok:#43B573;   --ok-bg:#12281B;
+  --warn:#D3A544; --warn-bg:#2B2210;
+  --stop:#E0705F; --stop-bg:#2E1A16;
+  --s1:#4C90CB; --s2:#D4703F; --s3:#9A7AD8; --s4:#C79A22; --s5:#46B394; --s6:#C9748F;
+  --chart:#1B1815; --grid:#26221D; --axis:#403830; --limit:#D4703F;
+  --band-alpha:.22;
+  --shadow-card:0 1px 2px rgba(0,0,0,.24),0 8px 28px -12px rgba(0,0,0,.55);
+  --shadow-pop:0 2px 6px rgba(0,0,0,.3),0 18px 48px -16px rgba(0,0,0,.65);
+}
+
+@media (prefers-reduced-motion: reduce){
+  :root{ --t-hover:.01ms; --t-fill:.01ms; --t-reveal:.01ms; --t-marquee:.01ms }
+}

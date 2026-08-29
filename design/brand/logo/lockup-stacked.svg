@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 128" width="200" height="128" role="img" aria-label="Quorum">
+  <title>Quorum</title>
+  <g transform="translate(68 4)">
+    <path d="M8.6 39.4a24 24 0 0 0 46.8 0Z" fill="#13594A"/>
+    <circle cx="32" cy="32" r="24" fill="none" stroke="#1A1714" stroke-width="4.6"/>
+    <rect x="0" y="36.6" width="64" height="5.2" rx="2.6" fill="#E07A3F"/>
+  </g>
+  <text x="100" y="108" text-anchor="middle"
+        font-family="Bricolage Grotesque, Inter Tight, system-ui, sans-serif"
+        font-size="32" font-weight="700" letter-spacing="-1" fill="#1A1714">Quorum</text>
+</svg>

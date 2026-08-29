@@ -3,25 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quorum — Operations</title>
+<title>Quorum: Operations</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12.5' fill='none' stroke='%231A1714' stroke-width='2.5'/%3E%3Cpath d='M4.6 19.6a12.5 12.5 0 0 0 22.8 0Z' fill='%2313594A'/%3E%3Crect x='0' y='18.2' width='32' height='2.6' rx='1.3' fill='%23E07A3F'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   QUORUM — house direction
+   QUORUM, house direction
    Graticule's instrument geometry · Almanac's spacing comfort
    Warm limestone + spruce + apricot · Bricolage / Inter Tight / JB Mono
    Every colour on bare :root for light, redefined for dark twice.
    ═══════════════════════════════════════════════════════════════ */
 :root{
-  /* surfaces — warm limestone, never grey, never cream-yellow */
+  /* surfaces: warm limestone, never grey, never cream-yellow */
   --canvas:#FAF7F2;
   --canvas-2:#F3EFE8;
   --panel:#FFFFFF;
   --panel-2:#F7F4EE;
-  /* ink — warm black, not #000, not blue-grey */
+  /* ink: warm black, not #000, not blue-grey */
   --ink:#1A1714;
   --ink-2:#544E47;
   --ink-3:#8A8278;
@@ -38,14 +38,14 @@
   /* status */
   --ok:#1C7A47; --warn:#8A6209; --warn-bg:#F8EFD9;
   --stop:#A33327; --stop-bg:#F9E4E0;
-  /* dataviz — a separate system from brand colour */
+  /* dataviz: a separate system from brand colour */
   --s1:#2F6F9F; --s2:#C0562F; --s3:#7A5AA8; --s4:#B58500;
   --chart:#FFFFFF; --grid:#EDE7DC; --axis:#CFC5B6; --limit:#C0562F;
-  /* spacing — 8pt, Almanac-comfortable */
+  /* spacing: 8pt, Almanac-comfortable */
   --sp1:4px; --sp2:8px; --sp3:12px; --sp4:16px; --sp5:24px;
   --sp6:32px; --sp7:48px; --sp8:64px; --sp9:96px; --sp10:128px;
   --r-sm:6px; --r:10px; --r-lg:16px;
-  /* motion — cubic-bézier only */
+  /* motion: cubic-bézier only */
   --ease:cubic-bezier(.16,1,.3,1);
   --ease-snap:cubic-bezier(.4,0,.2,1);
   --t-fill:520ms; --t-hover:220ms; --t-reveal:640ms;
@@ -97,7 +97,7 @@ html::-webkit-scrollbar{ width:0; height:0 }
 .scroll-none::-webkit-scrollbar{ width:0; height:0 }
 
 .qs{ position:fixed; top:0; right:5px; bottom:0; width:12px; z-index:200; pointer-events:none }
-/* the same bar bound to an inner scroller — JS sets top/left/height from its rect */
+/* the same bar bound to an inner scroller. JS sets top/left/height from its rect */
 .qs.qs-el{ right:auto; bottom:auto }
 .qs-t{ position:absolute; right:3px; width:4px; border-radius:99px; background:var(--ink-4);
   opacity:0; pointer-events:auto; cursor:grab; touch-action:none;
@@ -188,7 +188,7 @@ body{ font-size:16px }
 .chead .sub{ font:400 11.5px/1.5 'JetBrains Mono',monospace; color:var(--ink-3); margin-top:5px }
 .chead .pill{ margin-left:auto; flex:none }
 
-/* state pills — small, quiet, never shouty */
+/* state pills: small, quiet, never shouty */
 .pill{ font:500 10px/1 'JetBrains Mono',monospace; letter-spacing:.1em; text-transform:uppercase;
   padding:6px 9px; border-radius:999px; border:1px solid; white-space:nowrap }
 .p-est{ color:var(--brand); border-color:color-mix(in srgb,var(--brand) 32%,transparent); background:var(--brand-soft) }
@@ -196,18 +196,18 @@ body{ font-size:16px }
 .p-hold{ color:var(--stop); border-color:color-mix(in srgb,var(--stop) 34%,transparent); background:var(--stop-bg) }
 .p-wait{ color:var(--ink-3); border-color:var(--hair-2); background:transparent }
 
-/* the number — big, tabular, unmissable */
+/* the number: big, tabular, unmissable */
 .big{ font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-weight:600;
   font-size:clamp(2.6rem,4.4vw,3.4rem); letter-spacing:-.05em; line-height:1 }
 .big .u{ font-size:.38em; color:var(--ink-3); margin-left:6px; letter-spacing:0 }
 .big.range{ display:flex; align-items:baseline; gap:14px }
 .big.range i{ font-style:normal; width:22px; height:2px; background:var(--ink-4); display:inline-block; margin-bottom:.28em }
 
-/* meta strip — replaces paragraphs of prose */
+/* meta strip: replaces paragraphs of prose */
 .meta{ display:flex; flex-wrap:wrap; gap:var(--sp2) var(--sp5); font:400 12px/1.5 'JetBrains Mono',monospace; color:var(--ink-3) }
 .meta b{ color:var(--ink-2); font-weight:500 }
 
-/* progressive disclosure — the prose lives here, closed by default */
+/* progressive disclosure: the prose lives here, closed by default */
 details.why{ border-top:1px solid var(--hair); padding-top:var(--sp4); margin-top:auto }
 details.why summary{ list-style:none; cursor:pointer; display:flex; align-items:center; gap:8px;
   font:500 11px/1 'JetBrains Mono',monospace; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
@@ -235,7 +235,7 @@ details.why .body b{ color:var(--ink); font-weight:600 }
 .legend{ display:flex; gap:var(--sp5); flex-wrap:wrap; font:400 11.5px/1 'JetBrains Mono',monospace; color:var(--ink-3) }
 .legend i{ width:14px; height:3px; border-radius:2px; display:inline-block; margin-right:7px; vertical-align:middle }
 
-/* waiting state — calm, deliberate, never an error */
+/* waiting state: calm, deliberate, never an error */
 .wait-bar{ height:6px; border-radius:999px; background:var(--hair); overflow:hidden }
 .wait-bar > i{ display:block; height:100%; border-radius:999px; background:var(--brand);
   width:37%; transition:width 900ms var(--ease) }
@@ -316,8 +316,8 @@ details.why .body b{ color:var(--ink); font-weight:600 }
     </div>
     <div class="navgrp">
       <span class="lbl">Pack 04 · Voice</span>
-      <a class="ni" href="#">Poll results <span class="c">—</span></a>
-      <a class="ni" href="#">Budget fairness <span class="c">—</span></a>
+      <a class="ni" href="#">Poll results <span class="c">n/a</span></a>
+      <a class="ni" href="#">Budget fairness <span class="c">n/a</span></a>
     </div>
 
     <div class="side-foot navgrp">
@@ -348,7 +348,7 @@ details.why .body b{ color:var(--ink); font-weight:600 }
           <div class="meta"><span><b>n</b> 187</span><span><b>CI</b> 3.4–5.6</span><span><b>censored</b> 44</span></div>
           <details class="why"><summary>Why qualified</summary><div class="body">
             <p>Requests still open past 30 days skew towards plumbing (censoring test <b>p = 0.04</b>). The median may be optimistic.</p>
-            <p>The reading is <b>qualified, not withheld</b> — a non-blocking check never hides a value.</p>
+            <p>The reading is <b>qualified, not withheld</b>. A non-blocking check never hides a value.</p>
           </div></details>
           <div class="audit"><a href="#">survival.median_resolution_days</a><span class="sp">e3f1a9c2</span></div>
         </div>
@@ -369,7 +369,7 @@ details.why .body b{ color:var(--ink); font-weight:600 }
           <div class="big">44</div>
           <div class="meta"><span><b>backlog wait</b> 6.1 d</span><span><b>Little's law</b> L = λW</span></div>
           <details class="why"><summary>How this becomes a wait</summary><div class="body">
-            <p>Arrivals run at <b>7.2/week</b>. With 44 in the queue, Little's Law puts the expected wait at <b>6.1 days</b> — no model fitting required.</p>
+            <p>Arrivals run at <b>7.2/week</b>. With 44 in the queue, Little's Law puts the expected wait at <b>6.1 days</b>, with no model fitting required.</p>
           </div></details>
           <div class="audit"><a href="#">queueing.littles_law</a><span class="sp">4d90ba17</span></div>
         </div>
@@ -380,7 +380,7 @@ details.why .body b{ color:var(--ink); font-weight:600 }
           <div class="meta"><span><b>λ</b> 7.2/wk</span><span><b>service</b> 3.1 d</span><span><b>n</b> 187</span></div>
           <details class="why"><summary>What two more would buy</summary><div class="body">
             <p>At the current arrival and service rate, two active resolvers reach the 5-day target <b>61%</b> of the time. Four reach it <b>90%</b>.</p>
-            <p>A fifth adds <b>1.8 points</b> — past the knee of the curve.</p>
+            <p>A fifth adds <b>1.8 points</b>, past the knee of the curve.</p>
           </div></details>
           <div class="audit"><a href="#">queueing.erlang_c</a><span class="sp">c1e7f430</span></div>
         </div>
@@ -405,7 +405,7 @@ details.why .body b{ color:var(--ink); font-weight:600 }
           <div class="wait-num">11 <span>/ 30 closed</span></div>
           <div class="wait-bar"><i id="wb" style="width:0"></i></div>
           <div class="meta"><span><b>min_n</b> 30 events</span><span><b>7</b> more still open</span></div>
-          <p style="font-size:14.5px;line-height:1.6;color:var(--ink-2)">The scale is drawn. There is no reading on it yet — at the current rate, around <b style="color:var(--ink)">mid-November</b>.</p>
+          <p style="font-size:14.5px;line-height:1.6;color:var(--ink-2)">The scale is drawn. There is no reading on it yet. At the current rate, around <b style="color:var(--ink)">mid-November</b>.</p>
           <details class="why"><summary>Why nothing is shown</summary><div class="body">
             <p>A curve over 11 observations is a staircase of single events, not an estimate. Quorum will not draw one, and will not report a median whose interval is wider than the range of plausible answers.</p>
             <p>This is the minimum-n policy doing exactly what it is for. <b>It is not an error and not a permission problem.</b></p>
@@ -454,8 +454,8 @@ details.why .body b{ color:var(--ink); font-weight:600 }
             <tbody id="lb"></tbody>
           </table>
           <details class="why"><summary>Why 100% ranks fourth</summary><div class="body">
-            <p>Nashik Elevator Services resolved <b>3 of 3</b>. That is a perfect record and almost no evidence — its posterior runs from 55% to 95%, so its <b>lower bound is 55.1%</b>.</p>
-            <p>Shreeya Plumbing resolved <b>47 of 52</b>. A slightly lower point estimate, but a far narrower posterior, so its lower bound is <b>79.2%</b> — and it ranks first.</p>
+            <p>Nashik Elevator Services resolved <b>3 of 3</b>. That is a perfect record and almost no evidence. Its posterior runs from 55% to 95%, so its <b>lower bound is 55.1%</b>.</p>
+            <p>Shreeya Plumbing resolved <b>47 of 52</b>. A slightly lower point estimate, but a far narrower posterior, so its lower bound is <b>79.2%</b>, and it ranks first.</p>
             <p>Ranking by raw rate would put a three-job vendor above a fifty-job one. That is the single most common ranking bug in community software, and it is why this table exists.</p>
           </div></details>
           <div class="audit"><a href="#">bayes.beta_binomial_shrinkage</a><span>prior α 6.4 β 1.9 · pooled across 41 tenants</span><span class="sp">b7e21c05</span></div>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Quorum mark">
+  <title>Quorum</title>
+  <!-- fill below the threshold: the quorum reached -->
+  <path d="M8.6 39.4a24 24 0 0 0 46.8 0Z" fill="#13594A"/>
+  <!-- the dial face -->
+  <circle cx="32" cy="32" r="24" fill="none" stroke="#1A1714" stroke-width="4.6"/>
+  <!-- the threshold, overshooting both edges -->
+  <rect x="0" y="36.6" width="64" height="5.2" rx="2.6" fill="#E07A3F"/>
+</svg>

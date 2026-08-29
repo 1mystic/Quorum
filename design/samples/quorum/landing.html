@@ -3,25 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quorum — enough data to conclude</title>
+<title>Quorum: enough data to conclude</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12.5' fill='none' stroke='%231A1714' stroke-width='2.5'/%3E%3Cpath d='M4.6 19.6a12.5 12.5 0 0 0 22.8 0Z' fill='%2313594A'/%3E%3Crect x='0' y='18.2' width='32' height='2.6' rx='1.3' fill='%23E07A3F'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   QUORUM — house direction
+   QUORUM, house direction
    Graticule's instrument geometry · Almanac's spacing comfort
    Warm limestone + spruce + apricot · Bricolage / Inter Tight / JB Mono
    Every colour on bare :root for light, redefined for dark twice.
    ═══════════════════════════════════════════════════════════════ */
 :root{
-  /* surfaces — warm limestone, never grey, never cream-yellow */
+  /* surfaces: warm limestone, never grey, never cream-yellow */
   --canvas:#FAF7F2;
   --canvas-2:#F3EFE8;
   --panel:#FFFFFF;
   --panel-2:#F7F4EE;
-  /* ink — warm black, not #000, not blue-grey */
+  /* ink: warm black, not #000, not blue-grey */
   --ink:#1A1714;
   --ink-2:#544E47;
   --ink-3:#8A8278;
@@ -38,14 +38,14 @@
   /* status */
   --ok:#1C7A47; --warn:#8A6209; --warn-bg:#F8EFD9;
   --stop:#A33327; --stop-bg:#F9E4E0;
-  /* dataviz — a separate system from brand colour */
+  /* dataviz: a separate system from brand colour */
   --s1:#2F6F9F; --s2:#C0562F; --s3:#7A5AA8; --s4:#B58500;
   --chart:#FFFFFF; --grid:#EDE7DC; --axis:#CFC5B6; --limit:#C0562F;
-  /* spacing — 8pt, Almanac-comfortable */
+  /* spacing: 8pt, Almanac-comfortable */
   --sp1:4px; --sp2:8px; --sp3:12px; --sp4:16px; --sp5:24px;
   --sp6:32px; --sp7:48px; --sp8:64px; --sp9:96px; --sp10:128px;
   --r-sm:6px; --r:10px; --r-lg:16px;
-  /* motion — cubic-bézier only */
+  /* motion: cubic-bézier only */
   --ease:cubic-bezier(.16,1,.3,1);
   --ease-snap:cubic-bezier(.4,0,.2,1);
   --ease-constant:cubic-bezier(0,0,1,1);
@@ -223,7 +223,7 @@ h1 em{ font-style:normal; color:var(--brand) }
 .hero p.lead{ color:var(--ink-2); max-width:56ch; margin:var(--sp5) auto 0; font-size:clamp(1.02rem,1.3vw,1.18rem) }
 .btnrow{ margin-top:var(--sp7); display:flex; gap:var(--sp3); justify-content:center; flex-wrap:wrap }
 
-/* readout strip — the instrument's own face, on the 8pt grid */
+/* readout strip: the instrument's own face, on the 8pt grid */
 .readout{ position:relative; z-index:4; margin-top:var(--sp9); display:grid;
   grid-template-columns:repeat(4,1fr); gap:1px; background:var(--hair);
   border:1px solid var(--hair); border-radius:var(--r); overflow:hidden }
@@ -240,12 +240,15 @@ h1 em{ font-style:normal; color:var(--brand) }
 .sec.alt{ background:var(--canvas-2) }
 .sec-head{ display:flex; flex-direction:column; align-items:start; align-content:start;
   gap:var(--sp5); margin-bottom:var(--sp8) }
-.sec-no{ padding-top:0; display:flex; align-items:center; gap:10px }
+.sec-no{ padding-top:0; display:flex; align-items:center; gap:14px;
+  font:600 13px/1 'JetBrains Mono',monospace; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-2) }
+.sec-no b{ font-weight:600; color:var(--brand) }
 .sec-no::after{ content:''; width:56px; height:1px; background:var(--hair-2) }
 .sec-head h2{ font-size:clamp(1.9rem,3.6vw,3.1rem); max-width:19ch }
 .sec-head p{ color:var(--ink-2); margin-top:var(--sp4); max-width:62ch }
 
-/* six streams — even 6-col bento, no orphan cells */
+/* six streams: even 6-col bento, no orphan cells */
 .bento{ display:grid; grid-template-columns:repeat(6,1fr); gap:1px; background:var(--hair);
   border:1px solid var(--hair); border-radius:var(--r); overflow:hidden }
 .cell{ background:var(--panel); padding:var(--sp6) var(--sp5); grid-column:span 2; position:relative;
@@ -264,7 +267,7 @@ h1 em{ font-style:normal; color:var(--brand) }
 .tags span{ font:400 10.5px/1 'JetBrains Mono',monospace; color:var(--ink-3);
   border:1px solid var(--hair-2); border-radius:999px; padding:6px 10px }
 
-/* uncertainty — the thesis, shown not told */
+/* uncertainty: the thesis, shown not told */
 .uncert{ display:grid; grid-template-columns:1.05fr .95fr; gap:var(--sp8); align-items:center }
 @media(max-width:940px){ .uncert{ grid-template-columns:1fr } }
 .plate{ background:var(--chart); border:1px solid var(--hair); border-radius:var(--r-lg); padding:var(--sp5) }
@@ -390,7 +393,7 @@ footer{ border-top:1px solid var(--hair); padding:var(--sp8) 0 var(--sp7) }
   <div class="wrap hero-in">
     <span class="eyebrow rv"><i></i> Community operations · statistically honest</span>
     <h1 class="rv">Numbers your community can <em>actually act on.</em></h1>
-    <p class="lead rv">Quorum runs a housing society, a campus club or an NGO — and unlike every other tool in the category, it tells you how much to trust each number it shows you.</p>
+    <p class="lead rv">Quorum runs a housing society, a campus club or an NGO. Unlike every other tool in the category, it tells you how much to trust each number it shows you.</p>
     <div class="btnrow rv">
       <a class="btn btn-fill" href="dashboard.html">See the dashboard <span class="arw">→</span></a>
       <a class="btn btn-line" href="#uncertainty">Why intervals</a>
@@ -407,20 +410,20 @@ footer{ border-top:1px solid var(--hair); padding:var(--sp8) 0 var(--sp7) }
 <section class="sec" id="spine">
   <div class="wrap">
     <div class="sec-head rv">
-      <div class="sec-no lbl">§ 01 · Spine</div>
+      <div class="sec-no"><b>01</b> Spine</div>
       <div>
         <h2>Six streams. Every statistic written once.</h2>
         <p>A society's complaint, a club's task and an NGO's volunteer request are one shape wearing three names. Quorum maps every vertical onto six canonical streams, so survival analysis is implemented once rather than once per community type.</p>
       </div>
     </div>
     <div class="bento rv">
-      <div class="cell wide"><span class="idx">Stream 02 · load-bearing</span><h3>request_flow</h3><p>Anything that opens, gets assigned, progresses and closes — with a category, an owner and timestamps. Complaints, maintenance jobs, club task boards, membership applications.</p><div class="tags"><span>survival</span><span>spc</span><span>queueing</span><span>changepoint</span><span>conformal eta</span></div></div>
+      <div class="cell wide"><span class="idx">Stream 02 · load-bearing</span><h3>request_flow</h3><p>Anything that opens, gets assigned, progresses and closes, carrying a category, an owner and timestamps. Complaints, maintenance jobs, club task boards, membership applications.</p><div class="tags"><span>survival</span><span>spc</span><span>queueing</span><span>changepoint</span><span>conformal eta</span></div></div>
       <div class="cell wide"><span class="idx">Stream 03</span><h3>ledger</h3><p>Signed money movements with a category and a counterparty. Maintenance dues, festival contributions, vendor payments, event budgets.</p><div class="tags"><span>forecast</span><span>runway</span><span>benford</span><span>dp aggregates</span></div></div>
       <div class="cell"><span class="idx">Stream 01</span><h3>member_lifecycle</h3><p>Join, activate, lapse, exit.</p><div class="tags"><span>retention</span><span>churn risk</span></div></div>
       <div class="cell"><span class="idx">Stream 04</span><h3>participation</h3><p>Attendance, RSVPs, volunteer hours, upvotes.</p><div class="tags"><span>segmentation</span><span>network</span></div></div>
       <div class="cell"><span class="idx">Stream 05</span><h3>signal</h3><p>Free text and ordinal ratings.</p><div class="tags"><span>topics</span><span>near-dup</span><span>ordinal</span></div></div>
-      <div class="cell wide"><span class="idx">Stream 06</span><h3>decision</h3><p>Polls, ballots and budget allocations — with the social-choice disclosure most tools skip. When a poll contains a Condorcet cycle, the “winner” was chosen by the counting rule rather than by the community, and Quorum says so on the result page.</p><div class="tags"><span>voting</span><span>participatory budgeting</span><span>representativeness</span></div></div>
-      <div class="cell wide"><span class="idx">Privacy floor</span><h3>k_anonymity</h3><p>Small communities are small. A per-block average over three households identifies those households, so any cell under five members is suppressed — including from the admin who asked for it.</p><div class="tags"><span>k = 5</span><span>laplace noise</span></div></div>
+      <div class="cell wide"><span class="idx">Stream 06</span><h3>decision</h3><p>Polls, ballots and budget allocations, with the social-choice disclosure most tools skip. When a poll contains a Condorcet cycle, the “winner” was chosen by the counting rule rather than by the community, and Quorum says so on the result page.</p><div class="tags"><span>voting</span><span>participatory budgeting</span><span>representativeness</span></div></div>
+      <div class="cell wide"><span class="idx">Privacy floor</span><h3>k_anonymity</h3><p>Small communities are small. A per-block average over three households identifies those households, so any cell under five members is suppressed, including from the admin who asked for it.</p><div class="tags"><span>k = 5</span><span>laplace noise</span></div></div>
     </div>
   </div>
 </section>
@@ -428,7 +431,7 @@ footer{ border-top:1px solid var(--hair); padding:var(--sp8) 0 var(--sp7) }
 <section class="sec alt" id="uncertainty">
   <div class="wrap">
     <div class="sec-head rv">
-      <div class="sec-no lbl">§ 02 · Thesis</div>
+      <div class="sec-no"><b>02</b> Thesis</div>
       <div>
         <h2>Every other tool shows you a number. We show you how much of one it is.</h2>
         <p>“Average resolution: 3.2 days” is not a fact, it is a summary of a choice. Which tickets were counted, which were quietly dropped, and how wide the honest answer really is.</p>
@@ -464,8 +467,8 @@ footer{ border-top:1px solid var(--hair); padding:var(--sp8) 0 var(--sp7) }
       </figure>
       <div class="rv">
         <h3>The bug is in every dashboard you have used.</h3>
-        <p>Average resolution time is usually computed over closed tickets only. But a ticket that is still open has an <em>unknown</em> resolution time — and the ones still open are exactly the slow ones. Dropping them does not make the number neutral. It biases it downward, every single time.</p>
-        <div class="pull"><b>Quorum censors instead of dropping.</b> The 44 open requests above contribute what is known about them — that they have already exceeded their current age — and the curve is honest as a result.</div>
+        <p>Average resolution time is usually computed over closed tickets only. But a ticket that is still open has an <em>unknown</em> resolution time, and the ones still open are exactly the slow ones. Dropping them does not make the number neutral. It biases it downward, every single time.</p>
+        <div class="pull"><b>Quorum censors instead of dropping.</b> The 44 open requests above contribute what is known about them, that they have already exceeded their current age, and the curve is honest as a result.</div>
         <p>Same discipline everywhere else. A vendor at 3-for-3 does not outrank one at 47-for-52. A forecast that cannot beat a seasonal-naive baseline does not ship. A “30% risk” bucket is checked against whether 30% of it actually defaulted.</p>
         <a class="tl" href="dashboard.html">See it running in the dashboard →</a>
       </div>
@@ -476,7 +479,7 @@ footer{ border-top:1px solid var(--hair); padding:var(--sp8) 0 var(--sp7) }
 <section class="sec" id="packs">
   <div class="wrap">
     <div class="sec-head rv">
-      <div class="sec-no lbl">§ 03 · Packs</div>
+      <div class="sec-no"><b>03</b> Packs</div>
       <div>
         <h2>Four packs, each answering one committee question.</h2>
         <p>A tenant switches on what it needs. A housing society starts with Operations; a campus club starts with Voice. The mathematics underneath is the same code.</p>
@@ -486,7 +489,7 @@ footer{ border-top:1px solid var(--hair); padding:var(--sp8) 0 var(--sp7) }
       <thead><tr><th>Pack</th><th>The question it answers</th><th>Modules</th><th>Status</th></tr></thead>
       <tbody>
         <tr><td class="pk">01 · Operations<small>request_flow</small></td>
-          <td class="q">Is this getting better or worse — and is last week's dip a real shift or just noise?</td>
+          <td class="q">Is this getting better or worse, and is last week's dip a real shift or just noise?</td>
           <td><div class="tags"><span>survival</span><span>spc</span><span>queueing</span><span>changepoint</span></div></td>
           <td class="ship">Ships first</td></tr>
         <tr><td class="pk">03 · Foresight<small>ledger · request_flow</small></td>
@@ -500,7 +503,7 @@ footer{ border-top:1px solid var(--hair); padding:var(--sp8) 0 var(--sp7) }
         <tr><td class="pk">02 · Comparison<small>all streams</small></td>
           <td class="q">Is the new vendor actually better, or did it just have a lucky month?</td>
           <td><div class="tags"><span>bayes</span><span>experiments</span><span>bandits</span></div></td>
-          <td class="ship late">Last — needs history</td></tr>
+          <td class="ship late">Last, needs history</td></tr>
       </tbody>
     </table>
   </div>
@@ -509,12 +512,12 @@ footer{ border-top:1px solid var(--hair); padding:var(--sp8) 0 var(--sp7) }
 <section class="sec alt">
   <div class="wrap">
     <div class="sec-head rv">
-      <div class="sec-no lbl">§ 04 · How</div>
+      <div class="sec-no"><b>04</b> How</div>
       <div><h2>Three steps, and the third one is the product.</h2></div>
     </div>
     <div class="steps rv">
       <div class="step"><div class="n">01</div><h3>Onboard by slug</h3><p>Pick a vertical. <span class="mono">t/vaikunth-heights</span> gets a housing society's labels, categories and roles; <span class="mono">t/aavartan-robotics</span> gets a club's. Same schema, different manifest.</p></div>
-      <div class="step"><div class="n">02</div><h3>Run the community</h3><p>Requests, dues, events, announcements, polls. Ordinary operations software that people will actually open — because the boring part has to work before the clever part matters.</p></div>
+      <div class="step"><div class="n">02</div><h3>Run the community</h3><p>Requests, dues, events, announcements, polls. Ordinary operations software that people will actually open, because the boring part has to work before the clever part matters.</p></div>
       <div class="step"><div class="n">03</div><h3>Read what it means</h3><p>Every figure arrives with its sample size, its interval and its assumption checks. When a method cannot yet speak, it says what it is waiting for instead of guessing.</p></div>
     </div>
   </div>
@@ -535,7 +538,7 @@ footer{ border-top:1px solid var(--hair); padding:var(--sp8) 0 var(--sp7) }
   <div class="wrap">
     <div class="cta-band rv">
       <h2>Bring a quorum. We will bring the confidence intervals.</h2>
-      <p>Open the sample dashboard — a real housing society in Baner, Pune, with 187 requests and every number carrying its own evidence.</p>
+      <p>Open the sample dashboard for a real housing society in Baner, Pune, with 187 requests and every number carrying its own evidence.</p>
       <div class="btnrow">
         <a class="btn btn-fill" href="dashboard.html">Open the dashboard <span class="arw">→</span></a>
         <a class="btn btn-line" href="#spine">Read the spine</a>

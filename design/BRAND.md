@@ -1,7 +1,7 @@
-# Quorum — Brand strategy & identity architecture
+# Quorum: brand strategy and identity architecture
 
 *Cards B.2 / B.2a. Status: draft 1. Runs VibeCurb `brandkit-gen` Phase 1 (Brand Strategy) and
-Phase 2 (Identity Architecture) under the hand-authored-SVG constraint — no image generation
+Phase 2 (Identity Architecture) under the hand-authored-SVG constraint, no image generation
 available, so the identity ships as geometry and tokens, not as generated brand boards.*
 
 ---
@@ -10,12 +10,12 @@ available, so the identity ships as geometry and tokens, not as generated brand 
 
 **Quorum.** Two readings, and the product is the second one wearing the first one's clothes:
 
-- *the civic reading* — **enough people to decide**. A meeting without quorum cannot resolve.
-- *the statistical reading* — **enough data to conclude**. An estimate without `n` cannot resolve
+- *the civic reading*: **enough people to decide**. A meeting without quorum cannot resolve.
+- *the statistical reading*: **enough data to conclude**. An estimate without `n` cannot resolve
   either.
 
 The name is not decoration on the strategy. It **is** the strategy. Every screen in this product is
-answering "do we have quorum yet?" — about attendance, about evidence, about both. The brand's job
+answering "do we have quorum yet?" about attendance, about evidence, about both. The brand's job
 is to make "not yet" look like an honest answer rather than a broken screen.
 
 ---
@@ -26,11 +26,11 @@ is to make "not yet" look like an honest answer rather than a broken screen.
 > operations, positioned against both CRUD society apps and LLM-wrapper "AI assistants". Audience is
 > split and must both be served on one surface: the **resident**, who wants the leaking tap fixed
 > and wants to know *when*; and the **secretary**, who has to decide whether the new plumber is
-> actually better or whether last month just felt better. Core metaphor: **the threshold** — the
+> actually better or whether last month just felt better. Core metaphor: **the threshold**: the
 > line a count crosses when it becomes enough to act on. Emotional promise: *you can defend this
 > number in front of the committee.* Trust level: high, and earned by visible restraint rather than
 > claimed by badge. Visual world: warm ink on paper, printed record-keeping, a measured instrument
-> face — the register book and the calibrated dial, not the SaaS gradient. The brand should feel
+> face, the register book and the calibrated dial, not the SaaS gradient. The brand should feel
 > like it was designed by someone who has actually sat through an AGM.
 
 ### The ten signals
@@ -39,7 +39,7 @@ is to make "not yet" look like an honest answer rather than a broken screen.
 |---|---|
 | **Category** | Community operations platform with an inferential engine. Not analytics-for-enterprise. |
 | **Audience** | Two, on one surface. Resident: low-frequency, low-patience, wants an ETA. Secretary/coordinator: recurring, accountable to a committee, needs to justify decisions to peers who did not read the data. |
-| **Product function** | Observe a community as processes, then **decide** — with intervals, not vibes. |
+| **Product function** | Observe a community as processes, then **decide** with intervals, not vibes. |
 | **Emotional promise** | Defensibility. The calm of a number you can be questioned about. |
 | **Cultural position** | Warm-human and technical-expert simultaneously. Explicitly *not* corporate-SaaS, *not* playful-consumer, *not* "AI-powered". |
 | **Trust level** | High. Communities handle other people's money and other people's complaints. |
@@ -54,9 +54,9 @@ From the `brandkit-gen` verb table, Quorum's verbs are **organize/manage/control
 grid, register, index, **calibration**, dial) and **analyze/discover** (lens, **trace**, signal).
 Narrowed to three candidates:
 
-1. **The filled threshold** — a level rising to meet a rule. Quorum, literally.
-2. **The interval** — a span with two caps and a point inside it. Honest measurement, literally.
-3. **The register rule** — a ruled line across a page, the unit of a ledger.
+1. **The filled threshold**: a level rising to meet a rule. Quorum, literally.
+2. **The interval**: a span with two caps and a point inside it. Honest measurement, literally.
+3. **The register rule**: a ruled line across a page, the unit of a ledger.
 
 Candidate 1 wins: it carries *both* readings of the name in one form, and it survives 16px.
 
@@ -75,51 +75,60 @@ Banned from all copy: *elevate, seamless, unleash, empower, revolutionise, AI-po
 
 ### Visual mode
 
-**Custom mode, declared: "Warm Instrument."** Constructed per the skill's custom-mode procedure —
-start from **Mode 11 (Warm Editorial / Humanist)** for canvas and temperature, swap the
+**Custom mode, declared: "Warm Instrument."** Constructed per the skill's custom-mode procedure, start from **Mode 11 (Warm Editorial / Humanist)** for canvas and temperature, swap the
 art-historical image-world for a **measurement image-world** (graticules, control limits, ruled
 bands, tick scales) drawn from **Mode 5 (Light Editorial / Compliance)**, and keep Mode 11's rule
 that the logo must be so simple it disappears next to the data.
 
-- **Canvas:** warm ivory `#FBF7F0` light / warm near-black `#1A1613` dark.
+- **Canvas:** warm limestone `#FAF7F2` light / warm near-black `#12100E` dark. Limestone, not
+  cream and not grey: cream reads dated, grey reads corporate.
 - **Canvas treatment:** *textured paper* (light) shifting to *technical grid* wherever data is
   plotted. The chart is the only place the grid appears; it is a signal that you are now looking at
   measurement rather than at copy.
-- **Accents:** terracotta `#C2552B` as the single brand accent, deep indigo `#1F3A5F` as the
-  institutional secondary. Two accents maximum, per the skill's rule.
+- **Accents:** **spruce `#13594A`** as the primary, **apricot `#E07A3F`** as the interaction accent.
+  Two accents maximum, per the skill's rule.
 - **Mood:** considered, warm, accountable. A well-kept register book with an instrument on the desk
   beside it.
 
 Why this over the obvious picks: Mode 9 (Enterprise SaaS) would put us in the indigo-on-cool-grey
 sea that every society app already swims in, and it reads as *corporate*, which is the one thing
 this audience distrusts. Mode 1/2 (dark developer/operator) is honest about the statistics but
-alienates the resident, who is half the audience.
+alienates the resident, who is half the audience. An earlier draft of this brief proposed
+terracotta-on-ivory; it was cut at review for reading as the expected warm-startup palette rather
+than as a current one.
 
 ### Colour discipline
 
-**Structure: complementary anchor** — warm terracotta dominant, deep indigo opposite, used sparingly
-for institutional weight (headers, seals, the "method card" chrome). Everything else is the base
-paper/ink pair.
+**Structure: split-warm anchor.** Spruce carries brand weight and calm; apricot carries interaction
+and nothing else. Everything else is the limestone/ink pair.
 
-> **The rule that matters:** brand colour and **chart colour are two separate systems.** Terracotta
-> is never a series colour. A reader must never have to ask whether the orange line means "the
-> brand" or "vendor 2". This is specified fully in `design/DATAVIZ.md` (card B.5); the sample pages
-> already obey it, and their categorical palettes were run through the six-check validator in both
-> modes.
+Three rules, in priority order:
+
+1. **Apricot is never a status colour.** It means "you can act on this": hovers, focus rings, the
+   median crosshair, a signalled control point. Warning and stop have their own ramps (`--warn`,
+   `--stop`) so an alert never competes with a button.
+2. **Spruce is never a series colour**, and neither is apricot.
+3. **Brand colour and chart colour are two separate systems.** A reader must never have to ask
+   whether the orange line means "the brand" or "vendor 2".
+
+> Specified fully in `design/DATAVIZ.md` (card B.5). The sample pages already obey it, and their
+> categorical palettes were run through the six-check validator in both modes.
 
 ### Typography character
 
-**Editorial serif + clean geometric sans**, with a **monospace figure face** as a third, non-optional
-role.
+**Characterful grotesque + neutral text sans**, with a **monospace figure face** as a third,
+non-optional role.
 
-| Role | Character | Why |
+| Role | Face | Why |
 |---|---|---|
-| Display / headings | Editorial serif | The register book, the printed report. Signals "record" rather than "app". |
-| Body / UI | Clean geometric sans | Inherited warmth from Campus Connect's `Outfit` / `Plus Jakarta Sans` lineage; legible for the resident. |
-| **Figures, `n`, intervals, method ids** | Monospace, tabular figures | **A statistic wears a different face from prose.** This is the typographic form of the no-bare-numbers rule: if it is set in the mono face, it came out of an `Evidence` envelope. Nothing else may borrow that face. |
+| Display / headings | **Bricolage Grotesque** | Tight, slightly irregular, genuinely current. Carries personality without novelty, and holds up at 6rem where a neutral grotesque goes generic. |
+| Body / UI | **Inter Tight** | Neutral by design so the display face does the talking. Legible for the resident at 16px on a phone at night. |
+| **Figures, `n`, intervals, method ids** | **JetBrains Mono**, tabular figures | **A statistic wears a different face from prose.** This is the typographic form of the no-bare-numbers rule: if it is set in the mono face, it came out of an `Evidence` envelope. Nothing else may borrow that face. |
 
-The three style directions each realise this pairing differently (§4); the *three-role structure* is
-brand-level and does not vary.
+An earlier draft proposed an editorial serif for display. It was cut with the terracotta palette:
+together they read as a familiar warm-editorial template rather than as this product. The
+*three-role structure* is what is brand-level and does not vary; the faces filling those roles are
+the ones above.
 
 ### Logo concept
 
@@ -128,7 +137,7 @@ brand-level and does not vary.
 > **Geometry, one sentence:** *It is a circle with a horizontal chord that overshoots both edges, the
 > area below the chord filled.*
 
-Primitives: **2** (one circle, one rectangle) — under the 3-primitive cap.
+Primitives: **2** (one circle, one rectangle), under the 3-primitive cap.
 
 What it says: a level risen to meet a rule. Quorum reached. It reads simultaneously as a filled
 proportion, an instrument face with its threshold marked, and a token counted into a box. The
@@ -149,7 +158,7 @@ overshoot is load-bearing: without it the mark is a moon phase; with it, the cho
 
 **Fill-state variant, and why it is not a gimmick:** the mark's fill level is a legitimate state.
 At quorum the segment is filled to the chord; below quorum it is filled short of it, with the chord
-still drawn. The product's most common empty state therefore has a *brand-native* form — the logo
+still drawn. The product's most common empty state therefore has a *brand-native* form, the logo
 itself is the "not enough data yet" illustration. This is the single best thing about the mark and
 it is why it beat the interval-with-caps candidate.
 
@@ -164,7 +173,7 @@ Most of this product's pixels are **uncertainty**, not values:
 
 - a survival curve is mostly its band,
 - a control chart is mostly its limits,
-- a conformal ETA *is* an interval — there is no point estimate at all,
+- a conformal ETA *is* an interval, there is no point estimate at all,
 - and for any tenant in its first months, the most frequent tile on the screen says
   **not enough data yet.**
 
@@ -174,8 +183,8 @@ So the states get designed first, and the hero second. Four states, from
 | State | Visual contract | Never |
 |---|---|---|
 | **Estimate** | Value in the mono face, unit, interval, `n`, and `n_censored` when non-zero. Method id links to its card. | A bare number. Ever. |
-| **Qualified** | Value shown at full weight, with the failing check's label and detail inline beneath it, in the warning role. Not dimmed, not hidden — a qualified number is still a number. | Styling it as broken. |
-| **Not interpretable** | Value **suppressed** and replaced by the blocking check's `detail`. The tile keeps its full size and its frame — the space is held, not collapsed. | Collapsing the tile, which hides that the question was asked. |
+| **Qualified** | Value shown at full weight, with the failing check's label and detail inline beneath it, in the warning role. Not dimmed, not hidden, a qualified number is still a number. | Styling it as broken. |
+| **Not interpretable** | Value **suppressed** and replaced by the blocking check's `detail`. The tile keeps its full size and its frame, the space is held, not collapsed. | Collapsing the tile, which hides that the question was asked. |
 | **Not enough data** | Calm. Ink-muted, never a status colour, never an exclamation mark. States the target and the actual: *"needs 30 closed requests, has 11."* Carries a progress form (the logo's own fill state) so the reader sees it is *accruing*, not *failing*. | Red. Warning triangles. The word "error". Empty-state illustrations of confused people. |
 
 **The rule behind all four:** *if honest reporting looks broken, people learn to prefer tools that
@@ -184,7 +193,7 @@ lie.* An empty state that reads as a defect is a product failure, not a visual o
 Two more contracts that apply to every figure everywhere:
 
 1. **Every figure shows its `n` and its interval.** Where a quantity is exact (a count, a rank), it
-   says so explicitly — `interval_kind: "none"` renders as *"exact count"*, not as blank space.
+   says so explicitly, `interval_kind: "none"` renders as *"exact count"*, not as blank space.
 2. **The interval kind is named.** A 95% confidence interval, a 95% credible interval, a 90%
    conformal interval and a set of control limits are four different objects and the UI says which
    one it is showing. Control limits in particular are a **decision boundary, not an estimate**, and
@@ -194,10 +203,10 @@ Two more contracts that apply to every figure everywhere:
 
 ## 4. The three style directions
 
-All three sit inside the strategy above and share the identity architecture — the same logo
+All three sit inside the strategy above and share the identity architecture, the same logo
 geometry, the same three-role type structure, the same four render states, the same brand/chart
-colour separation. They differ in **temperature, type voice, motion personality, and — the real
-axis — what uncertainty is made of.**
+colour separation. They differ in **temperature, type voice, motion personality, and, the real
+axis, what uncertainty is made of.**
 
 The categorical chart hues do **not** vary by direction. Hue anchors are a CVD-safety mechanism, not
 a mood lever; each direction re-steps the same four hue families against its own surface and both
@@ -205,7 +214,7 @@ step sets were validated (lightness band, chroma floor, CVD ΔE, normal-vision f
 light and dark. What varies is the *form* uncertainty takes, which is the honest place for a style
 direction to express itself.
 
-### A. **Almanac** — warm editorial
+### A. **Almanac**: warm editorial
 
 `design/samples/almanac/`
 
@@ -217,13 +226,13 @@ and the one that most reassures a non-technical resident.
 - **Palette:** ivory `#FBF7F0` / ink `#2A211C` / terracotta `#B54A22` / indigo `#1F3A5F`.
 - **Type:** *Fraunces* (editorial serif, optical display axis) + *Plus Jakarta Sans* (body) +
   *JetBrains Mono* (figures).
-- **Motion personality:** **Cinematic** — slow editorial reveals, 500–800ms, `--ease-dramatic`.
+- **Motion personality:** **Cinematic**: slow editorial reveals, 500–800ms, `--ease-dramatic`.
 - **Uncertainty is: hatching.** Confidence bands are drawn as diagonal hand-hatched fills, the way a
   printed almanac or a census report shades an uncertain region. Hatching reads as *"drawn by
   someone who knew this was approximate"* rather than as a coloured block that might be mistaken
   for data. Not-enough-data is a ruled but unfilled ledger line with the tally written in the margin.
 
-### B. **Graticule** — precise instrument
+### B. **Graticule**: precise instrument
 
 `design/samples/graticule/`
 
@@ -235,30 +244,30 @@ most respects the secretary who has to defend a decision.
 - **Palette:** paper `#F7F8F7` / ink `#111417` / signal teal `#0E6A62` / indigo `#243B55`.
 - **Type:** *Archivo* (neo-grotesk, tight display) + *Archivo* body + *IBM Plex Mono* (figures,
   axes, every label).
-- **Motion personality:** **Surgical** — 120–240ms, `--ease-snap`, zero overshoot. Nothing on this
+- **Motion personality:** **Surgical**: 120–240ms, `--ease-snap`, zero overshoot. Nothing on this
   page bounces; instruments do not bounce.
 - **Uncertainty is: the graticule.** Bands are bounded by hairlines and filled with a fine ruled
   tint; every interval terminates in real tick caps against a real scale. The uncertainty is
   *measured*, with its edges legible, rather than atmospheric. Not-enough-data draws the complete
-  scale with no reading on it — the instrument exists, it simply has not been given enough to say.
+  scale with no reading on it, the instrument exists, it simply has not been given enough to say.
 
-### C. **Signal** — high-contrast poster
+### C. **Signal**: high-contrast poster
 
 `design/samples/signal/`
 
 Attitude. Dark-first, near-black warm charcoal, oversized condensed display type set as a poster,
 one acid accent, hard edges and no soft shadows. Built for the tenant who wants their community's
 data to look like it matters, and for the screen behind the podium at a general body meeting. Its
-light mode is bone paper with black ink — a printed poster, not a washed-out dark mode.
+light mode is bone paper with black ink, a printed poster, not a washed-out dark mode.
 
 - **Palette:** charcoal `#131210` / bone `#F2F0E9` / acid `#C8F031` / ember `#F2823F`.
 - **Type:** *Bricolage Grotesque* (variable display, condensed at scale) + *Space Grotesk* (body) +
   *Space Mono* (figures).
-- **Motion personality:** **Physical** — spring-shaped entries and press compression, 300–520ms.
+- **Motion personality:** **Physical**: spring-shaped entries and press compression, 300–520ms.
 - **Uncertainty is: the shadow.** An interval is a solid offset block sitting behind its point
   estimate: the number literally casts the width of its own doubt, and a wide interval is visibly a
   bigger, heavier shape than a narrow one. Control-chart signals are treated as poster events, not
-  as small red dots. Not-enough-data is a large, quiet typographic statement with a tally — the
+  as small red dots. Not-enough-data is a large, quiet typographic statement with a tally, the
   loudest direction saying the quietest thing, which is exactly where it earns trust.
 
 ---
@@ -267,18 +276,18 @@ light mode is bone paper with black ink — a printed poster, not a washed-out d
 
 Three constraints are already locked and do not vary by direction:
 
-1. **Easings are cubic-Bézier tokens.** No CSS keyword easings anywhere — not `ease`, not
+1. **Easings are cubic-Bézier tokens.** No CSS keyword easings anywhere, not `ease`, not
    `ease-in-out`, not `linear` as an animation curve. Spring-shaped `linear()` curves are
    deliberately deferred to `design/MOTION.md` so that the token contract stays one type.
 2. **`prefers-reduced-motion: reduce` is honoured on every page.** Reduced motion means no
-   translation, no scale, no parallax — opacity at reduced duration is permitted, and all reveal
+   translation, no scale, no parallax, opacity at reduced duration is permitted, and all reveal
    states must resolve to visible regardless of whether their trigger ever fires.
 3. **The motion budget follows frequency.** Marketing surfaces get full coverage. Product surfaces
    get almost none: a dashboard a secretary opens forty times a week must not animate its tiles
    forty times a week. Empty states and first-run are the one place the product spends delight.
 
 Banned: scroll-jacking, hover disco, text disassembly, layout-property animation, infinite
-preloaders, and any motion applied to a number that is still settling — **a figure never counts up.**
+preloaders, and any motion applied to a number that is still settling, **a figure never counts up.**
 Counting animation implies the value is arriving; in this product the value arrived with an interval
 attached and animating it is a small lie.
 
@@ -286,16 +295,16 @@ attached and animating it is a small lie.
 
 ## 6. What this brief hands to the next cards
 
-- **B.3** — logo SVGs from §2's geometry, including the fill-state variant.
-- **B.4** — `tokens.css` / `tokens.json`. Every colour on bare `:root` for light and redefined under
+- **B.3**: logo SVGs from §2's geometry, including the fill-state variant.
+- **B.4**: `tokens.css` / `tokens.json`. Every colour on bare `:root` for light and redefined under
   both `@media (prefers-color-scheme: dark)` and `[data-theme="dark"]`; no colour whose only
   definition lives in a media query. The sample pages already follow this rule and are the source
   for the token names.
-- **B.5** — `DATAVIZ.md`. The categorical steps validated here, the sequential ramp, the diverging
+- **B.5**: `DATAVIZ.md`. The categorical steps validated here, the sequential ramp, the diverging
   pair, the fixed status scale, and the two specs that matter most: the **survival curve with band**
   and the **control chart with limits**, including the rule that control limits never share a visual
   language with a confidence band.
-- **B.6** — `MOTION.md`. The three personalities above, one selected once a direction is picked.
-- **B.7** — the design canvas, built in the chosen direction.
+- **B.6**: `MOTION.md`. The three personalities above, one selected once a direction is picked.
+- **B.7**: the design canvas, built in the chosen direction.
 
 **Open, for the user's pick:** which direction. The recommendation is recorded in `CONTEXT.md`.
