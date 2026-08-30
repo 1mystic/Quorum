@@ -1601,6 +1601,7 @@ _s(
         "must match the closed form within Monte Carlo error at 20,000 draws."
     ),
     min_n_expr="12 LedgerPeriod observations for the inflow-outflow correlation, plus the forecasts' own floors",
+    implemented=True,
 )
 
 _s(
