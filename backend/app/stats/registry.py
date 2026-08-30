@@ -2793,6 +2793,7 @@ _s(
         "statistical disclosure control literature."
     ),
     min_n_expr="not applicable; it is a filter, and the last thing every Pack 4 service calls",
+    implemented=True,
 )
 
 _s(
@@ -2827,6 +2828,7 @@ _s(
         "reproducible from the seed."
     ),
     min_n_expr="not applicable",
+    implemented=True,
 )
 
 _s(
