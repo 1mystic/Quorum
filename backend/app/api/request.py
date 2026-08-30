@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, Query, Security
 from app.schemas import (
     RaiseRequestRequest, ReplyRequestRequest, RaiseRequestResponse, MyRequestItem,
-    LeaderRequestItem, RequestActionResponse, OpenRequestCountResponse
+    LeaderRequestItem, RequestActionResponse, OpenRequestCountResponse,
+    AssignRequestRequest, MergeRequestRequest
 )
 from app.services import RequestService
 from app.core.di import get_request_service, get_user_info
@@ -70,3 +71,78 @@ async def resolve_request(
     service: RequestService = Depends(get_request_service),
 ):
     return await service.resolve(payload, request_id)
+
+
+@request_router.patch("/{request_id}/escalate", response_model=RequestActionResponse)
+async def escalate_request(
+    request_id: int,
+    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    service: RequestService = Depends(get_request_service),
+):
+    return await service.escalate(payload, request_id)
+
+
+@request_router.patch("/{request_id}/withdraw", response_model=RequestActionResponse)
+async def withdraw_request(
+    request_id: int,
+    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    service: RequestService = Depends(get_request_service),
+):
+    return await service.withdraw(payload, request_id)
+
+
+@request_router.patch("/{request_id}/assign", response_model=RequestActionResponse)
+async def assign_request(
+    request_id: int,
+    data: AssignRequestRequest,
+    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    service: RequestService = Depends(get_request_service),
+):
+    return await service.assign(payload, request_id, data.assignee_member_id)
+
+
+@request_router.patch("/{request_id}/reassign", response_model=RequestActionResponse)
+async def reassign_request(
+    request_id: int,
+    data: AssignRequestRequest,
+    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    service: RequestService = Depends(get_request_service),
+):
+    return await service.reassign(payload, request_id, data.assignee_member_id)
+
+
+@request_router.patch("/{request_id}/pause", response_model=RequestActionResponse)
+async def pause_request(
+    request_id: int,
+    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    service: RequestService = Depends(get_request_service),
+):
+    return await service.pause(payload, request_id)
+
+
+@request_router.patch("/{request_id}/resume", response_model=RequestActionResponse)
+async def resume_request(
+    request_id: int,
+    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    service: RequestService = Depends(get_request_service),
+):
+    return await service.resume(payload, request_id)
+
+
+@request_router.patch("/{request_id}/merge", response_model=RequestActionResponse)
+async def merge_request(
+    request_id: int,
+    data: MergeRequestRequest,
+    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    service: RequestService = Depends(get_request_service),
+):
+    return await service.merge(payload, request_id, data.into_request_id)
+
+
+@request_router.patch("/{request_id}/reopen", response_model=RequestActionResponse)
+async def reopen_request(
+    request_id: int,
+    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    service: RequestService = Depends(get_request_service),
+):
+    return await service.reopen(payload, request_id)

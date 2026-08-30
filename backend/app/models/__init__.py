@@ -7,6 +7,7 @@ from app.models.membership import Membership, MembershipRole, MembershipStatus
 from app.models.event import Event, EventStatus
 from app.models.event_registration import EventRegistration, RegistrationResult
 from app.models.announcement import Announcement, AnnouncementCategory
-from app.models.request import Request, RequestCategory, RequestStatus
+from app.models.request import Request, RequestStatus
+from app.models.request_event import RequestEventLog, RequestEventKind
 from app.models.notification import Notification, NotificationType
 from app.models.certificate import Certificate

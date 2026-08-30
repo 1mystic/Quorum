@@ -16,6 +16,7 @@ TENANT_SCOPED_TABLES = [
     "announcements",
     "notifications",
     "requests",
+    "request_events",
     "certificates",
     "event_registrations",
     "memberships",
@@ -25,9 +26,9 @@ POLICY_NAME = "tenant_isolation"
 TENANT_FILTER = "tenant_id = current_setting('app.tenant_id', true)::int"
 
 
-def enable_statements() -> list[str]:
+def enable_statements(tables: list[str] | None = None) -> list[str]:
     statements = []
-    for table in TENANT_SCOPED_TABLES:
+    for table in (tables if tables is not None else TENANT_SCOPED_TABLES):
         statements.append(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
         statements.append(f"ALTER TABLE {table} FORCE ROW LEVEL SECURITY")
         statements.append(
@@ -37,10 +38,17 @@ def enable_statements() -> list[str]:
     return statements
 
 
-def disable_statements() -> list[str]:
+def disable_statements(tables: list[str] | None = None) -> list[str]:
     statements = []
-    for table in TENANT_SCOPED_TABLES:
+    for table in (tables if tables is not None else TENANT_SCOPED_TABLES):
         statements.append(f"DROP POLICY IF EXISTS {POLICY_NAME} ON {table}")
         statements.append(f"ALTER TABLE {table} NO FORCE ROW LEVEL SECURITY")
         statements.append(f"ALTER TABLE {table} DISABLE ROW LEVEL SECURITY")
     return statements
+
+
+# Aliases read naturally at a call site that is scoping a subset of tables,
+# e.g. a migration that adds one new tenant-scoped table after the original
+# tenancy migration already covered the rest.
+enable_statements_for = enable_statements
+disable_statements_for = disable_statements

@@ -63,6 +63,14 @@ class RequestMessages:
     RAISED = "Request submitted to the group leader"
     REPLIED = "Reply sent to the member"
     RESOLVED = "Request marked as resolved"
+    ESCALATED = "Request escalated"
+    WITHDRAWN = "Request withdrawn"
+    ASSIGNED = "Request assigned"
+    REASSIGNED = "Request reassigned"
+    PAUSED = "Request paused"
+    RESUMED = "Request resumed"
+    MERGED = "Request merged"
+    REOPENED = "Request reopened"
 
 
 class NotificationMessages:

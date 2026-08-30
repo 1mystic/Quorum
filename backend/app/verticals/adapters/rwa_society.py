@@ -77,17 +77,18 @@ class RwaSocietyAdapter(PortedSchemaAdapter):
     sla_clock: Literal["wall", "active"] = "wall"
     currency = "INR"
 
-    # TODO(missing model): `Request.category` is still the ported Campus Connect
-    # enum (EVENT, GROUP, CERTIFICATE, TECHNICAL, GENERAL). A housing society has
-    # none of those, and no column, table or lookup holds a society complaint
-    # category. The map is therefore empty on purpose: every row lands in "other"
-    # and is counted by `unmapped_report()`, which is the declared behaviour for
-    # an unmapped value and is deliberately loud. Fix it by adding the vertical
-    # category to the request model, not by guessing a mapping here. Until then
-    # survival.logrank_compare and survival.cox_hazard_ratios have exactly one
-    # category to work with, so "sewage requests resolve 2.4x slower than
-    # electrical", which the interview evidence makes a budget argument, cannot
-    # be computed at all.
+    # Card C.8: `Request.category` is no longer bound to the ported Campus
+    # Connect enum (EVENT, GROUP, CERTIFICATE, TECHNICAL, GENERAL) - it is a
+    # plain string, validated at the service layer against this vertical's own
+    # `request_categories` above. A society complaint written through the API
+    # today already lands in the declared vocabulary directly (`water_supply`,
+    # `sewage_stp`, ...), so this map stays empty: there is nothing legacy to
+    # translate. It only stays non-removed as the place a future bulk-import of
+    # pre-C.8 rows (which still hold the old enum strings) would register its
+    # translation, so an old row is counted as unmapped rather than guessed at,
+    # per the adapter's obligation 1. survival.logrank_compare and
+    # survival.cox_hazard_ratios by category are unblocked for any request
+    # written after this card.
     legacy_request_categories: Mapping[str, str] = {}
 
     def member_strata(self, row: Any) -> dict[str, str]:

@@ -98,8 +98,9 @@ def get_request_service(db: AsyncSession = Depends(get_db),
     membership_repo = MembershipRepository(db)
     member_repo = MemberRepository(db)
     user_repo = UserRepository(db)
+    tenant_repo = TenantRepository(db)
     return RequestService(request_repo, group_repo, event_repo, membership_repo,
-                        member_repo, user_repo)
+                        member_repo, user_repo, tenant_repo)
 
 def get_notification_service(db: AsyncSession = Depends(get_db)):
     notification_repo = NotificationRepository(db)

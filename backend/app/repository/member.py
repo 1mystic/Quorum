@@ -15,6 +15,10 @@ class MemberRepository:
         result = await self.db.execute(select(Member).where(Member.user_id == user_id))
         return result.scalar_one_or_none()
 
+    async def get_by_id(self, member_id: int) -> Member | None:
+        result = await self.db.execute(select(Member).where(Member.id == member_id))
+        return result.scalar_one_or_none()
+
     async def get_by_id_with_user(self, member_id: int) -> Member | None:
         result = await self.db.execute(
             select(Member).where(Member.id == member_id).options(selectinload(Member.user))

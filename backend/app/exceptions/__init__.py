@@ -17,7 +17,10 @@ from app.exceptions.event import (
     ResultsAlreadyDeclaredError
 )
 from app.exceptions.announcement import AnnouncementNotFoundError
-from app.exceptions.request import RequestNotFoundError, RequestActionNotAllowedError
+from app.exceptions.request import (
+    RequestNotFoundError, RequestActionNotAllowedError, RequestCategoryInvalidError,
+    RequestAlreadyTerminalError, RequestNotTerminalError, RequestMergeTargetInvalidError
+)
 from app.exceptions.notification import NotificationNotFoundError
 from app.exceptions.storage import (
     StorageError, StorageNotConfiguredError, InvalidFileTypeError, FileTooLargeError

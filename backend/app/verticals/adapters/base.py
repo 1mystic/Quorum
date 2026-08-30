@@ -271,32 +271,32 @@ class PortedSchemaAdapter(BaseAdapter):
         prevent, and the conformance suite has a fixture of open requests that
         must come through untouched.
 
-        TODO(missing model): there is no request event log, so "assigned",
-        "reassigned", "paused", "resumed", "escalated", "withdrawn", "merged" and
-        "reopened" cannot be emitted. The consequences are named in the Method
-        Cards already: without escalated and withdrawn,
-        survival.competing_risks_cif has nothing to estimate and the
-        competing-risks check cannot fire; without paused and resumed,
-        `duration_active_hours` is unavailable, so a vertical declaring
-        sla_clock="active" cannot actually have it.
-
-        TODO(missing model): `Request` has no priority, channel or location_ref
-        column. Channel is a first-class covariate for any community where most
-        people are on WhatsApp, and location_ref is the block, which is the
-        stratum every k-anonymity check turns on.
+        Card C.8 closed two of this method's gaps: `Request` now carries
+        `priority`, `channel`, `location_ref` and `subcategory` columns, read
+        directly below, and there is now a `RequestEventLog` table
+        (`app/models/request_event.py`) recording "assigned", "reassigned",
+        "paused", "resumed", "escalated", "withdrawn", "merged" and "reopened".
+        This method still only synthesises the three lifecycle events a bare
+        `Request` row can prove by itself (opened / acknowledged / resolved);
+        reading the richer event log and folding its rows in here - so
+        survival.competing_risks_cif and duration_active_hours actually have
+        something to estimate - is a stream-reducer integration, left to
+        whoever wires `streams/reduce.py` against `RequestRepository.stream_events`.
         """
         events: list[RequestEvent] = []
         for row in rows:
             ref = request_ref(row.id)
             raw_category = getattr(row.category, "value", row.category)
+            raw_priority = getattr(row, "priority", None)
             common = {
                 "request_ref": ref,
                 "category": self.category(
                     self.legacy_request_categories.get(str(raw_category), raw_category)
                 ),
-                "priority": None,
-                "channel": None,
-                "location_ref": None,
+                "subcategory": getattr(row, "subcategory", None),
+                "priority": self.priority(raw_priority) if raw_priority is not None else None,
+                "channel": getattr(row, "channel", None),
+                "location_ref": getattr(row, "location_ref", None),
                 "group_ref": group_ref(getattr(row, "group_id", None)),
             }
             events.append(

@@ -33,7 +33,8 @@ from app.schemas.announcement import (
 )
 from app.schemas.request import (
     RaiseRequestRequest, ReplyRequestRequest, RaiseRequestResponse, RequestResponseInfo,
-    MyRequestItem, LeaderRequestItem, RequestActionResponse, OpenRequestCountResponse
+    MyRequestItem, LeaderRequestItem, RequestActionResponse, OpenRequestCountResponse,
+    AssignRequestRequest, MergeRequestRequest
 )
 from app.schemas.notification import (
     NotificationItem, NotificationCountResponse, NotificationReadResponse,

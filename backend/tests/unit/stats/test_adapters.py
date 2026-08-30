@@ -129,6 +129,26 @@ def test_emitted_categories_are_in_the_declared_vocabulary(adapter_class):
 
 
 @pytest.mark.parametrize("adapter_class", ADAPTER_CLASSES, ids=lambda c: c.vertical_id)
+def test_priority_channel_and_location_now_flow_through(adapter_class):
+    """
+    Card C.8 gave `Request` the columns `app/verticals/adapters/base.py` named
+    as missing. `channel` and `location_ref` pass through as free strings (no
+    declared adapter vocabulary for either); `priority` is checked against the
+    vertical's declared `request_priorities`.
+    """
+    adapter = adapter_class()
+    row = request_row(
+        priority=adapter.request_priorities[0], channel="whatsapp", location_ref="block-c",
+        subcategory="sub",
+    )
+    event = adapter.request_events([row])[0]
+    assert event.priority == adapter.request_priorities[0]
+    assert event.channel == "whatsapp"
+    assert event.location_ref == "block-c"
+    assert event.subcategory == "sub"
+
+
+@pytest.mark.parametrize("adapter_class", ADAPTER_CLASSES, ids=lambda c: c.vertical_id)
 def test_an_unmapped_value_is_counted_never_silently_dropped(adapter_class):
     """
     Conformance obligation 1. The row survives, its category becomes "other", and
@@ -158,12 +178,23 @@ def test_campus_club_maps_the_ported_enum_onto_its_own_vocabulary():
     assert adapter.unmapped_report() == {}
 
 
-def test_rwa_society_cannot_categorise_a_complaint_yet_and_says_so_loudly():
+def test_rwa_society_now_categorises_a_complaint_using_its_own_vocabulary():
     """
-    The honest current state: `Request.category` is still the campus enum and no
-    column holds a society complaint category, so everything lands in "other" and
-    every row is counted as unmapped. Nothing is invented to paper over it.
+    Card C.8 closed the gap the previous version of this test documented:
+    `Request.category` is a plain string now, so a society complaint written
+    with a real category maps straight through, nothing left in "other".
     """
+    adapter = RwaSocietyAdapter()
+    rows = [request_row(id=i, category=c) for i, c in enumerate(
+        ["water_supply", "sewage_stp", "electrical"], start=1
+    )]
+    events = adapter.request_events(rows)
+    assert {e.category for e in events} == {"water_supply", "sewage_stp", "electrical"}
+    assert adapter.unmapped_report() == {}
+
+
+def test_rwa_society_still_reports_an_unknown_value_as_other_never_guessed():
+    """A category outside the declared vocabulary is still counted, never invented."""
     adapter = RwaSocietyAdapter()
     rows = [request_row(id=i, category=c) for i, c in enumerate(["EVENT", "TECHNICAL"], start=1)]
     events = adapter.request_events(rows)
