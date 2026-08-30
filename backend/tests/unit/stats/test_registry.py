@@ -216,7 +216,23 @@ def test_stub_services_raise_rather_than_return_a_number():
     unimplemented = [spec for spec in R.REGISTRY.values() if not spec.implemented]
     assert unimplemented, "if everything is implemented, delete this test"
     with pytest.raises(NotImplementedError):
-        R.get("survival.median_resolution_days").fn(None, None)
+        R.get("forecast.request_volume").fn(None, None)
+
+
+def test_pack_one_is_marked_implemented():
+    """
+    `implemented` is what the read surface uses to decide whether to offer a
+    service at all, so it must track the code rather than an intention. Pack 1
+    landed with card C.9; if one of these is flipped back, the packs endpoint
+    must stop advertising it on the same commit.
+    """
+    for service_id in (
+        "survival.km_resolution_curve",
+        "survival.median_resolution_days",
+        "survival.cox_hazard_ratios",
+        "survival.naive_vs_km_gap",
+    ):
+        assert R.get(service_id).implemented, service_id + " is implemented but not declared so"
 
 
 # ---------------------------------------------------------------------------

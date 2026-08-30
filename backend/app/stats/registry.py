@@ -325,6 +325,7 @@ _s(
         "3.1 days and the Kaplan-Meier median is 8.0, asserting we report 8.0."
     ),
     min_n_expr="30 observed events, not 30 rows",
+    implemented=True,
 )
 
 _s(
@@ -350,6 +351,7 @@ _s(
     refs=("Brookmeyer and Crowley (1982) Biometrics 38:29",) + _KM_REFS,
     known="lung: median 310 days, 95% interval 285 to 363, the figure survfit prints.",
     min_n_expr="30 observed events, and the curve must reach the quantile",
+    implemented=True,
 )
 
 _s(
@@ -372,6 +374,7 @@ _s(
     refs=_KM_REFS,
     known="lung at t = 365: the published summary(survfit(...), times=365) value.",
     min_n_expr="30 observed events and at least 10 at risk at the horizon",
+    implemented=True,
 )
 
 _s(
@@ -397,6 +400,7 @@ _s(
         "estimator."
     ),
     min_n_expr="30 observed first responses",
+    implemented=True,
 )
 
 _s(
@@ -424,6 +428,7 @@ _s(
         "external truth rather than a reference-implementation comparison."
     ),
     min_n_expr="30 observed exits",
+    implemented=True,
 )
 
 _s(
@@ -453,6 +458,7 @@ _s(
         "p = 0.001, universally reproduced in the R survival documentation."
     ),
     min_n_expr="10 observed events per group and at least 2 groups",
+    implemented=True,
 )
 
 _s(
@@ -494,6 +500,7 @@ _s(
         "itself, not only about the model."
     ),
     min_n_expr="10 observed events per covariate",
+    implemented=True,
 )
 
 _s(
@@ -529,6 +536,7 @@ _s(
         "whose published cumulative incidence values are asserted."
     ),
     min_n_expr="30 events of the reported cause and 5 of each competing cause",
+    implemented=True,
 )
 
 _s(
@@ -561,6 +569,7 @@ _s(
         "The service must report both, must report the gap, and n_censored must be non-zero."
     ),
     min_n_expr="30 observed events",
+    implemented=True,
 )
 
 _s(
