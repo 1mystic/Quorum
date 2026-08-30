@@ -215,8 +215,11 @@ def test_stub_services_raise_rather_than_return_a_number():
     """
     unimplemented = [spec for spec in R.REGISTRY.values() if not spec.implemented]
     assert unimplemented, "if everything is implemented, delete this test"
+    # Named rather than picked at random so the failure message is readable. It
+    # is swapped for another stub each time a pack lands; it was a forecast
+    # service before Pack 3.
     with pytest.raises(NotImplementedError):
-        R.get("forecast.request_volume").fn(None, None)
+        R.get("voting.pairwise_matrix").fn(None, None, None)
 
 
 def test_pack_one_is_marked_implemented():

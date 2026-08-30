@@ -1342,6 +1342,7 @@ _s(
         "1.0, which is the anchor for the entire gate."
     ),
     min_n_expr="2 * season_length periods",
+    implemented=True,
 )
 
 _s(
@@ -1373,6 +1374,7 @@ _s(
         "agreement with the statsmodels reference implementation on the co2 series."
     ),
     min_n_expr="2 * season_length periods and at least 24 observations",
+    implemented=True,
 )
 
 _s(
@@ -1411,6 +1413,7 @@ _s(
         "land inside."
     ),
     min_n_expr="2 * season_length periods, minimum 24",
+    implemented=True,
 )
 
 _s(
@@ -1446,6 +1449,7 @@ _s(
         "single most reproduced fit in the time-series literature."
     ),
     min_n_expr="3 * season_length periods and at least 36; stricter than the contract default because SARIMA has more parameters",
+    implemented=True,
 )
 
 _s(
@@ -1481,6 +1485,7 @@ _s(
         "binomial tolerance."
     ),
     min_n_expr="initial_train + min_folds * step periods, so at least 5 folds",
+    implemented=True,
 )
 
 _s(
@@ -1504,6 +1509,7 @@ _s(
     refs=("Hyndman and Athanasopoulos, FPP3, ch. 8",),
     known="Inherits its parent forecaster's ground truth; the addition is the billing-cycle fixture.",
     min_n_expr="2 * season_length periods",
+    implemented=True,
 )
 
 _s(
@@ -1526,6 +1532,7 @@ _s(
     refs=("Hyndman and Athanasopoulos, FPP3, ch. 8",),
     known="Inherits its parent forecaster's ground truth; the addition is the monsoon-season fixture.",
     min_n_expr="2 * season_length periods",
+    implemented=True,
 )
 
 _s(
@@ -1555,6 +1562,7 @@ _s(
         "check, tested against a fixture that would otherwise forecast past the roster size."
     ),
     min_n_expr="2 * season_length periods",
+    implemented=True,
 )
 
 _s(

@@ -472,6 +472,164 @@ def bootstrap_bca(
     return percentile(boots, lo_q), percentile(boots, hi_q)
 
 
+def wilson_interval(successes: int, trials: int, *, alpha: float = 0.05) -> tuple[float, float]:
+    """
+    Wilson (1927) score interval for a binomial proportion.
+
+    Preferred to the Wald interval everywhere in this package because Wald is
+    degenerate at 0 and 1, which is exactly where a small community's rates sit:
+    "0 of 7 late" under Wald is the interval [0, 0], which is a false statement.
+    """
+    if trials <= 0:
+        raise ValueError("wilson_interval needs at least one trial")
+    if successes < 0 or successes > trials:
+        raise ValueError("wilson_interval got " + str(successes) + " successes in " + str(trials))
+    z = norm_ppf(1.0 - alpha / 2.0)
+    p = successes / trials
+    denominator = 1.0 + z * z / trials
+    centre = (p + z * z / (2.0 * trials)) / denominator
+    half = z * math.sqrt(p * (1.0 - p) / trials + z * z / (4.0 * trials * trials)) / denominator
+    return max(0.0, centre - half), min(1.0, centre + half)
+
+
+def newcombe_difference(
+    successes_a: int, trials_a: int, successes_b: int, trials_b: int, *, alpha: float = 0.05
+) -> tuple[float, float]:
+    """
+    Newcombe (1998) hybrid-score interval for the difference of two proportions.
+
+    Built from the two Wilson intervals rather than from a pooled normal
+    approximation, so it inherits Wilson's behaviour at the boundary. The
+    construction is exactly the one in Newcombe's method 10.
+    """
+    p_a = successes_a / trials_a
+    p_b = successes_b / trials_b
+    lo_a, hi_a = wilson_interval(successes_a, trials_a, alpha=alpha)
+    lo_b, hi_b = wilson_interval(successes_b, trials_b, alpha=alpha)
+    diff = p_a - p_b
+    lower = diff - math.sqrt((p_a - lo_a) ** 2 + (hi_b - p_b) ** 2)
+    upper = diff + math.sqrt((hi_a - p_a) ** 2 + (p_b - lo_b) ** 2)
+    return max(-1.0, lower), min(1.0, upper)
+
+
+def nelder_mead(
+    objective: Callable[[Sequence[float]], float],
+    start: Sequence[float],
+    *,
+    step: float = 0.1,
+    max_iter: int = 800,
+    tol: float = 1e-9,
+) -> tuple[list[float], float]:
+    """
+    Derivative-free simplex minimisation (Nelder and Mead 1965).
+
+    Deterministic: the initial simplex is built from `start` by a fixed offset
+    per coordinate, never from a random perturbation, so two runs on the same
+    input are byte identical. Used where an analytic gradient is not worth
+    writing out, notably the conditional sum of squares for SARIMA.
+    """
+    dim = len(start)
+    if dim == 0:
+        return [], objective(start)
+    simplex = [list(start)]
+    for i in range(dim):
+        point = list(start)
+        point[i] += step if point[i] == 0.0 else step * (1.0 + abs(point[i]))
+        simplex.append(point)
+    scores = [objective(p) for p in simplex]
+    for _ in range(max_iter):
+        order = sorted(range(dim + 1), key=lambda i: scores[i])
+        simplex = [simplex[i] for i in order]
+        scores = [scores[i] for i in order]
+        if abs(scores[-1] - scores[0]) <= tol * (abs(scores[0]) + tol):
+            break
+        centroid = [math.fsum(p[i] for p in simplex[:-1]) / dim for i in range(dim)]
+        worst = simplex[-1]
+        reflected = [centroid[i] + (centroid[i] - worst[i]) for i in range(dim)]
+        f_reflected = objective(reflected)
+        if f_reflected < scores[0]:
+            expanded = [centroid[i] + 2.0 * (centroid[i] - worst[i]) for i in range(dim)]
+            f_expanded = objective(expanded)
+            if f_expanded < f_reflected:
+                simplex[-1], scores[-1] = expanded, f_expanded
+            else:
+                simplex[-1], scores[-1] = reflected, f_reflected
+            continue
+        if f_reflected < scores[-2]:
+            simplex[-1], scores[-1] = reflected, f_reflected
+            continue
+        contracted = [centroid[i] + 0.5 * (worst[i] - centroid[i]) for i in range(dim)]
+        f_contracted = objective(contracted)
+        if f_contracted < scores[-1]:
+            simplex[-1], scores[-1] = contracted, f_contracted
+            continue
+        best = simplex[0]
+        for i in range(1, dim + 1):
+            simplex[i] = [best[j] + 0.5 * (simplex[i][j] - best[j]) for j in range(dim)]
+            scores[i] = objective(simplex[i])
+    best_index = min(range(dim + 1), key=lambda i: scores[i])
+    return simplex[best_index], scores[best_index]
+
+
+def logistic_l2_fit(
+    design: Sequence[Sequence[float]],
+    labels: Sequence[float],
+    *,
+    penalty: float = 1.0,
+    max_iter: int = 100,
+    tol: float = 1e-10,
+) -> list[float]:
+    """
+    L2-penalised logistic regression by iteratively reweighted least squares.
+
+    The first column of `design` is expected to be the intercept and is NOT
+    penalised: shrinking the intercept would bias the fitted base rate, which is
+    the one quantity a calibrated probability must get right.
+    """
+    if not design:
+        raise ValueError("logistic_l2_fit needs at least one row")
+    n = len(design)
+    p = len(design[0])
+    if len(labels) != n:
+        raise ValueError("design and labels differ in length")
+    beta = [0.0] * p
+    for _ in range(max_iter):
+        gradient = [0.0] * p
+        hessian = [[0.0] * p for _ in range(p)]
+        for i in range(n):
+            row = design[i]
+            eta = math.fsum(beta[j] * row[j] for j in range(p))
+            eta = max(-35.0, min(35.0, eta))
+            mu = 1.0 / (1.0 + math.exp(-eta))
+            weight = max(mu * (1.0 - mu), 1e-9)
+            residual = labels[i] - mu
+            for j in range(p):
+                gradient[j] += residual * row[j]
+                for k in range(j, p):
+                    hessian[j][k] += weight * row[j] * row[k]
+        for j in range(1, p):
+            gradient[j] -= penalty * beta[j]
+            hessian[j][j] += penalty
+        for j in range(p):
+            for k in range(j):
+                hessian[j][k] = hessian[k][j]
+            hessian[j][j] += 1e-10
+        try:
+            step = solve(hessian, gradient)
+        except ValueError:
+            break
+        beta = [beta[j] + step[j] for j in range(p)]
+        if max(abs(s) for s in step) < tol:
+            break
+    return beta
+
+
+def logistic_predict(design_row: Sequence[float], beta: Sequence[float]) -> float:
+    eta = math.fsum(b * x for b, x in zip(beta, design_row))
+    eta = max(-35.0, min(35.0, eta))
+    return 1.0 / (1.0 + math.exp(-eta))
+
+
 __all__ = [
     "betainc",
     "bootstrap_bca",
@@ -480,7 +638,11 @@ __all__ = [
     "gammainc_p",
     "gammainc_q",
     "inverse",
+    "logistic_l2_fit",
+    "logistic_predict",
     "mean",
+    "nelder_mead",
+    "newcombe_difference",
     "nbinom_cdf",
     "nbinom_ppf",
     "norm_cdf",
@@ -497,4 +659,5 @@ __all__ = [
     "t_sf",
     "t_two_sided_p",
     "variance",
+    "wilson_interval",
 ]
