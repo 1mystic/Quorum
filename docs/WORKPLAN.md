@@ -87,7 +87,7 @@ whose only definition is inside a media query.
 | C.6 | `app/stats/contracts.py` + `registry.py` + purity lint | statistician | C.4, A.8 | DONE, 81 services registered with method cards, purity lint verified against a planted violation |
 | C.7 | `app/stats/streams/` — canonical dataclasses + RWA and campus adapters | statistician | C.6 | DONE, ledger/decision declared empty pending their models, see CONTEXT constraints |
 | C.8 | `request_flow` domain end to end (Request model, service, API, UI) | backend-porter | C.7 | DONE backend half (model/service/repository/API); UI was already done against fixtures in the frontend breadth pass, see CONTEXT.md |
-| C.9 | **Pack 1** implementation: `survival.py`, `spc.py`, `queueing.py` + known-answer tests | statistician | C.7 | TODO |
+| C.9 | **Pack 1** implementation: `survival.py`, `spc.py`, `queueing.py` + known-answer tests | statistician | C.7 | DONE, all 19 Pack-1 services real, 122 known-answer tests, censoring regression passes |
 | C.10 | `insight_runs` table + materialization worker + cadence scheduler | backend-porter | C.9 | TODO |
 | C.11 | Frontend retheme against `design/tokens.css` + `StatisticTile` / `EvidenceCard` components | frontend | B.7, C.6 | DONE, brought forward ahead of B.7/C.6, built against local fixtures pending the real API |
 | C.12 | Insight dashboard UI — KM curve, control chart, Erlang-C recommendation | frontend | C.11, C.10 | DONE against fixtures (`InsightsOperationsView`), pending real `insight_runs` API |
