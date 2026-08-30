@@ -1937,6 +1937,7 @@ _s(
         "asserted to 1e-12 on several small cases; and PSI is symmetric, which is also asserted."
     ),
     min_n_expr="200 in each window and 20 per bin",
+    implemented=True,
 )
 
 _s(
@@ -1963,6 +1964,7 @@ _s(
         "n = 100 and alpha = 0.05 is 0.1358."
     ),
     min_n_expr="200 in each window",
+    implemented=True,
 )
 
 _s(
@@ -1989,6 +1991,7 @@ _s(
         "checked against Newcombe's published worked examples."
     ),
     min_n_expr="100 labelled outcomes in each window",
+    implemented=True,
 )
 
 
