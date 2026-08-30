@@ -2528,6 +2528,7 @@ _s(
         "Exact arithmetic on a fixture, including the boundary cases: a member with no "
         "participation gets recency_days equal to their tenure, not None and not zero."
     ),
+    implemented=True,
 )
 
 _s(
@@ -2567,6 +2568,7 @@ _s(
         "answer."
     ),
     min_n_expr="50 members",
+    implemented=True,
 )
 
 _s(
@@ -2591,6 +2593,7 @@ _s(
         "the identity, and a fixture whose centroids genuinely moved must trigger the drift "
         "check. The negative control is again the point."
     ),
+    implemented=True,
 )
 
 _s(
