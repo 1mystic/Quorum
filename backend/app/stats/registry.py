@@ -2623,6 +2623,7 @@ _s(
         "partition on a small graph."
     ),
     min_n_expr="30 nodes and 60 edges",
+    implemented=True,
 )
 
 _s(
@@ -2650,6 +2651,7 @@ _s(
         "karate-club values, where nodes 0 and 33 are the documented highest."
     ),
     min_n_expr="30 nodes and 60 edges",
+    implemented=True,
 )
 
 _s(
@@ -2674,6 +2676,7 @@ _s(
     refs=("Wilson (1927) JASA 22:209", "Wasserman and Faust (1994), Social Network Analysis"),
     known="The Wilson interval closed form, exact; isolated-node counting is exact graph arithmetic on a fixture.",
     min_n_expr="30 nodes, and the tenant's k per stratum row",
+    implemented=True,
 )
 
 _s(
