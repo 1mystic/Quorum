@@ -1643,6 +1643,7 @@ _s(
         "a known logistic generator, which is a construction and is labelled as one."
     ),
     min_n_expr="300 due spells with at least 40 late outcomes, and 10 outcomes per feature",
+    implemented=True,
 )
 
 _s(
@@ -1676,6 +1677,7 @@ _s(
         "truth and is labelled so."
     ),
     min_n_expr="300 member spells with at least 40 lapse outcomes",
+    implemented=True,
 )
 
 _s(
