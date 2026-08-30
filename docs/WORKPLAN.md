@@ -99,6 +99,7 @@ whose only definition is inside a media query.
 | C.18 | Agent stats tools returning `Evidence` + grounding tests | backend-porter | C.9 | TODO |
 | C.19 | Seed script: one demo tenant per vertical with enough history for the packs to be non-trivial | backend-porter | C.15 | TODO |
 | C.20 | Deploy: `web` + `worker` Dockerfiles, Vercel config, Neon migration, `.env.example` | supervisor | C.19 | TODO |
+| C.21 | `streams/reduce.py` (atoms to units, censoring rules C1-C10) + `streams/capacity.py` (the cross-stream server count) | statistician | C.7, C.10 | DONE, 63 tests. The censoring regression now runs from raw atoms and still reports KM 8.0 against naive 3.1 with n=100 / n_censored=49; the materializer's monkeypatched reducer is provably unnecessary (same fixture, real reducer, n=40 / n_censored=5 / 8.0). See CONTEXT.md |
 
 **C.5 acceptance:** cross-tenant read is 403 at the API **and** returns zero rows under RLS with
 the API bypassed.
