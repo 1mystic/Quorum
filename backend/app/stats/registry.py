@@ -1834,6 +1834,7 @@ _s(
         "implementation that a coverage-only test would pass."
     ),
     min_n_expr="ceil(1/alpha) - 1 for the guarantee, but 100 for usefulness; the two thresholds differ and the card says so",
+    implemented=True,
 )
 
 _s(
@@ -1871,6 +1872,7 @@ _s(
         "proves the correction is doing work rather than merely not breaking."
     ),
     min_n_expr="200 spells with at least 100 observed events",
+    implemented=True,
 )
 
 _s(
@@ -1903,6 +1905,7 @@ _s(
         "heterogeneous class difficulty. The negative control is again the point."
     ),
     min_n_expr="100 calibration points per class",
+    implemented=True,
 )
 
 _s(
