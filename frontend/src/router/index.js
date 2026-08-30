@@ -77,7 +77,7 @@ const router = createRouter({
 
 const TIER_RANK = { public: 0, member: 1, admin: 2 }
 
-// Demo-only RBAC per CLAUDE.md/CONTEXT.md: there is no real backend to
+// Demo-only RBAC per docs/RULES.md and CONTEXT.md: there is no real backend to
 // authorize against yet, so a mismatch never blocks navigation. It logs and
 // surfaces a dismissible banner, which is the point, not an afterthought.
 router.beforeEach(function checkDemoRole(to) {
