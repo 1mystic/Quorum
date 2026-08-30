@@ -33,3 +33,4 @@ from app.exceptions.ledger import (
     DueNotFoundError, PaymentNotFoundError, PaymentAlreadySettledError,
     ReceiptAlreadyIssuedError, ReceiptNotFoundError, LedgerCategoryInvalidError,
 )
+from app.exceptions.insights import InsightNotFoundError, PackDisabledError, StreamUnavailableError

@@ -25,6 +25,7 @@ TENANT_SCOPED_TABLES = [
     "receipts",
     "contributions",
     "expenses",
+    "insight_runs",
 ]
 
 POLICY_NAME = "tenant_isolation"

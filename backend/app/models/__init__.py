@@ -15,3 +15,4 @@ from app.models.ledger import (
     Due, DueStatus, Payment, Receipt, Contribution, ContributionKind, Expense,
     LedgerInstrument, LedgerStatus,
 )
+from app.models.insight_run import InsightRun

@@ -7,7 +7,8 @@ from fastapi.responses import JSONResponse
 from app.api import (
     auth_router, tenant_router, member_router, group_router, public_group_router,
     event_router, announcement_router, request_router, notification_router,
-    certificate_router, public_certificate_router, ai_router, ledger_router
+    certificate_router, public_certificate_router, ai_router, ledger_router,
+    insights_router, methods_router
 )
 from app.core.tenancy import verify_tenant_scope
 from fastapi.middleware.cors import CORSMiddleware
@@ -56,6 +57,10 @@ app.include_router(tenant_router, prefix="/api")
 app.include_router(public_group_router, prefix="/api")
 app.include_router(public_certificate_router, prefix="/api")
 
+# Global, deliberately public and unauthenticated: a Method Card is a
+# property of the mathematics, not of a tenant (docs/STATS_API.md section 4).
+app.include_router(methods_router, prefix="/api")
+
 # Every other route is tenant-scoped. verify_tenant_scope is the one place
 # that checks the {slug} in the URL against the tenant_id/tenant_slug claims
 # in the caller's JWT - see app/core/tenancy.py. Never trust the URL alone.
@@ -69,4 +74,5 @@ tenant_api.include_router(notification_router)
 tenant_api.include_router(certificate_router)
 tenant_api.include_router(ai_router)
 tenant_api.include_router(ledger_router)
+tenant_api.include_router(insights_router)
 app.include_router(tenant_api)

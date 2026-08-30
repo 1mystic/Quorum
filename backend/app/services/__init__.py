@@ -10,4 +10,6 @@ from app.services.request import RequestService
 from app.services.notification import NotificationService
 from app.services.certificate import CertificateService, issue_certificate_job
 from app.services.ledger import LedgerService
+from app.services.insights import InsightsService
+from app.services.insight_materializer import InsightMaterializer, run_for_tenant
 

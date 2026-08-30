@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import utcnow
 from app.models import Member, User
@@ -50,3 +52,17 @@ class MemberRepository:
         member.announcements_seen_at = utcnow()
         await self.db.flush()
         return member
+
+    # ---- stream fetch -------------------------------------------------
+    #
+    # Card C.10. "You fetch and cache; they compute." `MemberRepository` is
+    # not `TenantScopedRepository`-wired at the query level yet (see
+    # CONTEXT.md's known constraints), so this filters by tenant_id directly
+    # rather than through `self.scope`. No arithmetic, no join event and no
+    # lapse/exit inferred: only a `member_lifecycle` reducer decides that.
+
+    async def stream_members(self, tenant_id: int, window_end: datetime) -> list[Member]:
+        result = await self.db.execute(
+            select(Member).where(Member.tenant_id == tenant_id, Member.created_at < window_end)
+        )
+        return list(result.scalars().all())

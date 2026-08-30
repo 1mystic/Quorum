@@ -4,12 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repository import (
     UserRepository, TenantRepository, MemberRepository, GroupRepository, MembershipRepository,
     EventRepository, EventRegistrationRepository, AnnouncementRepository, RequestRepository,
-    NotificationRepository, CertificateRepository, LedgerRepository
+    NotificationRepository, CertificateRepository, LedgerRepository, InsightRunRepository
 )
 from app.services import (
     UserService, TenantService, MemberService, GroupService, MembershipService,
     EventService, EventRegistrationService, AnnouncementService, RequestService,
-    NotificationService, CertificateService, LedgerService
+    NotificationService, CertificateService, LedgerService, InsightsService
 )
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, SecurityScopes
 from app.core.token import decode_token
@@ -121,6 +121,12 @@ def get_ledger_service(db: AsyncSession = Depends(get_db),
     user_repo = UserRepository(db)
     tenant_repo = TenantRepository(db)
     return LedgerService(ledger_repo, member_repo, user_repo, tenant_repo)
+
+def get_insights_service(db: AsyncSession = Depends(get_db),
+                         tenant_id: int = Depends(get_current_tenant_id)):
+    run_repo = InsightRunRepository(db, tenant_id)
+    tenant_repo = TenantRepository(db)
+    return InsightsService(run_repo, tenant_repo)
 
 
 
