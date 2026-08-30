@@ -1708,6 +1708,7 @@ _s(
         "of fitted values equals the sum of inputs."
     ),
     min_n_expr="200 observations with at least 30 positives",
+    implemented=True,
 )
 
 _s(
@@ -1732,6 +1733,7 @@ _s(
         "the exact property that a perfectly calibrated input maps to approximately the identity."
     ),
     min_n_expr="50 observations with at least 10 positives",
+    implemented=True,
 )
 
 _s(
@@ -1766,6 +1768,7 @@ _s(
         "implementation involved."
     ),
     min_n_expr="100 observations, 20 positives, and at least 5 observations per bin",
+    implemented=True,
 )
 
 _s(
@@ -1797,6 +1800,7 @@ _s(
         "an ECE close to the analytically computable 0.25."
     ),
     min_n_expr="100 observations and 20 positives",
+    implemented=True,
 )
 
 _s(
