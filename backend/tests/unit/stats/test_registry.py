@@ -235,6 +235,10 @@ def test_pack_one_is_marked_implemented():
         "spc.cusum_chart",
         "spc.poisson_rate_chart",
         "changepoint.detect_level_shifts",
+        "queueing.little_law_wait",
+        "queueing.erlang_c_staffing",
+        "fairness.workload_gini",
+        "fairness.balanced_assignment",
     ):
         assert R.get(service_id).implemented, service_id + " is implemented but not declared so"
 

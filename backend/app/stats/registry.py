@@ -738,6 +738,7 @@ _s(
         "to floating-point tolerance. A theorem is a stronger ground truth than any table."
     ),
     min_n_expr="8 periods",
+    implemented=True,
 )
 
 _s(
@@ -770,6 +771,7 @@ _s(
         "must hold for the model's own outputs."
     ),
     min_n_expr="30 closed spells for the service rate, and utilisation below 1",
+    implemented=True,
 )
 
 _s(
@@ -812,6 +814,7 @@ _s(
         "the same parameters."
     ),
     min_n_expr="30 closed spells for the service time and 8 periods for the arrival rate",
+    implemented=True,
 )
 
 _s(
@@ -838,6 +841,7 @@ _s(
         "floating-point tolerance."
     ),
     min_n_expr="30 closed spells, because the service-time variance needs more data than the mean",
+    implemented=True,
 )
 
 _s(
@@ -865,6 +869,7 @@ _s(
         "exactly when capacity is set to zero, and must reproduce Little's Law in steady state."
     ),
     min_n_expr="8 periods, plus whatever the arrival forecast requires",
+    implemented=True,
 )
 
 _s(
@@ -892,6 +897,7 @@ _s(
         "(n-1)/(3n). Lorenz curve against a published income distribution example."
     ),
     min_n_expr="10 resolvers and 50 assigned requests",
+    implemented=True,
 )
 
 _s(
@@ -917,12 +923,13 @@ _s(
     ),
     refs=("Kuhn (1955) Naval Research Logistics Quarterly 2:83", "Munkres (1957) JSIAM 5:32"),
     known=(
-        "Textbook assignment instances with published optimal cost (Kuhn's 3x3 example, Munkres' "
-        "worked cases), agreement with scipy.optimize.linear_sum_assignment as a second oracle "
-        "on seeded random matrices, and the invariant that adding a constant to any row leaves "
-        "the optimal assignment unchanged."
+        "Exhaustive enumeration as the oracle on seeded random matrices, which is exact rather "
+        "than a second implementation, a 3x3 instance where the greedy choice costs 34 and the "
+        "optimum 33, and the invariant that adding a constant to any row leaves the optimal "
+        "assignment unchanged."
     ),
     min_n_expr="1 open request and 2 resolvers; there is no statistical floor because there is no inference",
+    implemented=True,
 )
 
 

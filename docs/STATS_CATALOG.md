@@ -533,10 +533,10 @@ then no complete assignment exists and the service returns the partial one plus 
 - *interval_meaning:* none. Optimisation output.
 - *references:* Kuhn (1955) Naval Research Logistics Quarterly 2:83. Munkres (1957).
 
-**known answer** Textbook assignment instances with published optimal cost (Kuhn's original 3x3
-example, Munkres' worked examples), plus agreement with `scipy.optimize.linear_sum_assignment` as a
-second independent oracle on seeded random matrices, plus the invariant that adding a constant to
-any row leaves the optimal assignment unchanged.
+**known answer** Exhaustive enumeration as the oracle on seeded random matrices, which is exact
+rather than a second implementation and needs no dependency; a 3x3 instance where the greedy choice
+costs 34 and the optimum 33; and the invariant that adding a constant to any row leaves the optimal
+assignment unchanged.
 
 ---
 
