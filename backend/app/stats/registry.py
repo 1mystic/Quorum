@@ -2278,6 +2278,7 @@ _s(
         "literature. The negative control proves the property checker works."
     ),
     min_n_expr="20 ballots and 3 options",
+    implemented=True,
 )
 
 _s(
@@ -2301,6 +2302,7 @@ _s(
         "approximation bound of the greedy rule against that optimum."
     ),
     min_n_expr="20 ballots and 3 options",
+    implemented=True,
 )
 
 _s(
@@ -2334,6 +2336,7 @@ _s(
         "budget by more than the cost of the cheapest unfunded project they approved."
     ),
     min_n_expr="the tenant's k per stratum row, strictly enforced",
+    implemented=True,
 )
 
 _s(
