@@ -11,4 +11,6 @@ from app.repository.notification import NotificationRepository
 from app.repository.certificate import CertificateRepository
 from app.repository.ledger import LedgerRepository
 from app.repository.insight_run import InsightRunRepository
+from app.repository.participation import ParticipationRepository
+from app.repository.decision import DecisionRepository
 

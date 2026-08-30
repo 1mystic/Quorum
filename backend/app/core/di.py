@@ -4,12 +4,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repository import (
     UserRepository, TenantRepository, MemberRepository, GroupRepository, MembershipRepository,
     EventRepository, EventRegistrationRepository, AnnouncementRepository, RequestRepository,
-    NotificationRepository, CertificateRepository, LedgerRepository, InsightRunRepository
+    NotificationRepository, CertificateRepository, LedgerRepository, InsightRunRepository,
+    ParticipationRepository, DecisionRepository
 )
 from app.services import (
     UserService, TenantService, MemberService, GroupService, MembershipService,
     EventService, EventRegistrationService, AnnouncementService, RequestService,
-    NotificationService, CertificateService, LedgerService, InsightsService
+    NotificationService, CertificateService, LedgerService, InsightsService,
+    ParticipationService, DecisionService
 )
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, SecurityScopes
 from app.core.token import decode_token
@@ -127,6 +129,22 @@ def get_insights_service(db: AsyncSession = Depends(get_db),
     run_repo = InsightRunRepository(db, tenant_id)
     tenant_repo = TenantRepository(db)
     return InsightsService(run_repo, tenant_repo)
+
+def get_participation_service(db: AsyncSession = Depends(get_db),
+                              tenant_id: int = Depends(get_current_tenant_id)):
+    participation_repo = ParticipationRepository(db, tenant_id)
+    member_repo = MemberRepository(db)
+    user_repo = UserRepository(db)
+    tenant_repo = TenantRepository(db)
+    return ParticipationService(participation_repo, member_repo, user_repo, tenant_repo)
+
+def get_decision_service(db: AsyncSession = Depends(get_db),
+                         tenant_id: int = Depends(get_current_tenant_id)):
+    decision_repo = DecisionRepository(db, tenant_id)
+    member_repo = MemberRepository(db)
+    user_repo = UserRepository(db)
+    tenant_repo = TenantRepository(db)
+    return DecisionService(decision_repo, member_repo, user_repo, tenant_repo)
 
 
 

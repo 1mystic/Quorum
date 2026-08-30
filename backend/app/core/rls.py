@@ -26,6 +26,10 @@ TENANT_SCOPED_TABLES = [
     "contributions",
     "expenses",
     "insight_runs",
+    "participation_events",
+    "decisions",
+    "decision_options",
+    "ballots",
 ]
 
 POLICY_NAME = "tenant_isolation"

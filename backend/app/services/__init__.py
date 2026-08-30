@@ -12,4 +12,6 @@ from app.services.certificate import CertificateService, issue_certificate_job
 from app.services.ledger import LedgerService
 from app.services.insights import InsightsService
 from app.services.insight_materializer import InsightMaterializer, run_for_tenant
+from app.services.participation import ParticipationService
+from app.services.decision import DecisionService
 

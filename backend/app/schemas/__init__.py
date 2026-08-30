@@ -52,3 +52,10 @@ from app.schemas.ledger import (
 from app.schemas.insights import (
     PackSummary, PacksResponse, InsightEnvelopeResponse, InsightHealthResponse,
 )
+from app.schemas.participation import (
+    RecordParticipationEventRequest, ParticipationEventItem,
+)
+from app.schemas.decision import (
+    CreateDecisionOptionRequest, CreateDecisionRequest, DecisionOptionItem, DecisionItem,
+    CastBallotRequest, BallotItem, DecisionActionResponse,
+)

@@ -10,3 +10,5 @@ from app.api.certificate import certificate_router, public_certificate_router
 from app.api.ai import ai_router
 from app.api.ledger import ledger_router
 from app.api.insights import insights_router, methods_router
+from app.api.participation import participation_router
+from app.api.decision import decision_router

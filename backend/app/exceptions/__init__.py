@@ -34,3 +34,10 @@ from app.exceptions.ledger import (
     ReceiptAlreadyIssuedError, ReceiptNotFoundError, LedgerCategoryInvalidError,
 )
 from app.exceptions.insights import InsightNotFoundError, PackDisabledError, StreamUnavailableError
+from app.exceptions.participation import (
+    ParticipationEventNotFoundError, ExposureArmRequiredError, ExposureArmNotAllowedError,
+)
+from app.exceptions.decision import (
+    DecisionNotFoundError, DecisionOptionNotFoundError, DecisionAlreadyClosedError,
+    DeclaredRuleInvalidError, BallotShapeInvalidError, BallotOptionInvalidError,
+)

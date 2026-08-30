@@ -8,7 +8,7 @@ from app.api import (
     auth_router, tenant_router, member_router, group_router, public_group_router,
     event_router, announcement_router, request_router, notification_router,
     certificate_router, public_certificate_router, ai_router, ledger_router,
-    insights_router, methods_router
+    insights_router, methods_router, participation_router, decision_router
 )
 from app.core.tenancy import verify_tenant_scope
 from fastapi.middleware.cors import CORSMiddleware
@@ -75,4 +75,6 @@ tenant_api.include_router(certificate_router)
 tenant_api.include_router(ai_router)
 tenant_api.include_router(ledger_router)
 tenant_api.include_router(insights_router)
+tenant_api.include_router(participation_router)
+tenant_api.include_router(decision_router)
 app.include_router(tenant_api)

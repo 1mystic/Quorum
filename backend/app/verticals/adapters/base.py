@@ -33,6 +33,8 @@ from datetime import datetime, timezone
 from typing import Any, Iterable, Literal, Mapping, Protocol, runtime_checkable
 
 from app.stats.streams import (
+    Ballot,
+    DecisionOption,
     DecisionSpec,
     LedgerEntry,
     MemberEvent,
@@ -111,6 +113,29 @@ def group_ref(group_id: int | None) -> str | None:
 
 def object_ref(prefix: str, object_id: int | None) -> str | None:
     return None if object_id is None else prefix + "_" + str(object_id)
+
+
+def decision_ref(decision_id: int) -> str:
+    return "dec_" + str(decision_id)
+
+
+def option_ref(option_id: int) -> str:
+    return "opt_" + str(option_id)
+
+
+# `ParticipationEventLog.object_type` is a free string (docs/DATA_SPINE.md's
+# object_ref/object_kind pair). Known types get the short prefix the rest of
+# this module already uses for the same entity elsewhere (event -> "e",
+# announcement -> "a"); an unrecognised type is passed through unprefixed
+# rather than silently dropped.
+_OBJECT_TYPE_PREFIX: Mapping[str, str] = {
+    "event": "e",
+    "announcement": "a",
+    "request": "r",
+    "poll": "poll",
+    "decision": "poll",
+    "campaign": "campaign",
+}
 
 
 class BaseAdapter:
@@ -513,19 +538,25 @@ class PortedSchemaAdapter(BaseAdapter):
 
     def participation_events(self, rows: Iterable[Any]) -> tuple[ParticipationEvent, ...]:
         """
-        `EventRegistration` and `Announcement` rows to participation atoms.
+        `EventRegistration`, `Announcement` and `ParticipationEventLog` rows to
+        participation atoms.
 
-        TODO(missing model): the exposure log has no table. There is nowhere to
-        record nudge_sent, nudge_delivered, nudge_opened or nudge_acted, and no
-        arm_ref. Pack 2's experiments and bandits therefore have no input at all:
-        without knowing who was OFFERED a nudge, an A/B test measures
-        self-selection. This is the missing model that blocks a whole pack rather
-        than degrading one service.
+        Card C.15 closes the gap this method's own TODO named: there was no
+        exposure-log table, so `nudge_sent`/`nudge_delivered`/`nudge_opened`/
+        `nudge_acted` and `arm_ref` had nowhere to be recorded and Pack 2's
+        `experiments.*`/`bandits.*` had no input at all. `ParticipationEventLog`
+        (`app/models/participation.py`) now carries every kind the spine
+        declares, including the four exposure kinds with their `arm_ref`, and
+        this is where those rows get read, once, dispatched by the attributes
+        they carry rather than by isinstance, same discipline as
+        `request_events` and `ledger_entries` above.
         """
         events: list[ParticipationEvent] = []
         for row in rows:
             if hasattr(row, "checked_in"):
                 events.extend(self._registration_events(row))
+            elif hasattr(row, "kind") and hasattr(row, "arm_ref"):
+                events.append(self._participation_log_event(row))
             elif hasattr(row, "body") and hasattr(row, "author_id"):
                 events.append(
                     ParticipationEvent(
@@ -539,6 +570,26 @@ class PortedSchemaAdapter(BaseAdapter):
                 )
         events.sort(key=lambda e: (e.at, e.member_ref, e.kind))
         return tuple(events)
+
+    def _participation_log_event(self, row: Any) -> ParticipationEvent:
+        kind = row.kind.value if hasattr(row.kind, "value") else str(row.kind)
+        object_type = getattr(row, "object_type", None)
+        object_id = getattr(row, "object_id", None)
+        prefix = _OBJECT_TYPE_PREFIX.get(object_type, object_type) if object_type else None
+        ref = object_ref(prefix, object_id) if prefix and object_id is not None else None
+        weight = row.weight if getattr(row, "weight", None) is not None else 1.0
+        return ParticipationEvent(
+            member_ref=member_ref(row.member_id),
+            at=utc(row.at),
+            kind=kind,
+            object_ref=ref,
+            object_kind=object_type,
+            group_ref=group_ref(getattr(row, "group_id", None)),
+            weight=float(weight),
+            channel=getattr(row, "channel", None),
+            arm_ref=getattr(row, "arm_ref", None),
+            strata=dict(getattr(row, "strata", None) or {}),
+        )
 
     def _registration_events(self, row: Any) -> list[ParticipationEvent]:
         ref = member_ref(row.member_id)
@@ -615,21 +666,103 @@ class PortedSchemaAdapter(BaseAdapter):
     # ---- decision -------------------------------------------------------
     #
     # `ledger_entries` for the real Due/Payment/Receipt/Contribution/Expense
-    # mapping now lives above, next to member_lifecycle (card C.10). This
-    # section is what remains genuinely empty.
+    # mapping now lives above, next to member_lifecycle (card C.10). Card
+    # C.15 closes this section's own TODO: `Decision`/`DecisionOption`/
+    # `Ballot` (`app/models/decision.py`) now back `decisions`,
+    # `decision_options` and `ballots` below, exactly the reading-once
+    # discipline `request_events` and `ledger_entries` already use.
+    #
+    # `decisions()` alone satisfies the `VerticalAdapter` Protocol;
+    # `decision_options()`/`ballots()` are an addition beyond it, because
+    # `app/stats/voting.py`/`budgeting.py` take `ballots, options, spec` as
+    # three separate arguments rather than through one combined method.
 
     def decisions(self, rows: Iterable[Any]) -> tuple[DecisionSpec, ...]:
         """
-        Empty, deliberately.
+        `Decision` rows to `DecisionSpec` atoms.
 
-        TODO(missing model): there is no decision, option or ballot model. Note
-        for whoever adds one: `DecisionSpec.declared_rule` must be recorded when
-        the decision OPENS (spine rule D1) and therefore has to be non-nullable
-        from the first migration. Adding it later leaves a history of decisions
-        whose rule cannot be trusted, which is the one governance failure a
-        voting module can actually cause.
+        Rule D1 was already enforced before a row could reach here:
+        `Decision.declared_rule` is `nullable=False` from its first migration
+        (card C.15) and `DecisionService` additionally checks it against the
+        six declared rules, so every row this method sees always has one, and
+        `DecisionSpec.__post_init__`'s own check is a second line, not the
+        only one.
         """
-        return ()
+        specs = [self._decision_spec(row) for row in rows]
+        specs.sort(key=lambda d: d.opened_at)
+        return tuple(specs)
+
+    def _decision_spec(self, decision: Any) -> DecisionSpec:
+        kind = decision.kind.value if hasattr(decision.kind, "value") else str(decision.kind)
+        ballot_style = (
+            decision.ballot_style.value if hasattr(decision.ballot_style, "value")
+            else str(decision.ballot_style)
+        )
+        eligible: dict[tuple[str, ...], int] = {}
+        for row in (decision.eligible_strata or ()):
+            strata = row.get("strata", {}) or {}
+            key = tuple(value for _, value in sorted(strata.items()))
+            eligible[key] = row.get("count", 0)
+        return DecisionSpec(
+            decision_ref=decision_ref(decision.id),
+            kind=kind,
+            opened_at=utc(decision.opened_at),
+            closed_at=utc(decision.closed_at),
+            declared_rule=decision.declared_rule,
+            seats=decision.seats,
+            quorum_rule=decision.quorum_rule,
+            budget_minor=decision.budget_minor,
+            eligible_strata=eligible,
+            ballot_style=ballot_style,
+        )
+
+    def decision_options(self, rows: Iterable[Any]) -> tuple[DecisionOption, ...]:
+        """`DecisionOption` rows to atoms. `cost_minor` stays null outside participatory budgeting."""
+        options = [
+            DecisionOption(
+                option_ref=option_ref(row.id),
+                decision_ref=decision_ref(row.decision_id),
+                label=row.label,
+                cost_minor=row.cost_minor,
+                tags=tuple(row.tags or ()),
+                proposer_ref=member_ref(getattr(row, "proposer_id", None)),
+            )
+            for row in rows
+        ]
+        options.sort(key=lambda o: (o.decision_ref, o.option_ref))
+        return tuple(options)
+
+    def ballots(self, rows: Iterable[Any]) -> tuple[Ballot, ...]:
+        """
+        `Ballot` rows to atoms. `Ballot.__post_init__` rejects a ranking that
+        repeats an option across tiers, so an invalid stored ballot surfaces
+        loudly here rather than being silently repaired.
+        """
+        out = [self._ballot_atom(row) for row in rows]
+        out.sort(key=lambda b: (b.decision_ref, b.cast_at))
+        return tuple(out)
+
+    @staticmethod
+    def _ballot_atom(row: Any) -> Ballot:
+        ranking = tuple(
+            tuple(option_ref(option_id) for option_id in tier)
+            for tier in (row.ranking or ())
+        )
+        approvals = frozenset(option_ref(option_id) for option_id in (row.approvals or ()))
+        scores = {option_ref(int(k)): v for k, v in (row.scores or {}).items()}
+        allocation = {option_ref(int(k)): v for k, v in (row.allocation or {}).items()}
+        return Ballot(
+            ballot_ref="bal_" + str(row.id),
+            decision_ref=decision_ref(row.decision_id),
+            voter_ref=member_ref(row.voter_id),
+            cast_at=utc(row.cast_at),
+            ranking=ranking,
+            approvals=approvals,
+            scores=scores,
+            allocation=allocation,
+            strata=dict(getattr(row, "strata", None) or {}),
+            channel=getattr(row, "channel", None),
+        )
 
 
 __all__ = [
@@ -637,9 +770,11 @@ __all__ = [
     "BaseAdapter",
     "PortedSchemaAdapter",
     "VerticalAdapter",
+    "decision_ref",
     "group_ref",
     "member_ref",
     "object_ref",
+    "option_ref",
     "request_ref",
     "utc",
 ]
