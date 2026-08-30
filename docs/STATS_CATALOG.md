@@ -627,12 +627,17 @@ used); the seasonal pattern changes slowly.
 - *references:* Cleveland, Cleveland, McRae and Terpenning (1990) Journal of Official Statistics 6:3.
 
 **known answer** Partial, and stated as such. There is **no published table of STL component
-values** to assert against, so the ground truth is three-part: the exact reconstruction identity
-above; recovery of known components from a synthetic series built as a specified trend plus a
-specified seasonal plus seeded noise, within tolerance; and agreement with the reference `statsmodels`
-STL implementation on the standard `co2` series. The first is a theorem, the second is a
-construction, the third is a reference implementation. **None of the three is a published external
-number, and the Method Card says so.**
+values** to assert against, so the ground truth is two-part: the exact reconstruction identity
+above, asserted to 1e-9; and recovery of known components from a synthetic series built as a
+specified trend plus a specified seasonal plus seeded noise, where the recovery error must be a
+stated fraction of the injected noise. The first is a theorem, the second is a construction.
+**Neither is a published external number, and the Method Card says so.**
+
+> *Corrected during implementation.* This entry originally named a third ground truth, agreement
+> with the reference `statsmodels` STL implementation on the `co2` series. `statsmodels` is not a
+> dependency of this package and `co2` is not vendored, so that comparison cannot run here and
+> claiming it would have been a known answer nothing checks. The remaining two are what the tests
+> actually assert.
 
 ---
 
@@ -646,8 +651,12 @@ number, and the Method Card says so.**
 | **min_n** | `2 * season_length`, minimum 24 periods. |
 
 **checks**
-- `beats-seasonal-naive`: MASE from `forecast.rolling_origin_backtest` must be below 1. **Blocking.
-  This is the gate.**
+- `beats-seasonal-naive`: MASE from `forecast.rolling_origin_backtest` must be below 1.
+  **This is the gate.** A failure substitutes the seasonal-naive forecast and marks the envelope
+  `qualified`; it is deliberately *not* flagged blocking, because a blocking failure empties the
+  value (the rule recorded in the decision log) and the entire point of this gate's failure path is
+  that the honest baseline number is still shown. The substitution is named in the check detail and
+  in a caveat, and `structure.served` records which forecaster produced the numbers.
 - `residual-independence`: Ljung-Box on residuals. A failure means the intervals are too narrow;
   WARN with widened intervals and the inflation factor disclosed.
 - `residual-normality`: only affects the interval, not the point forecast. If it fails, the service
@@ -691,10 +700,21 @@ non-invertible fit's forecasts are unstable), `overdifferencing`.
 - *interval_meaning:* as Holt-Winters, and additionally these intervals ignore parameter uncertainty, so they are known to be slightly too narrow. The caveat says so.
 - *references:* Box, Jenkins, Reinsel and Ljung, *Time Series Analysis*, 5th ed. Hyndman and Khandakar (2008) JSS 27:3 for automatic order selection.
 
-**known answer** The Box-Jenkins **airline model** on the classic `AirPassengers` series:
-ARIMA(0,1,1)(0,1,1) with period 12 on the log scale, with the published estimates
-theta = -0.40 and Theta = -0.56. This is the single most reproduced fit in time-series literature.
-Tolerance 0.02 on each coefficient.
+**known answer** Two parts. First, an exact algebraic identity: the multiplicative seasonal
+polynomial `(1 + t B)(1 + T B^m)` expands to `t` at lag 1, `T` at lag m and the cross term `t * T`
+at lag m + 1, asserted to 1e-12. That cross term is the entire content of the airline model and an
+implementation that dropped it would still fit plausibly while being a different model. Second,
+parametric recovery: the airline process is simulated at a fixed seed from theta = -0.40 and
+Theta = -0.56 and the estimator must recover both, within a tolerance derived from the asymptotic
+standard error `sqrt((1 - theta^2) / n)` rather than chosen.
+
+> *Corrected during implementation.* This entry originally asserted the published `AirPassengers`
+> fit to a tolerance of 0.02. `AirPassengers` is not vendored in this repository and the
+> implementation environment has no network access, so that fit cannot be reproduced here.
+> Vendoring the series from memory to keep the sentence true would have been the exact dishonesty
+> this document exists to prevent. Parametric recovery is a weaker claim than reproducing a
+> published fit and is labelled as one; the published figures remain the right test to add on the
+> day the series is vendored.
 
 ---
 
@@ -776,11 +796,23 @@ as certain and disclosed separately from forecast outflows.
 - *interval_meaning:* `p_shortfall` is a probability under the model; the interval on the first shortfall period is a predictive interval over simulated paths, which widens fast.
 - *references:* standard first-passage formulation. Kroese, Taimre and Botev, *Handbook of Monte Carlo Methods*.
 
-**known answer** Strong and analytic. For a Gaussian random walk with known drift and volatility,
-the probability of hitting a floor within a horizon has a **closed-form first-passage solution**
-(the inverse Gaussian distribution). The test drives the simulator with that process at a fixed seed
-and asserts the Monte Carlo estimate matches the closed form within Monte Carlo error at 20,000
-draws. This is a genuine external mathematical truth, not a reference implementation.
+**known answer** Strong and analytic, in two closed forms rather than one. At a horizon of one
+period the running minimum and the terminal balance are the same random variable, so the simulator
+must reproduce the **exact Gaussian tail** `Phi((-distance - h * drift) / (sigma * sqrt(h)))` within
+Monte Carlo error. Over a longer horizon the simulator's answer must sit inside a bracket whose two
+ends are both closed forms: the exact terminal probability below, and the continuously monitored
+**first-passage probability** from the reflection principle (whose density is the inverse Gaussian)
+above. Both are genuine external mathematical truths, not reference implementations. A third
+assertion covers the modelling claim the Method Card makes: `p_shortfall` must fall monotonically as
+the inflow-outflow correlation rises, so independent sampling demonstrably understates the risk.
+
+> *Corrected during implementation.* This entry originally asserted that the simulator matches the
+> inverse-Gaussian first-passage formula directly. That formula is for **continuously monitored**
+> Brownian motion; a ledger is monitored at period ends, because that is when a treasurer looks, so
+> a path may dip below the floor and recover inside one month without being counted. The two
+> quantities are genuinely different and the continuous one is strictly larger. Asserting equality
+> would have forced either a wrong simulator or a padded tolerance, so the bracket is the honest
+> statement and both of its ends are exact.
 
 ---
 
@@ -810,9 +842,20 @@ is non-decreasing and that the sum of fitted values equals the sum of inputs.
 ### `calibration.platt_calibrate`
 
 Logistic regression of labels on scores, with Platt's prior correction to the target labels which
-prevents overfitting at small n. **min_n** 50 with at least 10 positives. **known answer**
-agreement with `sklearn.linear_model.LogisticRegression` on the same design to 1e-6, plus the exact
-property that a perfectly calibrated input is mapped to approximately the identity.
+prevents overfitting at small n. **min_n** 50 with at least 10 positives. **known answer** the
+**score equations are exactly zero at the fitted optimum**, asserted to 1e-8: at the maximum of a
+strictly concave log-likelihood the gradient vanishes, which is a theorem about the objective.
+Plus recovery of a known logistic generator at a fixed seed, and the exact property that a
+perfectly calibrated input is mapped to approximately the identity. A fourth assertion covers the
+prior correction specifically: on perfectly separable classes the fitted map must still return
+probabilities strictly inside (0, 1), which is what the correction exists to guarantee.
+
+> *Corrected during implementation.* This entry originally named agreement with
+> `sklearn.linear_model.LogisticRegression` to 1e-6. `sklearn` is not a dependency of this package
+> (see the standard-library-only decision in `CONTEXT.md`), so that comparison cannot run. The
+> replacement is stronger rather than weaker: agreement with another library is only evidence that
+> two implementations share their mistakes, whereas a vanishing gradient is a property of the
+> optimum itself.
 
 ---
 
@@ -837,11 +880,26 @@ score entirely), `sample-size-for-bins`.
 - *interval_meaning:* a bootstrap interval on the Brier score. The decomposition components are exact given the binning, and the binning is a declared parameter.
 - *references:* Brier (1950) Monthly Weather Review 78:1. Murphy (1973) J. Applied Meteorology 12:595 for the three-component decomposition.
 
-**known answer** Exact and analytic: the Murphy decomposition is an identity,
-`Brier = reliability - resolution + uncertainty`, which must hold to 1e-12 on arbitrary seeded
-inputs. Additionally `uncertainty = base_rate * (1 - base_rate)` exactly, and a perfectly calibrated
-constant forecaster has `reliability = 0` exactly. Three exact identities, no reference
-implementation involved.
+**known answer** Exact and analytic. The Murphy decomposition is an identity, and its exact form on
+arbitrary input carries a fourth term:
+
+```
+Brier = reliability - resolution + uncertainty + within_bin
+```
+
+where `within_bin = mean(d_i^2 - 2 * d_i * y_i)` and `d_i` is a forecast's deviation from its own
+bin's mean. This must hold to 1e-12 on arbitrary seeded inputs. The familiar three-term form is
+recovered **exactly** when the forecast is constant inside each bin, and that case is asserted
+separately with `within_bin` equal to 0 to 1e-12. Additionally `uncertainty = base_rate *
+(1 - base_rate)` exactly, and a perfectly calibrated constant forecaster has `reliability = 0`
+exactly. Four exact identities, no reference implementation involved. `within_bin` is reported in
+the envelope so a reader can check the arithmetic rather than trust it.
+
+> *Corrected during implementation.* This entry originally claimed the three-term identity holds on
+> arbitrary seeded inputs. It does not: with a continuous forecast the cross term does not vanish,
+> and the three-term form is exact only under the constant-within-bin condition. The choice was to
+> state the true identity or to quietly widen the tolerance until the false one passed. A document
+> whose subject is honest measurement cannot take the second option.
 
 ---
 
@@ -1001,9 +1059,20 @@ non-expert will trust and quote, so the bar to display one is the highest in the
 **known answer** The coverage theorem again, under censoring. The test simulates from a known joint
 distribution of event and censoring times at a fixed seed, holds out points, and asserts empirical
 coverage of the lower bound is at least `1 - alpha` within binomial tolerance. A second test is the
-one that matters most in practice: **naive split conformal on the resolved subset must
-under-cover on the same fixture**, and the test asserts that it does, so the fixture proves the
-correction is doing work rather than merely not breaking.
+one that matters most in practice: **the naive resolved-only bound must under-cover on the same
+fixture**, and the test asserts that it does, so the fixture proves the correction is doing work
+rather than merely not breaking. On the shipped fixture (lognormal waits, exponential censoring,
+43% still open) the naive 90% bound covers **76%** of true waiting times while the censoring-aware
+bound covers **90%**: a fourteen point shortfall, in the direction that flatters the ETA.
+
+> *Clarified during implementation.* The under-coverage is a property of the **upper** bound, the
+> "resolved within X days" figure a naive implementation would ship, because dropping open tickets
+> removes exactly the slow ones. For the **lower** bound the naive subset errs conservative
+> instead. Under right censoring the data is informative about short waits and systematically
+> missing about long ones, so no distribution-free upper bound exists at all; the service therefore
+> guarantees the lower bound (Candes, Lei and Ren) and reports the point and upper figures from the
+> censoring-aware Kaplan-Meier estimate, labelled model-based. A resident is entitled to know which
+> half of the promise is underwritten by a theorem.
 
 ---
 
@@ -1064,8 +1133,16 @@ Base-rate comparison between the fitting window and the current window, with a W
 each rate and on the difference. Cheap, and it catches the most consequential drift: a risk model
 fitted when 12% of dues were late is meaningless once 30% are. **Blocking** input to
 `risk.late_payment_risk` when the rates differ by more than the model's calibration tolerance.
-**known answer** the Wilson interval has a closed form, checked exactly; the difference interval is
-checked against the Newcombe hybrid-score published worked examples.
+**known answer** the Wilson interval has a closed form, written out independently in the test and
+checked exactly; the difference interval is checked against Newcombe's method 10 **construction**,
+`lower = d - sqrt((p1 - l1)^2 + (u2 - p2)^2)` and `upper = d + sqrt((u1 - p1)^2 + (p2 - l2)^2)`,
+recomputed in the test from the two Wilson intervals, plus the property that swapping the groups
+negates and reverses the interval.
+
+> *Corrected during implementation.* This entry originally named Newcombe's published worked
+> examples. The paper is not vendored and the implementation environment has no network access, so
+> asserting a number recalled rather than read would be worse than asserting the algebra. The
+> construction check is what the tests actually do.
 
 ---
 

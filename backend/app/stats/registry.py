@@ -1369,9 +1369,10 @@ _s(
     refs=("Cleveland, Cleveland, McRae and Terpenning (1990) Journal of Official Statistics 6:3",),
     known=(
         "Partial, and stated as such: there is no published table of STL component values. The "
-        "ground truth is three-part, and none of the three is a published external number: the "
-        "exact reconstruction identity, recovery of known components from a synthetic build, and "
-        "agreement with the statsmodels reference implementation on the co2 series."
+        "ground truth is two-part and neither part is a published external number: the exact "
+        "reconstruction identity to 1e-9, and recovery of known components from a synthetic "
+        "build within a stated fraction of the injected noise. The statsmodels comparison the "
+        "catalog first named was dropped because statsmodels is not a dependency here."
     ),
     min_n_expr="2 * season_length periods and at least 24 observations",
     implemented=True,
@@ -1389,7 +1390,10 @@ _s(
         "Additive errors unless the multiplicative form was selected.",
         "A stable seasonal period.",
         "It beat seasonal-naive on MASE under rolling-origin cross-validation on this tenant's "
-        "own history. That is a blocking check, not a note.",
+        "own history. That is a measured check, not a note. A failure substitutes the "
+        "seasonal-naive forecast and marks the envelope qualified rather than blocking it, "
+        "because blocking would empty the value and the baseline number is the one the tenant is "
+        "entitled to see.",
     ),
     wrong_when=(
         "The level shifted; fit on the segment after the changepoint instead.",
@@ -1407,10 +1411,13 @@ _s(
         "Hyndman and Athanasopoulos, FPP3, ch. 8",
     ),
     known=(
-        "FPP3 section 8.3's worked Holt-Winters example on Australian domestic tourism, whose "
-        "fitted smoothing parameters and point forecasts are published. Second: on the M3 monthly "
-        "series, published benchmark MASE values for ETS give a range our implementation must "
-        "land inside."
+        "The gate itself, asserted in both directions, which is the anchor that matters. On a "
+        "series with a trend the fit must beat seasonal-naive (it reaches MASE 0.14 against the "
+        "baseline's 0.99), and on a seasonal random walk, where seasonal-naive is the optimal "
+        "predictor by construction, it must LOSE (1.25 against 1.00). Interval coverage is "
+        "checked against nominal 80% within binomial tolerance. Neither the FPP3 tourism example "
+        "nor the M3 series is vendored here, so those published figures are named as the tests to "
+        "add when they are, rather than claimed."
     ),
     min_n_expr="2 * season_length periods, minimum 24",
     implemented=True,
@@ -1444,9 +1451,12 @@ _s(
         "Hyndman and Khandakar (2008) JSS 27:3",
     ),
     known=(
-        "The Box-Jenkins airline model on AirPassengers: ARIMA(0,1,1)(0,1,1)[12] on the log "
-        "scale, published estimates theta = -0.40 and Theta = -0.56, tolerance 0.02 on each. The "
-        "single most reproduced fit in the time-series literature."
+        "Two parts. The exact algebraic identity that (1 + t B)(1 + T B^m) expands to t at lag "
+        "1, T at lag m and the cross term t * T at lag m + 1, asserted to 1e-12. Then parametric "
+        "recovery: the airline process simulated at a fixed seed from theta = -0.40 and "
+        "Theta = -0.56, recovered within a tolerance derived from the asymptotic standard error. "
+        "AirPassengers is not vendored here, so the published fit is named as the test to add "
+        "when it is, rather than claimed."
     ),
     min_n_expr="3 * season_length periods and at least 36; stricter than the contract default because SARIMA has more parameters",
     implemented=True,
@@ -1595,10 +1605,13 @@ _s(
         "Standard first-passage formulation",
     ),
     known=(
-        "Strong and analytic: for a Gaussian random walk with known drift and volatility the "
-        "probability of hitting a floor within a horizon has a closed-form first-passage solution "
-        "(the inverse Gaussian). The simulator is driven with that process at a fixed seed and "
-        "must match the closed form within Monte Carlo error at 20,000 draws."
+        "Strong and analytic, in two closed forms. At a horizon of one period the running "
+        "minimum and the terminal balance coincide, so the simulator must reproduce the exact "
+        "Gaussian tail within Monte Carlo error. Over a longer horizon its answer must sit inside "
+        "a bracket whose ends are both exact: the terminal probability below and the "
+        "continuously monitored first-passage probability (inverse Gaussian) above. The ledger is "
+        "monitored at period ends, so the continuous formula is an upper bound rather than the "
+        "target."
     ),
     min_n_expr="12 LedgerPeriod observations for the inflow-outflow correlation, plus the forecasts' own floors",
     implemented=True,
@@ -1732,8 +1745,11 @@ _s(
     interval="None on the mapping; the Brier decomposition carries the uncertainty.",
     refs=("Platt (1999) Advances in Large Margin Classifiers", "Niculescu-Mizil and Caruana (2005) ICML"),
     known=(
-        "Agreement with sklearn.linear_model.LogisticRegression on the same design to 1e-6, plus "
-        "the exact property that a perfectly calibrated input maps to approximately the identity."
+        "The score equations are exactly zero at the fitted optimum, asserted to 1e-8: at the "
+        "maximum of a strictly concave log-likelihood the gradient vanishes. Plus recovery of a "
+        "known logistic generator, the property that a perfectly calibrated input maps to "
+        "approximately the identity, and the guarantee that separable classes still map strictly "
+        "inside (0, 1). sklearn is not a dependency here, so the theorem replaces the comparison."
     ),
     min_n_expr="50 observations with at least 10 positives",
     implemented=True,
@@ -1764,11 +1780,12 @@ _s(
         "Murphy (1973) Journal of Applied Meteorology 12:595",
     ),
     known=(
-        "Exact and analytic: the Murphy decomposition is an identity, Brier = reliability - "
-        "resolution + uncertainty, holding to 1e-12 on arbitrary seeded inputs; uncertainty "
-        "equals base_rate * (1 - base_rate) exactly; and a perfectly calibrated constant "
-        "forecaster has reliability exactly 0. Three exact identities, no reference "
-        "implementation involved."
+        "Exact and analytic. On arbitrary input the identity carries a fourth term: Brier = "
+        "reliability - resolution + uncertainty + within_bin, holding to 1e-12. The familiar "
+        "three-term form is exact only when the forecast is constant inside each bin, and that "
+        "case is asserted separately with within_bin equal to 0. Also uncertainty equals "
+        "base_rate * (1 - base_rate) exactly, and a perfectly calibrated constant forecaster has "
+        "reliability exactly 0. Four exact identities, no reference implementation involved."
     ),
     min_n_expr="100 observations, 20 positives, and at least 5 observations per bin",
     implemented=True,
@@ -1870,9 +1887,11 @@ _s(
     known=(
         "The coverage theorem under censoring: simulate from a known joint distribution of event "
         "and censoring times at a fixed seed and assert empirical coverage of the lower bound is "
-        "at least 1 - alpha within binomial tolerance. The second test matters more: naive split "
-        "conformal on the resolved subset must UNDER-cover on the same fixture, so the fixture "
-        "proves the correction is doing work rather than merely not breaking."
+        "at least 1 - alpha within binomial tolerance. The second test matters more: the naive "
+        "resolved-only UPPER bound must under-cover on the same fixture, and on the shipped one "
+        "it covers 76% while claiming 90%, against the censoring-aware bound's 90%. Only the "
+        "lower bound carries a distribution-free guarantee, because under right censoring no "
+        "distribution-free upper bound exists."
     ),
     min_n_expr="200 spells with at least 100 observed events",
     implemented=True,
@@ -1990,8 +2009,11 @@ _s(
     ),
     refs=("Wilson (1927) JASA 22:209", "Newcombe (1998) Statistics in Medicine 17:873"),
     known=(
-        "The Wilson interval has a closed form, checked exactly; the difference interval is "
-        "checked against Newcombe's published worked examples."
+        "The Wilson interval has a closed form, written out independently in the test and "
+        "checked exactly; the difference interval is checked against Newcombe's method 10 "
+        "construction, recomputed from the two Wilson intervals, plus antisymmetry under swapping "
+        "the groups. Newcombe's paper is not vendored here, so the algebra replaces the worked "
+        "example."
     ),
     min_n_expr="100 labelled outcomes in each window",
     implemented=True,
