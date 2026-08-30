@@ -2053,6 +2053,7 @@ _s(
         "Knoxville 17%), whose pairwise matrix is published and asserted cell by cell."
     ),
     min_n_expr="1 ballot; it is a tabulation, and the floor that matters is the quorum rule",
+    implemented=True,
 )
 
 _s(
@@ -2081,6 +2082,7 @@ _s(
         "second is the one that matters and it is a hard requirement for shipping the pack."
     ),
     min_n_expr="1 ballot",
+    implemented=True,
 )
 
 _s(
@@ -2109,6 +2111,7 @@ _s(
         "gets the winner right by luck."
     ),
     min_n_expr="1 ballot",
+    implemented=True,
 )
 
 _s(
@@ -2134,6 +2137,7 @@ _s(
         "the Condorcet winner and is therefore the ideal fixture for the sensitivity display."
     ),
     min_n_expr="1 ballot",
+    implemented=True,
 )
 
 _s(
@@ -2151,6 +2155,7 @@ _s(
     refs=("Brams and Fishburn (1978) American Political Science Review 72:831",),
     known="The Tennessee example's published approval outcome.",
     min_n_expr="1 ballot",
+    implemented=True,
 )
 
 _s(
@@ -2171,6 +2176,7 @@ _s(
     refs=("Balinski and Laraki (2010), Majority Judgment",),
     known="Exact arithmetic on a fixture, plus the Tennessee example under a score ballot.",
     min_n_expr="1 ballot",
+    implemented=True,
 )
 
 _s(
@@ -2203,6 +2209,7 @@ _s(
         "seats."
     ),
     min_n_expr="seats + 1 options and at least seats valid ballots",
+    implemented=True,
 )
 
 _s(
@@ -2234,6 +2241,7 @@ _s(
         "goodness-of-fit against known expected counts is hand-computable and asserted exactly."
     ),
     min_n_expr="30 ballots for the aggregate, and the tenant's k per stratum row",
+    implemented=True,
 )
 
 _s(

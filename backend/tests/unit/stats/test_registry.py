@@ -217,9 +217,9 @@ def test_stub_services_raise_rather_than_return_a_number():
     assert unimplemented, "if everything is implemented, delete this test"
     # Named rather than picked at random so the failure message is readable. It
     # is swapped for another stub each time a pack lands; it was a forecast
-    # service before Pack 3.
+    # service before Pack 3 and a voting service before Pack 4.
     with pytest.raises(NotImplementedError):
-        R.get("voting.pairwise_matrix").fn(None, None, None)
+        R.get("bayes.hierarchical_pool").fn(None, levels=(), seed=0)
 
 
 def test_pack_one_is_marked_implemented():
