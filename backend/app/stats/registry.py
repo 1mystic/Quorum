@@ -2369,6 +2369,7 @@ _s(
         "within Monte Carlo tolerance over many seeded draws."
     ),
     min_n_expr="a pool at least 3x the panel size, with every quota lower bound satisfiable",
+    implemented=True,
 )
 
 _s(
