@@ -88,10 +88,10 @@ whose only definition is inside a media query.
 | C.7 | `app/stats/streams/` — canonical dataclasses + RWA and campus adapters | statistician | C.6 | DONE, ledger/decision declared empty pending their models, see CONTEXT constraints |
 | C.8 | `request_flow` domain end to end (Request model, service, API, UI) | backend-porter | C.7 | DONE backend half (model/service/repository/API); UI was already done against fixtures in the frontend breadth pass, see CONTEXT.md |
 | C.9 | **Pack 1** implementation: `survival.py`, `spc.py`, `queueing.py` + known-answer tests | statistician | C.7 | DONE, all 19 Pack-1 services real, 122 known-answer tests, censoring regression passes |
-| C.10 | `insight_runs` table + materialization worker + cadence scheduler | backend-porter | C.9 | TODO |
+| C.10 | `insight_runs` table + materialization worker + cadence scheduler | backend-porter | C.9 | DONE, worker proven correct against a monkeypatched reducer since `streams/reduce.py` is still unimplemented; see CONTEXT.md |
 | C.11 | Frontend retheme against `design/tokens.css` + `StatisticTile` / `EvidenceCard` components | frontend | B.7, C.6 | DONE, brought forward ahead of B.7/C.6, built against local fixtures pending the real API |
 | C.12 | Insight dashboard UI — KM curve, control chart, Erlang-C recommendation | frontend | C.11, C.10 | DONE against fixtures (`InsightsOperationsView`), pending real `insight_runs` API |
-| C.13 | `ledger` domain + **Pack 3** (`forecast.py`, `calibration.py`, `conformal.py`, `drift.py`) | statistician | C.10 | TODO |
+| C.13 | `ledger` domain (DONE, brought forward into C.10 by backend-porter, see CONTEXT.md) + **Pack 3** (`forecast.py`, `calibration.py`, `conformal.py`, `drift.py`) | statistician | C.10 | Pack 3 stats TODO; `app/models/ledger.py`/`LedgerRepository`/`LedgerService`/API and the adapter's `ledger_entries` mapping already exist |
 | C.14 | Conformal ETA surfaced on the request detail page | frontend | C.13 | DONE against fixtures (`RequestDetailView`, `display="range"` StatTile), pending the real per-request ETA endpoint |
 | C.15 | `participation` + `decision` domains + **Pack 4** | statistician | C.13 | TODO |
 | C.16 | Decision console UI — pairwise matrix, cycle disclosure, budgeting fairness report | frontend | C.15 | DONE against fixtures (`DecisionDetailView`, pairwise matrix + mandatory cycle disclosure, tested); budgeting fairness report not yet a page, no fixture shape drafted for it |
