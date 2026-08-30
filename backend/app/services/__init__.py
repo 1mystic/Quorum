@@ -9,4 +9,5 @@ from app.services.announcement import AnnouncementService
 from app.services.request import RequestService
 from app.services.notification import NotificationService
 from app.services.certificate import CertificateService, issue_certificate_job
+from app.services.ledger import LedgerService
 

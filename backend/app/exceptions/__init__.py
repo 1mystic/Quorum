@@ -29,3 +29,7 @@ from app.exceptions.certificate import (
     CertificateNotFoundError, CertificateNotEarnedError, CertificateGenerationError
 )
 from app.exceptions.tenant import VerticalNotFoundError, TenantSlugMismatchError
+from app.exceptions.ledger import (
+    DueNotFoundError, PaymentNotFoundError, PaymentAlreadySettledError,
+    ReceiptAlreadyIssuedError, ReceiptNotFoundError, LedgerCategoryInvalidError,
+)

@@ -4,12 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repository import (
     UserRepository, TenantRepository, MemberRepository, GroupRepository, MembershipRepository,
     EventRepository, EventRegistrationRepository, AnnouncementRepository, RequestRepository,
-    NotificationRepository, CertificateRepository
+    NotificationRepository, CertificateRepository, LedgerRepository
 )
 from app.services import (
     UserService, TenantService, MemberService, GroupService, MembershipService,
     EventService, EventRegistrationService, AnnouncementService, RequestService,
-    NotificationService, CertificateService
+    NotificationService, CertificateService, LedgerService
 )
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, SecurityScopes
 from app.core.token import decode_token
@@ -113,6 +113,14 @@ def get_certificate_service(db: AsyncSession = Depends(get_db),
     member_repo = MemberRepository(db)
     notification_repo = NotificationRepository(db)
     return CertificateService(certificate_repo, member_repo, notification_repo, storage)
+
+def get_ledger_service(db: AsyncSession = Depends(get_db),
+                       tenant_id: int = Depends(get_current_tenant_id)):
+    ledger_repo = LedgerRepository(db, tenant_id)
+    member_repo = MemberRepository(db)
+    user_repo = UserRepository(db)
+    tenant_repo = TenantRepository(db)
+    return LedgerService(ledger_repo, member_repo, user_repo, tenant_repo)
 
 
 

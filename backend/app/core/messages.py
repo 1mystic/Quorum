@@ -75,6 +75,16 @@ class RequestMessages:
 
 class NotificationMessages:
     MARKED_READ = "Notification marked as read"
+
+
+class LedgerMessages:
+    DUE_RAISED = "Due raised"
+    PAYMENT_RECORDED = "Payment recorded, awaiting verification"
+    PAYMENT_VERIFIED = "Payment verified and settled"
+    RECEIPT_ISSUED = "Receipt issued"
+    RECEIPT_COLLECTED = "Receipt marked as collected"
+    CONTRIBUTION_ADDED = "Contribution recorded"
+    EXPENSE_ADDED = "Expense recorded"
     ALL_MARKED_READ = "All notifications marked as read"
 
     @staticmethod

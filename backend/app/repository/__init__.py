@@ -9,4 +9,5 @@ from app.repository.announcement import AnnouncementRepository
 from app.repository.request import RequestRepository
 from app.repository.notification import NotificationRepository
 from app.repository.certificate import CertificateRepository
+from app.repository.ledger import LedgerRepository
 

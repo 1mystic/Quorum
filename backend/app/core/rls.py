@@ -20,6 +20,11 @@ TENANT_SCOPED_TABLES = [
     "certificates",
     "event_registrations",
     "memberships",
+    "dues",
+    "payments",
+    "receipts",
+    "contributions",
+    "expenses",
 ]
 
 POLICY_NAME = "tenant_isolation"

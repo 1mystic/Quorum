@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from app.api import (
     auth_router, tenant_router, member_router, group_router, public_group_router,
     event_router, announcement_router, request_router, notification_router,
-    certificate_router, public_certificate_router, ai_router
+    certificate_router, public_certificate_router, ai_router, ledger_router
 )
 from app.core.tenancy import verify_tenant_scope
 from fastapi.middleware.cors import CORSMiddleware
@@ -40,9 +40,11 @@ app.add_middleware(
 
 @app.exception_handler(AppException)
 async def handle_app_exc(request: Request, exc: AppException):
+    content = {"message": exc.message}
+    content.update(getattr(exc, "extra", {}))
     return JSONResponse(
         status_code=exc.status_code,
-        content={"message": exc.message}
+        content=content,
     )
 
 # Global, no tenant context yet: account creation and onboarding a new tenant.
@@ -66,4 +68,5 @@ tenant_api.include_router(request_router)
 tenant_api.include_router(notification_router)
 tenant_api.include_router(certificate_router)
 tenant_api.include_router(ai_router)
+tenant_api.include_router(ledger_router)
 app.include_router(tenant_api)

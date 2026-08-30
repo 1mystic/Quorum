@@ -241,12 +241,18 @@ class PortedSchemaAdapter(BaseAdapter):
     so this module does not import the ORM and every method is testable against
     plain fixtures with no database.
 
-    **What the ported schema cannot supply.** Four of the six streams have no
-    table behind them yet. Each gap is marked TODO on the method that would fill
-    it and names the missing model. None is invented: an adapter that fabricates
-    a stream is worse than one that declares it empty, and a service whose stream
-    is empty returns `InsufficientData`, which the pack registry turns into "this
-    pack needs the ledger switched on" rather than an error.
+    **What the ported schema cannot supply.** Card C.10 closed the `ledger`
+    gap: `app.models.ledger`'s five tables (Due, Payment, Receipt,
+    Contribution, Expense) now back `ledger_entries` below, and
+    `rwa_society`'s two most interview-grounded statistics (verification lag,
+    receipt-collection gap) have rows to read. Three of the six streams still
+    have no table behind them: the exposure log, decision/option/ballot, and
+    member lifecycle events (lapse/reinstate/exit). Each remaining gap is
+    marked TODO on the method that would fill it and names the missing model.
+    None is invented: an adapter that fabricates a stream is worse than one
+    that declares it empty, and a service whose stream is empty returns
+    `InsufficientData`, which the pack registry turns into "this pack needs
+    the decision stream switched on" rather than an error.
     """
 
     # Subclasses map the ported Campus Connect `RequestCategory` enum into their
@@ -359,6 +365,150 @@ class PortedSchemaAdapter(BaseAdapter):
         events.sort(key=lambda e: (e.member_ref, e.at))
         return tuple(events)
 
+    # ---- ledger -----------------------------------------------------------
+
+    def ledger_entries(self, rows: Iterable[Any]) -> tuple[LedgerEntry, ...]:
+        """
+        Card C.10. Closes the gap this class's own docstring named: there was
+        no ledger model, so `forecast_risk`'s money half, `montecarlo.
+        runway_shortfall`, `risk.late_payment_risk` and `audit.*` had nothing
+        to read, and rwa_society's two most interview-grounded headline
+        statistics (verification lag, receipt-collection gap) could not exist.
+
+        `app.models.ledger` now has five tables (Due, Payment, Receipt,
+        Contribution, Expense; see that module's docstring), and this method
+        is where they get read, once, exactly like `request_events` reads
+        `Request` for both verticals. Rows are dispatched by the attributes
+        they carry, not by isinstance, so this stays testable against plain
+        fixtures with no database (same discipline as `participation_events`
+        below).
+
+        One LedgerEntry per row:
+
+        - `Due` -> the receivable itself: inflow, `due_at` set, status tracks
+          whether it has been paid, `verified_at`/receipt fields folded in
+          from whichever settling Payment has them, so `DueSpell` (rule L1)
+          has a single row to reduce rather than a due and its payment both
+          claiming the same money.
+        - `Payment` not linked to a Due (`due_id is None`) -> a standalone
+          inflow, e.g. a one-off festival-fund collection nobody billed.
+        - `Contribution` -> inflow, `due_at` unset: never a receivable.
+        - `Expense` -> outflow, amount sign-flipped per the atom's contract.
+        """
+        entries: list[LedgerEntry] = []
+        for row in rows:
+            if hasattr(row, "due_at") and hasattr(row, "issued_at") and not hasattr(row, "instrument"):
+                entries.append(self._due_entry(row))
+            elif hasattr(row, "due_id"):
+                if row.due_id is None:
+                    entries.append(self._payment_entry(row))
+                # Payments settling a Due are folded into that Due's own
+                # entry above, never emitted twice: the receivable and its
+                # settlement are the same signed movement, not two.
+            elif hasattr(row, "approved_by_id"):
+                entries.append(self._expense_entry(row))
+            elif hasattr(row, "kind") and hasattr(row, "campaign_ref"):
+                entries.append(self._contribution_entry(row))
+        entries.sort(key=lambda e: (e.entry_ref, e.at))
+        return tuple(entries)
+
+    def _due_entry(self, due: Any) -> LedgerEntry:
+        settling = [p for p in (getattr(due, "payments", None) or []) if p.due_id == due.id]
+        verified = next((p for p in settling if p.verified_at is not None), None)
+        receipted = next((p for p in settling if getattr(p, "receipt", None) is not None), None)
+        status = due.status.value if hasattr(due.status, "value") else str(due.status)
+        ledger_status = {
+            "open": "expected", "partial": "pending", "paid": "settled",
+            "waived": "written_off", "written_off": "written_off",
+        }.get(status.lower(), "expected")
+        return LedgerEntry(
+            entry_ref="due_" + str(due.id),
+            at=utc(due.issued_at),
+            booked_at=utc(due.issued_at),
+            amount_minor=abs(int(due.amount_minor)),
+            currency=due.currency,
+            category=self.ledger_category(due.category),
+            subcategory=getattr(due, "subcategory", None),
+            direction="inflow",
+            instrument="adjustment",
+            status=ledger_status,
+            member_ref=member_ref(due.member_id),
+            group_ref=group_ref(getattr(due, "group_id", None)),
+            due_at=utc(due.due_at),
+            settled_at=utc(verified.settled_at) if verified else None,
+            verified_at=utc(verified.verified_at) if verified else None,
+            verified_by_ref=member_ref(verified.verified_by_id) if verified else None,
+            receipt_issued_at=utc(receipted.receipt.issued_at) if receipted else None,
+            receipt_collected_at=utc(receipted.receipt.collected_at) if receipted else None,
+            reconciled=bool(verified.reconciled) if verified else False,
+        )
+
+    def _payment_entry(self, payment: Any) -> LedgerEntry:
+        status = payment.status.value if hasattr(payment.status, "value") else str(payment.status)
+        instrument = payment.instrument.value if hasattr(payment.instrument, "value") else str(payment.instrument)
+        receipt = getattr(payment, "receipt", None)
+        return LedgerEntry(
+            entry_ref="pay_" + str(payment.id),
+            at=utc(payment.at),
+            booked_at=utc(payment.booked_at),
+            amount_minor=abs(int(payment.amount_minor)),
+            currency=payment.currency,
+            category=self.ledger_category(payment.category),
+            subcategory=getattr(payment, "subcategory", None),
+            direction="inflow",
+            instrument=instrument,
+            status=status,
+            member_ref=member_ref(payment.member_id),
+            group_ref=group_ref(getattr(payment, "group_id", None)),
+            campaign_ref=getattr(payment, "campaign_ref", None),
+            settled_at=utc(payment.settled_at),
+            verified_at=utc(payment.verified_at),
+            verified_by_ref=member_ref(payment.verified_by_id),
+            receipt_issued_at=utc(receipt.issued_at) if receipt else None,
+            receipt_collected_at=utc(receipt.collected_at) if receipt else None,
+            reconciled=bool(payment.reconciled),
+        )
+
+    def _contribution_entry(self, contribution: Any) -> LedgerEntry:
+        kind = contribution.kind.value if hasattr(contribution.kind, "value") else str(contribution.kind)
+        return LedgerEntry(
+            entry_ref="con_" + str(contribution.id),
+            at=utc(contribution.at),
+            booked_at=utc(contribution.at),
+            amount_minor=abs(int(contribution.amount_minor)),
+            currency=contribution.currency,
+            category=self.ledger_category(contribution.category),
+            direction="inflow",
+            instrument="in_kind" if kind == "in_kind" else "adjustment",
+            status="settled",
+            member_ref=member_ref(contribution.member_id),
+            group_ref=group_ref(getattr(contribution, "group_id", None)),
+            campaign_ref=getattr(contribution, "campaign_ref", None),
+            settled_at=utc(contribution.at),
+            reconciled=True,
+        )
+
+    def _expense_entry(self, expense: Any) -> LedgerEntry:
+        status = expense.status.value if hasattr(expense.status, "value") else str(expense.status)
+        instrument = expense.instrument.value if hasattr(expense.instrument, "value") else str(expense.instrument)
+        return LedgerEntry(
+            entry_ref="exp_" + str(expense.id),
+            at=utc(expense.at),
+            booked_at=utc(expense.booked_at),
+            amount_minor=-abs(int(expense.amount_minor)),
+            currency=expense.currency,
+            category=self.ledger_category(expense.category),
+            subcategory=getattr(expense, "subcategory", None),
+            direction="outflow",
+            instrument=instrument,
+            status=status,
+            counterparty_ref=getattr(expense, "counterparty_ref", None),
+            group_ref=group_ref(getattr(expense, "group_id", None)),
+            campaign_ref=getattr(expense, "campaign_ref", None),
+            settled_at=utc(expense.settled_at),
+            reconciled=bool(expense.reconciled),
+        )
+
     # ---- participation ----------------------------------------------------
 
     def participation_events(self, rows: Iterable[Any]) -> tuple[ParticipationEvent, ...]:
@@ -462,19 +612,11 @@ class PortedSchemaAdapter(BaseAdapter):
             )
         return tuple(records)
 
-    # ---- ledger and decision ------------------------------------------------
-
-    def ledger_entries(self, rows: Iterable[Any]) -> tuple[LedgerEntry, ...]:
-        """
-        Empty, deliberately.
-
-        TODO(missing model): there is no ledger model. Nothing in the ported
-        schema records money: no entry, no receivable, no verification and no
-        receipt. Declaring the stream empty is the honest state until the model
-        exists; approximating it from anything present would be fiction with a
-        currency symbol.
-        """
-        return ()
+    # ---- decision -------------------------------------------------------
+    #
+    # `ledger_entries` for the real Due/Payment/Receipt/Contribution/Expense
+    # mapping now lives above, next to member_lifecycle (card C.10). This
+    # section is what remains genuinely empty.
 
     def decisions(self, rows: Iterable[Any]) -> tuple[DecisionSpec, ...]:
         """
