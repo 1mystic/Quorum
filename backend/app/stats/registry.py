@@ -2407,6 +2407,7 @@ _s(
         "delta = 2U/(mn) - 1, is asserted against a reference U computation."
     ),
     min_n_expr="20 responses per item, and the tenant's k per group row",
+    implemented=True,
 )
 
 _s(
@@ -2445,6 +2446,7 @@ _s(
         "verdict."
     ),
     min_n_expr="10 responses per covariate per sparse response level, in practice 100 for 3 covariates",
+    implemented=True,
 )
 
 _s(
@@ -2481,6 +2483,7 @@ _s(
         "example."
     ),
     min_n_expr="50 respondents and at least 5 in every cell being raked",
+    implemented=True,
 )
 
 _s(
@@ -2500,6 +2503,7 @@ _s(
         "Exact closed form, hand-computable, asserted to 1e-12. Exactly 1 for uniform weights, "
         "and equal to the published Kish worked example value for his tabulated case."
     ),
+    implemented=True,
 )
 
 _s(
