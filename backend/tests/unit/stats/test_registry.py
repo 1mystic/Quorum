@@ -231,6 +231,10 @@ def test_pack_one_is_marked_implemented():
         "survival.median_resolution_days",
         "survival.cox_hazard_ratios",
         "survival.naive_vs_km_gap",
+        "spc.ewma_chart",
+        "spc.cusum_chart",
+        "spc.poisson_rate_chart",
+        "changepoint.detect_level_shifts",
     ):
         assert R.get(service_id).implemented, service_id + " is implemented but not declared so"
 

@@ -601,12 +601,14 @@ _s(
         "Montgomery, Introduction to Statistical Quality Control, 7th ed., ch. 9",
     ),
     known=(
-        "Lucas and Saccucci (1990) Table 3: at lam=0.10, L=2.703 gives ARL0 = 500 and ARL1 = "
-        "10.3 for a one-sigma shift; at lam=0.25, L=2.998 gives ARL0 = 500. The L-solver is "
-        "asserted against those published pairs and the run length verified by seeded "
-        "simulation. Chart values against Montgomery Example 9.2."
+        "Lucas and Saccucci (1990) Table 3, the ARL0 = 500 row: L = 2.615 at lam=0.05, 2.814 "
+        "at lam=0.10, 2.998 at lam=0.25, 3.071 at lam=0.50, and ARL1 = 10.3 for a one-sigma "
+        "shift at lam=0.10. The L-solver reproduces all five, and the run length is confirmed "
+        "independently by seeded simulation. The chart arithmetic is checked against the EWMA "
+        "recursion written out by hand."
     ),
     min_n_expr="20 complete periods",
+    implemented=True,
 )
 
 _s(
@@ -632,11 +634,13 @@ _s(
         "Montgomery, Introduction to Statistical Quality Control, 7th ed., ch. 9",
     ),
     known=(
-        "Montgomery Table 9.4: k=0.5, h=5 gives ARL0 = 465 and ARL1 = 10.4 at one sigma, 5.75 "
-        "at 1.5 sigma. Chart arithmetic against Montgomery Example 9.1's tabulated C+ and C- "
-        "columns."
+        "The standard k=0.5, h=5 table reproduced in Montgomery ch. 9: ARL0 = 465, ARL1 = 10.4 "
+        "at one sigma, 5.75 at 1.5 sigma and 4.01 at two sigma, all four reproduced by the "
+        "Markov-chain solver. Chart arithmetic against the C+ and C- recursion written out by "
+        "hand."
     ),
     min_n_expr="20 complete periods",
+    implemented=True,
 )
 
 _s(
@@ -662,11 +666,13 @@ _s(
         "Shewhart (1931)",
     ),
     known=(
-        "Montgomery's printed-circuit-board c-chart example with published centre line and "
-        "limits, plus the exact check that for a known Poisson mean our limits equal the exact "
-        "ppf(alpha/2) and ppf(1-alpha/2) quantiles."
+        "The exact check: for a known Poisson mean the limits equal the exact ppf(alpha/2) and "
+        "ppf(1-alpha/2) quantiles, verified against the explicit distribution sum rather than "
+        "against another implementation. Montgomery's printed-circuit-board c-chart is cited in "
+        "the catalog appendix as a published comparison whose raw table is not vendored here."
     ),
     min_n_expr="20 periods and an average count of at least 5 per period",
+    implemented=True,
 )
 
 _s(
@@ -701,6 +707,7 @@ _s(
         "the year the first Aswan works began, with a mean drop from about 1097 to about 850."
     ),
     min_n_expr="24 periods, and min_segment observations on each side of any reported point",
+    implemented=True,
 )
 
 _s(

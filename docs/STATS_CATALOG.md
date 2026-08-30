@@ -282,10 +282,12 @@ chart that says everything is fine, which is worse than no chart.
 - *interval_meaning:* not a confidence interval. Points outside the limits are a decision rule tuned so that a stable process false-alarms about once every `target_arl0` periods.
 - *references:* Roberts (1959) Technometrics 1:239. Lucas and Saccucci (1990) Technometrics 32:1, whose ARL tables we use. Montgomery, *Introduction to Statistical Quality Control*, 7th ed., ch. 9.
 
-**known answer** Lucas and Saccucci (1990) Table 3: at `lam=0.10`, `L=2.703` gives ARL0 = 500 and
-ARL1 = 10.3 for a 1 sigma shift; at `lam=0.25`, `L=2.998` gives ARL0 = 500. Our `L`-solver is
-asserted against those published pairs, and the ARL is verified by seeded simulation to within
-Monte Carlo tolerance. Chart values themselves are checked against Montgomery's Example 9.2.
+**known answer** Lucas and Saccucci (1990) Table 3, the ARL0 = 500 row: `L` = 2.615 at
+`lam=0.05`, 2.814 at `lam=0.10`, 2.998 at `lam=0.25`, 3.071 at `lam=0.50`; and ARL1 = 10.3 for a
+1 sigma shift at `lam=0.10`. Our `L`-solver reproduces all five to within 0.01, and the run length
+is confirmed independently by seeded simulation. Chart values are checked against the EWMA
+recursion written out by hand. (An earlier draft of this line paired `L=2.703` with ARL0 = 500;
+2.703 is the ARL0 = 370 constant at `lam=0.10`, and the implementation reproduces both rows.)
 
 ---
 
@@ -303,9 +305,10 @@ non-normality. The pack runs both and the dashboard shows agreement or disagreem
 picking one, because a disagreement is itself information about whether the shift is a step or a
 drift.
 
-**known answer** Hawkins (1993) and Montgomery Table 9.4: `k=0.5`, `h=5` gives ARL0 = 465 and
-ARL1 = 10.4 for a 1 sigma shift, ARL1 = 5.75 at 1.5 sigma. Chart arithmetic against Montgomery's
-Example 9.1 tabulated `C+`/`C-` columns.
+**known answer** Hawkins (1993) and the standard `k=0.5`, `h=5` table reproduced in Montgomery
+ch. 9: ARL0 = 465, ARL1 = 10.4 at 1 sigma, 5.75 at 1.5 sigma, 4.01 at 2 sigma. All four are
+reproduced by the Markov-chain solver. Chart arithmetic is checked against the `C+`/`C-` recursion
+written out by hand rather than against Montgomery's printed table, which is not vendored.
 
 ---
 
@@ -322,9 +325,10 @@ Example 9.1 tabulated `C+`/`C-` columns.
 `unequal-exposure` (uses a u-chart with varying limits when period lengths differ, which they do
 whenever a month is the period).
 
-**known answer** Montgomery's printed-circuit-board c-chart example with published centre line and
-limits, plus an exact check: for a known Poisson mean, our limits must equal the exact
-`ppf(alpha/2)` and `ppf(1-alpha/2)` quantiles.
+**known answer** The exact check: for a known Poisson mean, our limits must equal the exact
+`ppf(alpha/2)` and `ppf(1-alpha/2)` quantiles, verified against the explicit distribution sum.
+Montgomery's printed-circuit-board c-chart is the published comparison, but its raw table is not
+vendored, so it is listed in the appendix of services validated by identity rather than by dataset.
 
 ---
 
