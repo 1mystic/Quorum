@@ -50,12 +50,13 @@ spacing**, with fresher colour and type. That synthesis is now the **house direc
 | 2026-08-30 | **The atom-to-unit reducers, card C.21 (statistician).** `app/stats/streams/reduce.py` and `streams/capacity.py` were the last `NotImplementedError` between 40 real, published-value-verified services and real data; both now have bodies, and the materialization worker built in card C.10 produces genuine numbers on the very next run with no change to `insight_materializer.py`, exactly as that card predicted. **`request_spells` implements C1 to C10 individually and the code names each rule where it implements it**: every request opened before `window.end` produces a spell and there is no argument that filters on outcome (C1); an open request is censored at the boundary and counted (C2); one opened earlier is left-truncated with `at_risk_from = window.start`, so `survival._entry_days` recovers the true age as `at_risk_from - opened_at` (C3); a `bracketed` terminal becomes `censoring="interval"` with both ends carried and `terminal_at=None`, never a midpoint (C4); the competing cause goes in `outcome` and `censoring` stays `"none"`, because the reducer does not know which cause is under analysis and `survival._check_competing_risks` reads `outcome` to decide (C5); `reopen_policy` splits into `r`/`r#2` child spells or extends one spell and counts the reopens (C6); a merged duplicate is **emitted, not dropped**, so the estimator can exclude it into `n_excluded` where the exclusion is visible, and the survivor's `duplicate_count` increments (C7); `duration_hours` is always wall clock and `duration_active_hours` is filled only when the vertical declares `sla_clock="active"` (C8); the opened atom's attributes ride in `covariates` for the censoring-informative check (C9); and nothing is imputed, so a terminal that falls after `window.end` leaves the spell open with `terminal_at=None` (C10). Also implemented: `flow_periods` (calendar buckets in the window's own timezone, partial and past-`complete_through` buckets emitted with `complete=False` rather than dropped), `member_spells`/`roster_snapshot`, `due_spells`/`ledger_periods`, `participation_periods`/`engagement_features`/`interaction_edges`, `rate_observations`/`count_observations`/`pairwise_results`, and `capacity.active_servers`/`active_servers_by_period`. **63 new tests, 1136 in `tests/unit/stats`, all passing**; the purity lint passes over all 43 modules (it caught two module-level dict constants in `reduce.py` while this was being written, now `MappingProxyType`, which is the lint doing its job for the second time). **The seam is what is tested, not either half.** `tests/unit/stats/test_reduce.py::test_the_censoring_regression_survives_the_reducer` rebuilds `test_survival.py`'s exact 100-request fixture from raw `RequestEvent` atoms instead of hand-written spells and gets the same three numbers back out of the estimator: **n=100, n_censored=49, Kaplan-Meier median 8.0 days against a naive mean-of-closed of 3.1**, gap 4.9. A companion test asserts the reduced spells match `datasets.spell` field for field on duration, observation, censoring and outcome, so the known-answer suite cannot be testing a shape the reducer never produces. **The materializer's monkeypatch is now provably unnecessary**: `test_the_materializer_known_answer_needs_no_monkeypatch` reproduces card C.10's hand-checked fixture (35 resolved at exactly 8 days, 5 still open) against the real reducer and gets **n=40, n_censored=5, value=8.0**; running `test_insight_materializer.py`'s own two monkeypatched tests with the monkeypatch removed reproduces every assertion including the `insight_runs` row (`insufficient=False`, `worst_status="PASS"`, `payload["value"]=8.0`). Walking `registry.implemented_ids()` on that fixture now computes 12 Pack-1 services for real (the rest are legitimately below `min_n` on 40 rows) where every one previously degraded. **Four judgement calls worth knowing.** (1) A merged duplicate is emitted rather than filtered, because an invisible exclusion is indistinguishable from a lost row; the count surfaces as `n_excluded`. (2) A calendar bucket the window only partly covers is `complete=False`, on the same argument `complete_through` exists for: a half-covered first week reads as a collapse. (3) `capacity.active_servers` returns **zero** for a period nobody worked, and caps the FTE-weighted count at the declared pool, because overstating servers is the direction that makes Erlang-C say a diverging queue is comfortable; `RosterSnapshot.roles` is `role -> headcount` and cannot attribute an individual, so without a `roles_by_member` map each active person is weighted by the declared pool's mean FTE, which reproduces the documented convention exactly (four committee members at 0.2 FTE is 0.8 servers, and `test_capacity.py` measures the resulting factor of five through the real `queueing.erlang_c_staffing`). (4) `rate_observations`' `success` predicate may return **None for undetermined**, and an undetermined spell is not a trial: an open request younger than the SLA horizon has neither met nor missed it, and counting it either way is a number about our impatience rather than about the vendor. **One real bug caught by a test and fixed**: under `reopen_policy="extend"` the spell terminated at the *first* terminal, so a request resolved, reopened and resolved again was recorded as having ended the first time; the terminal is now the last one not undone by a reopen, with a regression test on both the reopened-and-reclosed and the reopened-and-still-open cases. **`basis="reply"` is refused with a ValueError** rather than approximated, because `ParticipationEvent` carries the object replied to but not the author replied to, and a co-comment graph under the name "reply graph" is the edge being invented rather than measured |
 
 | 2026-08-31 | **`SelectField.vue` popover positioning, two bugs (frontend).** Bug 1 (first-open-of-session popover pinned near x=0, detached from its trigger): the existing single `nextTick()` before `placeList()` only guaranteed Vue's own DOM patch had applied, not that the browser had completed a real layout/paint pass or that anything outside Vue's render cycle (the Google Fonts this app loads with `display=swap` in `index.html`, which reflow the trigger when they swap in after first paint) had settled. Fixed by mounting the popover off-screen and `visibility:hidden`, waiting `nextTick()` plus two chained animation frames (`requestAnimationFrame`, with a `setTimeout` fallback since jsdom has none), measuring against that settled layout, and only then revealing it (`ready` class, `style.css` section 42) — no special-cased "first open" flag, the same measure-then-reveal path runs on every open. Bug 2 (role switcher dropdown in the sticky topbar consistently offset right, not just first open): traced to `RoleSwitcher.vue` rendering its `UserCog` icon as a DOM sibling of `SelectField`, outside the `<button>` that `triggerRef`/`placeList()` actually measures, so every popover was anchored to the text-only inner button and landed offset right by the icon's width plus its gap on every single open. The `position:sticky`/`backdrop-filter` topbar ancestor was checked and ruled out as a mechanism here specifically because the popover is `<Teleport to="body">`d, which moves its real DOM node out from under any such ancestor before `position:fixed` is ever resolved, so no ancestor can become its containing block; documented in the component's own comment rather than asserted. Fixed by giving `SelectField` an `#icon` slot rendered inside the same `<button>`, moving the pill's own border/padding from `.role-switcher` onto `.role-switcher .select-trigger` in `style.css` (so the measured box is the same box the user sees as the trigger, matching how every other `SelectField` usage already works), and updating `RoleSwitcher.vue` to pass the icon through the slot. Also tightened `placeList()`'s right-edge clamp to measure the popover's actual rendered width (`listEl.offsetWidth`, read only after the settle) instead of a width guessed before any CSS `min-width` rule (`.role-switcher .select-list{min-width:180px}` for the longer role labels) had been applied. New `src/components/ui/SelectField.test.js`, 4 tests: a fresh mount opened immediately never reveals before its measurement pass; open/close/reopen re-gates on every cycle, not just the first; the popover's real DOM parent is always `document.body` even when mounted inside a `position:sticky` wrapper (the structural guarantee that makes the sticky-ancestor hypothesis moot here); an `#icon` slot renders inside the measured `.select-trigger`, not beside it. jsdom has no layout engine (`getBoundingClientRect`/`offsetWidth` are always zero there) and no `requestAnimationFrame`/`scrollIntoView`, both guarded with fallbacks in the component itself rather than only in test setup, so these tests verify sequencing and DOM structure, not pixel geometry — genuine on-screen positioning was verified by tracing the code path by hand (`placeList`'s math and the `ready`-gated reveal), not by a real browser render, per instruction to skip browser automation. `npm run test`: 38/38 passing (34 pre-existing plus these 4). `npm run build` succeeds. No em dashes (checked by grep). `backend/` untouched throughout |
+| 2026-08-31 | **Pack 4 implemented for real (card C.15, statistician).** All 28 `governance_insight` services now have bodies: `voting.py` (pairwise matrix, Condorcet with the Smith set by Tarjan and a shortest-cycle disclosure, Schulze widest paths, Borda, approval, score, STV with Gregory transfers, turnout with Wilson intervals and a chi-square against the eligible roll), `budgeting.py` (Method of Equal Shares with add1 completion, an exhaustive EJR verifier, the greedy knapsack baseline scored against an exact DP optimum, the per-stratum fairness report), `sortition.py` (exact maximin and leximin by water-filling over disjoint strata), `survey.py` (Likert with no mean key, proportional-odds regression by Newton-Raphson gated on a real Brant test, raking by IPF, Kish's design effect), `segmentation.py` (RFM features, Gaussian mixtures by EM with BIC and silhouette selection, Hungarian label matching), `network.py` (Louvain, Brandes betweenness, isolation shares that cannot name anyone), `text.py` (MinHash with LSH banding, TF-IDF, NMF with deterministic NNDSVD initialisation and NPMI coherence), `privacy.py` (k-anonymity with Cox complementary suppression, the Laplace mechanism) and `audit.py` (Benford). **191 new tests, 1282 in `tests/unit/stats`, all passing**; the purity lint passes over every module. **69 of the 81 registered services are now implemented**; only Pack 2 remains. Zachary's karate club is vendored at `backend/tests/unit/stats/data/karate.py` and is asserted against its published shape (34 nodes, 78 edges, degrees 16/17/12 at the hubs) before it is used for anything, so a transcription error cannot masquerade as an algorithm result. Headline measured numbers: karate betweenness **0.43764** at node 0 and **0.30407** at node 33, matching the published figures to five decimals; Louvain **Q = 0.4156 over 4 communities** recovering **32 of 34** recorded faction memberships at **z = 8.32** against a degree-preserving null, where an Erdos-Renyi graph scores a plausible-looking Q = 0.3292 but **z = -0.75** and is refused; MinHash unbiased at **0.4999 against an exact Jaccard of 0.5** with empirical variance **0.00182 against the analytic 0.00195**; Brant **p = 0.72** when proportional odds holds and **p < 1e-5** when it does not, failing only the covariate that actually varies. Three real bugs caught by the tests and fixed with named regression tests (the Brant cross-covariance used pi_l(1 - pi_j) where the nesting of the cumulative indicators requires pi_j(1 - pi_l), which made the stacked covariance non positive definite and produced a **negative Wald statistic**; raking re-raked *after* trimming and returned a weight of 10.5 against a declared cap of 5.0; the MinHash error bound printed **0.000** at a degenerate threshold, reading as perfect precision while measuring nothing). Seven known-answer corrections to `docs/STATS_CATALOG.md` and the matching Method Cards, five because the stated oracle is not vendored here and two because the catalog was substantively wrong. |
 
 ## In flight
 
 Design and branding are done. Three agents now running in parallel on disjoint paths:
 
-- **statistician**: **A.2 to A.8, C.6, C.7 and C.9 complete.** The statistical architecture exists in
+- **statistician**: **A.2 to A.8, C.6, C.7, C.9, C.13, C.15 and C.21 complete.** The statistical architecture exists in
   code and **Pack 1 is now real mathematics**: the envelope, the registry of all 81 services with
   their Method Cards, the six streams, two vertical adapters, and 19 implemented services. Nothing
   is left half-wired; what is not implemented raises `NotImplementedError` and says which document
@@ -177,7 +178,116 @@ Design and branding are done. Three agents now running in parallel on disjoint p
   atoms now fold into units for every stream, the censoring rules C1 to C10 are implemented one by
   one with the code naming each rule, and the materialization worker computes real numbers rather
   than honest `insufficient_data` rows. See the C.21 `Done` row for the numbers and for the four
-  judgement calls. **Packs 2 and 4 are now the only remaining statistician mathematics.**
+  judgement calls.
+
+  **Pack 4 is now real mathematics too (card C.15).** All 28 `governance_insight` services have
+  bodies. **69 of the 81 registered services are `implemented=True`**; the only mathematics left is
+  **Pack 2** (`bayes.*` 5, `experiments.*` 3, `bandits.*` 2, `pairwise.*` 2), which is card C.17.
+
+  **The Condorcet cycle disclosure is real and is asserted as a sentence, not a boolean.** On the
+  textbook cycle (A>B>C, B>C>A, C>A>B) `voting.condorcet_winner` returns `winner=None`, the cycle
+  `["a", "b", "c"]` and a Smith set of all three, and the check detail reads "There is no Condorcet
+  winner because the preferences cycle: a beats b beats c beats a. Any single winner shown for this
+  decision is the output of a completion rule resolving that cycle, not an option the community
+  preferred to every other." The check is a **non-blocking FAIL**, so the envelope renders
+  `qualified` rather than being suppressed: a cycle is a true property of the ballots, not a broken
+  count. `voting.schulze` on the same ballots still returns a winner, because that is what Schulze
+  is for, but sets `is_condorcet_winner=False`, carries `cycle_disclosed` and leads its caveats with
+  "The winner shown is the RESOLUTION OF A CYCLE, not a Condorcet winner". The negative control
+  ships alongside: on Tennessee, `is_condorcet_winner` is True and `cycle_disclosed` is None, so the
+  label cannot always say cycle. Schulze's published 45-voter example is asserted against the whole
+  **strongest-path matrix**, not only its winner, and reproduces the published ranking
+  E > A > C > B > D; a wrong widest-path implementation lands on the right winner far more often
+  than on all twenty off-diagonal strengths. The STV food election is asserted **round by round**,
+  including the 0.5 Gregory transfer ratio and the last seat filled below quota.
+
+  **The karate club numbers, actually reproduced.** Normalised betweenness: node 0 **0.43764**,
+  node 33 **0.30407**, node 32 **0.14525**, node 2 **0.14366**, node 31 **0.13828**, matching the
+  published values to five decimals, with node 0 highest and node 33 second as documented.
+  Betweenness also carries two exact analytic checks asserted to 1e-12: on a path of n nodes the
+  betweenness of node i is i(n-1-i), and on a star the centre is exactly 1 and every leaf exactly 0.
+  Louvain finds **4 communities at modularity 0.4156** with sizes [13, 12, 5, 4]; each community
+  sits at least 90% inside one of Zachary's two recorded factions, and collapsing them onto their
+  majority side recovers **32 of the 34** real faction memberships, with nodes 0 and 33 always
+  separated. Restart stability is **0.932**.
+
+  **The Louvain null gate is real and was verified in both directions.** Modularity maximisation
+  partitions a random graph without complaint, so a partition only counts as community structure if
+  it beats a degree-preserving null partitioned by the same algorithm. Karate scores **z = 8.32**
+  (0.4156 against a null mean of 0.2967, sd 0.0143). An Erdos-Renyi graph on 60 nodes scores
+  **Q = 0.3292**, which looks perfectly respectable on a dashboard, but **z = -0.75**: the check
+  fails blocking, `communities` and `labels` are emptied and the envelope renders
+  `not_interpretable`. The raw number looking plausible is the entire point of that fixture.
+
+  **The Brant gate blocks per covariate, and was tested both ways.** On 1200 draws from a genuine
+  proportional-odds model the omnibus Brant test gives **p = 0.72** and every covariate passes. On
+  1500 draws where one covariate's effect is generated as 1.6, 0.8 and 0.0 across the three
+  cutpoints (the satisfaction-data pattern the Method Card names: something that moves people off
+  the bottom of the scale and does nothing at the top), the omnibus test gives **p < 1e-5**, that
+  covariate's own test fails, **its `coef` and `odds_ratio` are None** and are replaced by the
+  per-cutpoint effects, its `Check` is `blocking=True` so the envelope renders `not_interpretable`,
+  and the *other* covariate keeps its number at p = 0.96. A gate that condemned both would be none.
+
+  **k-anonymity genuinely empties cells, and the complementary suppression is the Cox rule rather
+  than a row count.** A suppressed row's figures are `None`, not flagged-but-present, so a CSV
+  export or a mis-wired client has nothing to read. The subtlety is the second pass: an `Evidence`
+  always publishes `n`, so the hidden cells are known to sum to a residual, and "hide at least two"
+  is not enough. On counts (20, 4, 4) with k = 5 both small cells are hidden, the residual is 8, an
+  attacker knows each hidden cell is below 5, and 8 = 4 + 4 is the only split, so both are recovered
+  exactly. The service computes each hidden cell's feasible interval under those bounds and keeps
+  suppressing until none is a single point, which on that fixture means the whole table goes. That
+  leak fixture is the important test, and Pack 2's cross-tenant privacy work builds on this.
+
+  **Segmentation chooses k, and the choice is checked in the source as well as in the output.** BIC
+  is minimised at k = 3 on data drawn from a three-component mixture, silhouette independently peaks
+  at 3, and the component means are recovered to within 0.5. `k` is never a parameter and never a
+  constant: one test greps the module for a hardcoded cluster count. Two runs on the same data with
+  the same seed produce byte-identical labels, centroids and stability; two *different* seeds agree
+  at an adjusted Rand index above 0.9, which is the stronger property, since reproducibility alone
+  would be satisfied by an answer that is purely an artefact of the seed.
+
+  **Three real bugs were found by these tests and are fixed with regression tests naming them.**
+  (1) The Brant cross-covariance used `pi_l(1 - pi_j)` where the nesting of the cumulative
+  indicators requires `pi_j(1 - pi_l)`. That made the stacked covariance non positive definite and
+  the Wald statistic came out **negative**, which is how the sign error announced itself; a test now
+  asserts `stat > 0` with that reasoning written down beside it. (2) `survey.raking_weights` trimmed
+  extreme weights and then re-raked, which put them straight back over the cap: a declared bound of
+  5.0 returned a weight of **10.5**. Every pass now ends on a cap, and the residual margin error
+  that buys is reported rather than hidden behind a claim of convergence. (3) The MinHash error
+  bound was evaluated at the caller's threshold, so a threshold of 0 printed a standard error of
+  **0.000**, which reads as perfect precision and measures nothing; it now falls back to the worst
+  case at J = 0.5 and says that it did. That is the same failure mode as Pack 3's ECE reading
+  exactly 0.0000, and it is the second time it has appeared.
+
+  **Four deliberate design calls.** `sortition.stratified_panel` **refuses** quotas that cross two
+  stratification features rather than approximating them: the maximin optimum has a closed form only
+  when the strata are disjoint (each member of stratum s is drawn with probability c_s/|s|, so the
+  problem reduces to a water-filling over integer seat counts), and running a heuristic under the
+  name of a provable optimum is the drift this package exists to prevent. `voting.stv` refuses
+  `transfer="meek"` on the same argument. `budgeting.greedy_knapsack` ships the max of density
+  greedy and the best single affordable project, because density greedy alone has no constant-factor
+  guarantee at all, and it discloses which of the two it served. And `network.isolation_report`
+  accepts either member records or a counts-only `RosterSnapshot`; with the latter it returns the
+  aggregate share and an **empty** per-stratum breakdown with a `SKIPPED` check saying why, because
+  a snapshot carries headcounts and cannot say who is missing.
+
+  **Seven known-answer corrections to `docs/STATS_CATALOG.md` and the matching Method Cards.** Five
+  are "the stated oracle is not vendored here and there is no network access": `MASS::polr`'s 72-row
+  housing table (`survey.ordinal_logistic`), R `survey::rake` (`survey.raking_weights`), Kish's
+  tabulated worked case (`survey.design_effect`), `iris` (`segmentation.gmm_select_k`) and
+  `sklearn`'s `TfidfVectorizer` (`text.tfidf_similarity`, where scikit-learn is deliberately not a
+  dependency of the light tier). In three of those the replacement is stronger than the original,
+  because it is an identity rather than another library that could be wrong in the same way: raking
+  against the exact post-stratification weight `N_h/n_h`, the design effect against a hand
+  computation, and the ordinal model against `numeric.logistic_l2_fit` at two response levels, where
+  it agrees to under 1e-6 on both the slope and the cutpoint. Two are substantive and were the
+  catalog being **wrong**: the Tennessee example's Borda outcome does *not* differ from its
+  Condorcet winner (both are Nashville, on totals 194/173/126/107) and it is the
+  **first-preference** count that gives Memphis on 42%, which is the sensitivity finding that
+  example is actually famous for; and the 1/2-approximation bound does not belong to density greedy,
+  which has no constant-factor guarantee, but to the max of it and the best single affordable item.
+
+  **Pack 2 (card C.17) is the only remaining statistician mathematics.**
 
   **One test in another agent's file is red because of this, deliberately left alone.**
   `tests/unit/services/test_insight_materializer.py::test_materialize_one_is_honest_when_the_reducer_is_not_implemented`
