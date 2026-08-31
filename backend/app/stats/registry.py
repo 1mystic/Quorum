@@ -2133,8 +2133,10 @@ _s(
     interval="None. An exact tabulation.",
     refs=("Borda (1781)", "Saari (1995), Basic Geometry of Voting"),
     known=(
-        "The Tennessee example, which has published Borda and approval outcomes differing from "
-        "the Condorcet winner and is therefore the ideal fixture for the sensitivity display."
+        "The Tennessee example, asserted on its published Borda totals: Nashville 194, "
+        "Chattanooga 173, Memphis 126, Knoxville 107. Borda AGREES with the Condorcet winner "
+        "here; it is the first-preference count that differs, giving Memphis on 42%. That is the "
+        "sensitivity finding this example is famous for, and the earlier wording had it wrong."
     ),
     min_n_expr="1 ballot",
     implemented=True,
@@ -2153,7 +2155,12 @@ _s(
     ),
     interval="None. An exact tabulation.",
     refs=("Brams and Fishburn (1978) American Political Science Review 72:831",),
-    known="The Tennessee example's published approval outcome.",
+    known=(
+        "The Tennessee example publishes rankings and no approval sets, so there is no published "
+        "approval outcome for it. The test asserts a stated top-two derivation instead (Memphis "
+        "42, Nashville 68, Chattanooga 58, Knoxville 32) and labels it as a derivation, plus "
+        "exact counts and Wilson shares on a hand-built ballot set."
+    ),
     min_n_expr="1 ballot",
     implemented=True,
 )
@@ -2174,7 +2181,11 @@ _s(
     ),
     interval="None. An exact tabulation.",
     refs=("Balinski and Laraki (2010), Majority Judgment",),
-    known="Exact arithmetic on a fixture, plus the Tennessee example under a score ballot.",
+    known=(
+        "Exact arithmetic on a fixture, including the two readings of an unscored option: the "
+        "mean over scorers and the mean over all ballots are both reported, because choosing one "
+        "silently is choosing the winner."
+    ),
     min_n_expr="1 ballot",
     implemented=True,
 )
@@ -2298,8 +2309,11 @@ _s(
     interval="None. An allocation rule.",
     refs=("Dantzig (1957) Operations Research 5:266", "Peters and Skowron (2020) EC'20"),
     known=(
-        "Exact dynamic-programming optimum on small instances, and the known one-half "
-        "approximation bound of the greedy rule against that optimum."
+        "Exact dynamic-programming optimum on small instances, and the one-half approximation "
+        "bound against it, checked for a counterexample across 200 seeded instances. Density "
+        "greedy alone has NO constant-factor guarantee, so the shipped rule is the max of density "
+        "greedy and the best single affordable project, which is the variant the bound belongs "
+        "to; which of the two was served is disclosed in a check."
     ),
     min_n_expr="20 ballots and 3 options",
     implemented=True,
@@ -2440,10 +2454,12 @@ _s(
         "Venables and Ripley, MASS, 4th ed., section 7.3",
     ),
     known=(
-        "The MASS::polr housing-satisfaction example, the canonical published proportional-odds "
-        "fit, with published coefficients for Infl, Type and Cont and published cutpoints, "
-        "tolerance 1e-3. The Brant test is asserted on the same dataset against its published "
-        "verdict."
+        "The MASS::polr housing table is not vendored here and there is no network access, so "
+        "three assertions stand in for it. Recovery: 1200 draws from a model with stated "
+        "coefficients, every parameter recovered within three standard errors. Reduction: with "
+        "two response levels the model IS logistic regression and agrees with "
+        "numeric.logistic_l2_fit to under 1e-6 on both slope and cutpoint. And the Brant test in "
+        "both directions, failing only for the covariate whose effect actually varies."
     ),
     min_n_expr="10 responses per covariate per sparse response level, in practice 100 for 3 covariates",
     implemented=True,
@@ -2477,10 +2493,11 @@ _s(
         "Kolenikov (2014) Stata Journal 14:22",
     ),
     known=(
-        "Iterative proportional fitting converges to the margins exactly, which is a theorem, so "
-        "the achieved margins must match the targets to within tol on several seeded random "
-        "tables. Second ground truth: agreement with R survey::rake on a published worked "
-        "example."
+        "Iterative proportional fitting converges to the margins exactly, which is a theorem, "
+        "so the achieved margins must match the targets to within tol on several seeded random "
+        "tables. R survey::rake is not available here, so the second ground truth is a closed "
+        "form instead: with one margin, raking reduces to post-stratification and the weights "
+        "must be exactly N_h/n_h rescaled to n, asserted to 1e-9."
     ),
     min_n_expr="50 respondents and at least 5 in every cell being raked",
     implemented=True,
@@ -2500,8 +2517,10 @@ _s(
     interval="None. It is an exact function of the weights.",
     refs=("Kish (1965), Survey Sampling",),
     known=(
-        "Exact closed form, hand-computable, asserted to 1e-12. Exactly 1 for uniform weights, "
-        "and equal to the published Kish worked example value for his tabulated case."
+        "Exact closed form, hand-computable, asserted to 1e-12. Exactly 1 for any constant "
+        "weight, not only for 1. Kish's tabulated case is not vendored, so the second assertion "
+        "is a hand computation: weights (1, 1, 1, 3) give deff = 4 * 12 / 36 = 4/3 and an "
+        "effective sample size of exactly 3."
     ),
     implemented=True,
 )
@@ -2561,11 +2580,12 @@ _s(
         "Hennig (2007) Computational Statistics and Data Analysis 52:258",
     ),
     known=(
-        "Synthetic: data drawn from a 3-component Gaussian mixture with a specified separation "
-        "must minimise BIC at k = 3, seeded and repeated. Published: silhouette on iris is well "
-        "documented to peak at k = 2 rather than the 3 true species, and our implementation must "
-        "reproduce that, which is useful precisely because it is the counter-intuitive published "
-        "answer."
+        "Synthetic: data drawn from a 3-component Gaussian mixture must minimise BIC at k = 3, "
+        "seeded and repeated, with the component means recovered to within 0.5. The iris "
+        "silhouette result is real but iris is not vendored here, so it is replaced by exact "
+        "closed forms: silhouette on a four-point fixture is (9.5/10.5 + 8.5/9.5)/2 to 1e-12 and "
+        "exactly 0 for a single cluster, and the adjusted Rand index is exactly 1 for a "
+        "relabelling and exactly 0 for the all-in-one partition."
     ),
     min_n_expr="50 members",
     implemented=True,
@@ -2708,8 +2728,10 @@ _s(
     ),
     known=(
         "Exact hand computation on a three-document toy corpus with the smoothing convention "
-        "stated, plus agreement with sklearn's TfidfVectorizer under matching parameters as a "
-        "second oracle."
+        "stated: the idf of a token in every document is exactly 1 and of a token in one document "
+        "exactly 1 + log 2. The sklearn second oracle is dropped, since scikit-learn is "
+        "deliberately not a dependency of the light tier and an oracle that is not installed is "
+        "not one."
     ),
     min_n_expr="2 documents",
     implemented=True,

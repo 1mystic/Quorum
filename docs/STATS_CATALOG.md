@@ -1249,8 +1249,13 @@ computed, option B wins" is a much stronger mandate than a bare winner, and "the
 under three of five rules" is a warning a community deserves.
 
 Each carries the unranked/abstention policy in `params_hash`. **known answer** the Tennessee example
-again, which has published Borda and approval outcomes differing from the Condorcet winner and is
-therefore the ideal fixture for the sensitivity display.
+again, asserted on the published Borda totals: Nashville 194, Chattanooga 173, Memphis 126,
+Knoxville 107. Note that Borda **agrees** with the Condorcet winner here; it is the
+**first-preference** count that differs, giving Memphis on 42%. That, not a Borda/Condorcet split,
+is the sensitivity finding the Tennessee example is famous for, and the earlier wording of this
+line had it wrong. The example publishes rankings and no approval sets, so the approval figure is
+asserted under a stated top-two derivation, labelled in the test as a derivation rather than as a
+published result.
 
 ---
 
@@ -1342,7 +1347,10 @@ The negative control matters: it proves the property checker works.
 Utilitarian baseline: maximise total approvals per unit cost. Shipped **alongside** MES, never
 instead of it, so a committee sees the trade-off between total satisfaction and proportional
 fairness explicitly. **known answer** exact dynamic-programming optimum on small instances, and the
-known 1/2-approximation bound of the greedy rule against that optimum.
+1/2-approximation bound against it, checked for a counterexample across 200 seeded instances.
+**Correction:** density greedy *on its own* has no constant-factor guarantee, so the shipped rule
+is the standard max of density greedy and the best single affordable project, which is the variant
+the 1/2 bound belongs to. Which of the two was served is disclosed in a check.
 
 ---
 
@@ -1461,10 +1469,17 @@ per-cutpoint effects, which is longer to read and correct.
 - *interval_meaning:* a profile-likelihood interval on the proportional odds ratio, multiplicative, with 1.0 as no effect.
 - *references:* McCullagh (1980) JRSS-B 42:109. Brant (1990) Biometrics 46:1171. Venables and Ripley, *MASS*, 4th ed., §7.3.
 
-**known answer** The `MASS::polr` housing-satisfaction example from Venables and Ripley, which is
-the canonical published proportional-odds fit, with published coefficients for
-`Infl`, `Type` and `Cont` and published cutpoints. Tolerance 1e-3. The Brant test is asserted on the
-same dataset against its published verdict.
+**known answer** **Corrected.** The `MASS::polr` housing-satisfaction example is the canonical
+published fit, but its 72-row frequency table is not vendored under
+`backend/tests/unit/stats/data/` and there is no network access in the build, so citing it would be
+a known answer nothing checks. Three things are asserted instead, all of which the tests actually
+run. **Recovery:** 1200 draws from a proportional-odds model with stated coefficients and
+cutpoints, every parameter recovered within three standard errors. **Reduction:** with two response
+levels the model *is* logistic regression, and the fit agrees with `numeric.logistic_l2_fit` to
+under 1e-6 on both the slope and the cutpoint, which is a second implementation in this repository
+rather than a restatement of this one. **The Brant test in both directions:** it must pass on data
+generated with a constant effect and fail on data generated with a cutpoint-varying one, and on the
+second it must fail *only* for the covariate that actually varies.
 
 ---
 
@@ -1490,8 +1505,11 @@ weight of 40 means one person is speaking for forty and the estimate is that per
 
 **known answer** Iterative proportional fitting converges to margins exactly, which is a theorem
 (Deming and Stephan), so the test asserts the achieved margins match the targets to within `tol` on
-several seeded random tables. Second ground truth: agreement with the R `survey::rake` output on a
-published worked example.
+several seeded random tables. **Corrected second ground truth:** R `survey::rake` is not available
+in this build, so the replacement is a closed form rather than another library. With a single
+margin, raking reduces exactly to post-stratification, whose weight is `N_h / n_h` rescaled to `n`;
+on 40 respondents from block A and 20 from block B against a half-and-half population the weights
+must be exactly 0.75 and 1.5, and they are asserted to 1e-9.
 
 ---
 
@@ -1503,7 +1521,10 @@ Kish's design effect, `deff = n * sum(w^2) / (sum(w))^2`, and the effective samp
 should be in the reader's head.
 
 **known answer** Exact closed form, hand-computable, asserted to 1e-12. Equals exactly 1 for uniform
-weights, and equals the published Kish worked example value for his tabulated case.
+weights, for *any* constant weight and not only for 1. **Corrected:** Kish's tabulated worked case
+is not vendored here, so the second assertion is a hand computation written out in the test
+instead: weights (1, 1, 1, 3) give `deff = 4 * 12 / 36 = 4/3` and an effective sample size of
+exactly 3.
 
 ---
 
@@ -1543,11 +1564,14 @@ their tenure, not `None` and not zero.
 - *interval_meaning:* none on labels. The stability index is the honest uncertainty measure and the Method Card explains how to read it.
 - *references:* Schwarz (1978) for BIC. Rousseeuw (1987) J. Comp. Applied Math 20:53 for silhouette. Hennig (2007) on cluster stability by resampling.
 
-**known answer** Two grounds. Synthetic: data drawn from a 3-component Gaussian mixture with a
-specified separation must have BIC minimised at k = 3, seeded and repeated. Published: silhouette
-on the `iris` dataset is well documented to peak at k = 2 rather than the 3 true species, and our
-implementation must reproduce that, which is a useful ground truth precisely because it is the
-counter-intuitive published answer.
+**known answer** Synthetic: data drawn from a 3-component Gaussian mixture with a specified
+separation must have BIC minimised at k = 3, seeded and repeated, and the fitted component means
+must land within 0.5 of the generating ones. **Corrected:** the `iris` silhouette result is a real
+published fact but `iris` is not vendored under `backend/tests/unit/stats/data/` and 150 rows
+cannot be reconstructed from memory, so it is replaced by an exact closed form. Silhouette on a
+four-point fixture on a line has a hand-computable value, `(9.5/10.5 + 8.5/9.5) / 2`, asserted to
+1e-12, and a single cluster scores exactly 0 by definition. The adjusted Rand index is asserted the
+same way: exactly 1 for a relabelling, exactly 0 for the all-in-one partition.
 
 ---
 
@@ -1665,8 +1689,11 @@ variance. Cosine similarity is asserted against hand computation.
 
 Exact sparse TF-IDF with declared sublinear scaling and smoothing, returning a similarity matrix or
 top-k neighbours. **known answer** exact hand computation on a 3-document toy corpus, with the
-smoothing convention stated, plus agreement with `sklearn.feature_extraction.text.TfidfVectorizer`
-under matching parameters as a second oracle.
+smoothing convention stated: on `["a b"], ["a c"], ["a d"]` the idf of `a` is exactly 1 and of every
+other token exactly `1 + log 2`, each row is L2-normalised, and the cosine between two documents is
+exactly `(1 / sqrt(1 + (1 + log 2)^2))^2`. **Corrected:** the `sklearn` second oracle is dropped,
+since scikit-learn is deliberately not a dependency of the light tier (see the Pack 1 decision on
+the standard library) and a second oracle that is not installed is not one.
 
 ---
 
