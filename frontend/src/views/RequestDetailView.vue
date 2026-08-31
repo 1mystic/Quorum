@@ -1,32 +1,69 @@
 <script setup>
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
-import StatTile from '../components/evidence/StatTile.vue'
 import { tenantBySlug } from '../fixtures/tenants'
-import { requestByRef } from '../fixtures/requests'
 import { toast } from '../composables/useToast'
+import { listMyRequests, resolveRequest, escalateRequest } from '../api/requests'
+import { useAsyncData } from '../composables/useAsyncData'
+
+// There is no GET /api/t/{slug}/requests/{id} route (app/api/request.py only
+// lists), so this reads the same list RequestsView does and finds the one
+// row by id - honest about the real shape of the API rather than inventing
+// a route. The fixture's `eta` (conformal.mondrian_eta) and `near_duplicates`
+// (text.near_duplicate_candidates) have no backing endpoint yet and are not
+// shown.
 
 const route = useRoute()
-const router = useRouter()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))
-const request = computed(() => requestByRef(slug.value, route.params.ref))
+const requestId = computed(() => Number(route.params.ref))
+
+const { loading, error, data, run } = useAsyncData()
+const request = computed(() => (data.value || []).find((r) => r.id === requestId.value) || null)
+
+function load() {
+  run(() => listMyRequests(slug.value))
+}
+
+onMounted(load)
+watch(() => route.params.ref, load)
 
 function fmt(iso) {
-  return new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+  return iso ? new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''
 }
 
-function resolve() {
-  toast.success(`${request.value.ref} marked resolved. This is a UI stub until the request_flow write path lands.`)
+async function resolve() {
+  try {
+    await resolveRequest(slug.value, requestId.value)
+    toast.success(`#${requestId.value} marked resolved.`)
+    load()
+  } catch (err) {
+    toast.error(err.message || 'Could not mark resolved.')
+  }
 }
-function escalate() {
-  toast.info(`${request.value.ref} escalated to the committee. This is a UI stub until the request_flow write path lands.`)
+
+async function escalate() {
+  try {
+    await escalateRequest(slug.value, requestId.value)
+    toast.info(`#${requestId.value} escalated to the committee.`)
+    load()
+  } catch (err) {
+    toast.error(err.message || 'Could not escalate.')
+  }
 }
 </script>
 
 <template>
-  <TenantShell v-if="request" :title="request.title" :subtitle="`${request.ref} · ${tenant.labels.request}`">
+  <TenantShell v-if="loading" title="Loading…">
+    <div class="empty-state"><h3>Loading…</h3></div>
+  </TenantShell>
+
+  <TenantShell v-else-if="error" title="Could not load">
+    <div class="callout callout-warn"><span>{{ error }}</span></div>
+  </TenantShell>
+
+  <TenantShell v-else-if="request" :title="request.title" :subtitle="`#${request.id} · ${tenant.labels.request}`">
     <template #actions>
       <button class="btn btn-ghost" @click="escalate">Escalate</button>
       <button class="btn btn-primary" @click="resolve"><span>Mark resolved</span></button>
@@ -37,45 +74,35 @@ function escalate() {
         <div class="chead">
           <div>
             <h3>{{ request.title }}</h3>
-            <div class="sub">{{ request.category.replace(/_/g, ' ') }} · {{ request.location || 'no location' }} · raised by {{ request.raised_by }}</div>
+            <div class="sub">{{ request.category.replace(/_/g, ' ') }} · {{ request.location_ref || 'no location' }} · {{ request.group_name }}</div>
           </div>
-          <span class="badge" :class="'badge-' + request.status.replace('_', '-').replace('in-progress', 'progress')">{{ request.status.replace('_', ' ') }}</span>
+          <span class="badge" :class="'badge-' + request.status.toLowerCase().replace('_', '-')">{{ request.status.replace('_', ' ').toLowerCase() }}</span>
         </div>
         <p style="font-size:14.5px;line-height:1.65;color:var(--ink-2)">{{ request.description }}</p>
         <div class="meta">
-          <span><b>priority</b> {{ request.priority.replace('_', ' ') }}</span>
-          <span><b>assignee</b> {{ request.assignee || 'unassigned' }}</span>
-          <span><b>channel</b> {{ request.channel }}</span>
-        </div>
-
-        <div v-if="request.near_duplicates.length" class="callout callout-warn">
-          <span>Possible duplicate: <b>{{ request.near_duplicates[0].title }}</b> ({{ request.near_duplicates[0].ref }}), similarity {{ (request.near_duplicates[0].similarity * 100).toFixed(0) }}%. <code style="font-family:var(--font-mono)">text.near_duplicate_candidates</code>, computed on submission.</span>
+          <span v-if="request.priority"><b>priority</b> {{ request.priority.replace('_', ' ') }}</span>
+          <span v-if="request.channel"><b>channel</b> {{ request.channel }}</span>
+          <span><b>opened</b> {{ fmt(request.created_at) }}</span>
         </div>
       </div>
 
       <div class="card">
-        <div class="chead"><div><h3>Status history</h3></div></div>
-        <div class="timeline">
-          <div v-for="(t, i) in request.timeline" :key="i" class="tl-item">
-            <div class="tl-label">{{ t.label }}</div>
-            <div class="tl-at">{{ fmt(t.at) }}</div>
-            <div v-if="t.detail" class="tl-detail">{{ t.detail }}</div>
+        <div class="chead"><div><h3>Response</h3></div></div>
+        <div v-if="request.response" class="timeline">
+          <div class="tl-item">
+            <div class="tl-label">Replied by {{ request.response.by }}</div>
+            <div class="tl-at">{{ fmt(request.response.at) }}</div>
+            <div class="tl-detail">{{ request.response.text }}</div>
+          </div>
+        </div>
+        <p v-else style="font-size:14.5px;color:var(--ink-2)">No response yet.</p>
+        <div v-if="request.resolved_at" class="timeline" style="margin-top:var(--sp3)">
+          <div class="tl-item">
+            <div class="tl-label">Resolved</div>
+            <div class="tl-at">{{ fmt(request.resolved_at) }}</div>
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="row" style="grid-template-columns:1fr" v-if="request.eta">
-      <StatTile
-        title="Estimated time to resolution"
-        subtitle="conformalised survival eta"
-        :evidence="request.eta"
-        display="range"
-      >
-        <template #why>
-          <p>A conformal interval guarantees marginal coverage: across many requests like this one, the true resolution time falls inside the stated bound the stated fraction of the time. It is not a promise about this one request alone.</p>
-        </template>
-      </StatTile>
     </div>
   </TenantShell>
 

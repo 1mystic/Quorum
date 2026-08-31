@@ -1,17 +1,22 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
 import StatTile from '../components/evidence/StatTile.vue'
 import { tenantBySlug } from '../fixtures/tenants'
 import { ledgerFor, formatMinor } from '../fixtures/ledger'
 import { toast } from '../composables/useToast'
+import { myDues, recordPayment } from '../api/ledger'
+import { useAsyncData } from '../composables/useAsyncData'
 
 // docs/VERTICALS.md rwa_society: verification lag and receipt-collection gap
 // are headline statistics here, each a survival curve / Wilson interval over
-// a censored duration, not an average - see the two StatTiles below. The
-// ledger stream has no Campus Connect analogue; this view is built fresh
-// against docs/DATA_SPINE.md §3.
+// a censored duration (see the two StatTiles below). Those, and the
+// tenant-wide "Entries" table, still read `fixtures/ledger.js`: they need
+// either a materialized insight_runs row (Pack 1, no seed data yet, see
+// CONTEXT.md's C.19) or a "list every ledger entry" endpoint that
+// app/api/ledger.py does not have (it only has /dues/me plus one-at-a-time
+// write routes). "Your dues" below is real - GET .../ledger/dues/me.
 
 const route = useRoute()
 const slug = computed(() => route.params.slug)
@@ -19,15 +24,45 @@ const tenant = computed(() => tenantBySlug(slug.value))
 const ledger = computed(() => ledgerFor(slug.value))
 
 const markedPaid = ref(new Set())
+const markedPaidFixture = ref(new Set())
 
-function markPaid(entry) {
-  markedPaid.value.add(entry.entry_ref)
-  toast.success(`${entry.entry_ref} marked paid, pending treasurer verification. UI stub until the ledger write path lands.`)
+// The fixture "Entries" table's own mark-paid is a UI stub, same as before:
+// there is no real entry underneath it to record a payment against.
+function markPaidFixtureEntry(entry) {
+  markedPaidFixture.value.add(entry.entry_ref)
+  toast.success(`${entry.entry_ref} marked paid, pending treasurer verification. UI stub, fixture-backed.`)
+}
+
+const { loading: duesLoading, error: duesError, data: duesData, run: runDues } = useAsyncData()
+const myDuesList = computed(() => duesData.value || [])
+
+function loadMyDues() {
+  runDues(() => myDues(slug.value))
+}
+onMounted(loadMyDues)
+
+async function markPaid(due) {
+  try {
+    await recordPayment(slug.value, {
+      amount_minor: due.amount_minor,
+      category: due.category,
+      subcategory: due.subcategory,
+      instrument: 'upi',
+      at: new Date().toISOString(),
+      due_id: due.id,
+      currency: due.currency
+    })
+    markedPaid.value.add(due.id)
+    toast.success(`Due #${due.id} marked paid, pending treasurer verification.`)
+    loadMyDues()
+  } catch (err) {
+    toast.error(err.message || 'Could not record the payment.')
+  }
 }
 
 function statusBadge(status) {
   const map = { settled: 'badge-resolved', pending: 'badge-pending', expected: 'badge-open', failed: 'badge-escalated', reversed: 'badge-escalated', written_off: 'badge-pending' }
-  return 'badge ' + (map[status] || 'badge-pending')
+  return 'badge ' + (map[status.toLowerCase()] || 'badge-pending')
 }
 </script>
 
@@ -55,7 +90,40 @@ function statusBadge(status) {
     </div>
 
     <div class="card">
-      <div class="chead"><div><h3>Entries</h3><div class="sub">signed money movement, most recent first</div></div></div>
+      <div class="chead"><div><h3>Your dues</h3><div class="sub">live · GET .../ledger/dues/me</div></div></div>
+
+      <div v-if="duesLoading" class="empty-state"><h3>Loading…</h3></div>
+      <div v-else-if="duesError" class="callout callout-warn"><span>Could not load your dues: {{ duesError }}</span></div>
+      <div v-else-if="!myDuesList.length" class="empty-state">
+        <h3>Nothing owed</h3>
+        <p>No open dues on your account right now.</p>
+      </div>
+      <div v-else class="tbl-scroll">
+        <table class="tbl">
+          <thead><tr><th>Due</th><th>Category</th><th class="r">Amount</th><th>Due date</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr v-for="d in myDuesList" :key="d.id">
+              <td class="dim">#{{ d.id }}</td>
+              <td>{{ d.category.replace(/_/g, ' ') }}</td>
+              <td class="r num">{{ formatMinor(d.amount_minor, d.currency) }}</td>
+              <td class="dim">{{ new Date(d.due_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) }}</td>
+              <td><span :class="statusBadge(d.status)">{{ d.status.replace('_', ' ').toLowerCase() }}</span></td>
+              <td>
+                <button
+                  v-if="d.status === 'OPEN' || d.status === 'PARTIAL'"
+                  class="btn btn-ghost" style="min-height:32px;padding:8px 12px;font-size:12px"
+                  :disabled="markedPaid.has(d.id)"
+                  @click="markPaid(d)"
+                >{{ markedPaid.has(d.id) ? 'Marked' : 'Mark paid' }}</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chead"><div><h3>Entries</h3><div class="sub">fixture-backed · signed money movement, most recent first (no list-all endpoint yet, see comment above)</div></div></div>
       <div class="tbl-scroll">
         <table class="tbl">
           <thead>
@@ -78,9 +146,9 @@ function statusBadge(status) {
                 <button
                   v-if="e.status === 'pending' || e.status === 'expected'"
                   class="btn btn-ghost" style="min-height:32px;padding:8px 12px;font-size:12px"
-                  :disabled="markedPaid.has(e.entry_ref)"
-                  @click="markPaid(e)"
-                >{{ markedPaid.has(e.entry_ref) ? 'Marked' : 'Mark paid' }}</button>
+                  :disabled="markedPaidFixture.has(e.entry_ref)"
+                  @click="markPaidFixtureEntry(e)"
+                >{{ markedPaidFixture.has(e.entry_ref) ? 'Marked' : 'Mark paid' }}</button>
               </td>
             </tr>
           </tbody>
