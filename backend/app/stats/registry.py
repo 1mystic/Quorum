@@ -2712,6 +2712,7 @@ _s(
         "second oracle."
     ),
     min_n_expr="2 documents",
+    implemented=True,
 )
 
 _s(
@@ -2748,6 +2749,7 @@ _s(
         "variance across seeds matches the analytic variance."
     ),
     min_n_expr="1 candidate document; this runs at submission time on whatever exists",
+    implemented=True,
 )
 
 _s(
@@ -2783,6 +2785,7 @@ _s(
         "answers and are tested separately."
     ),
     min_n_expr="200 documents and 30 per topic",
+    implemented=True,
 )
 
 _s(
@@ -2884,6 +2887,7 @@ _s(
         "process at a fixed seed must not."
     ),
     min_n_expr="300 entries, and only for categories spanning at least two orders of magnitude",
+    implemented=True,
 )
 
 
