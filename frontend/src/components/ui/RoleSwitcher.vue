@@ -16,12 +16,13 @@ const options = computed(() => roles.value.map((r) => ({ value: r.id, label: r.l
 
 <template>
   <div class="role-switcher" title="Demo role, not enforced by a real backend yet">
-    <UserCog :size="14" />
     <SelectField
       :model-value="currentRoleId"
       :options="options"
       aria-label="Demo role"
       @update:model-value="selectRole"
-    />
+    >
+      <template #icon><UserCog :size="14" /></template>
+    </SelectField>
   </div>
 </template>

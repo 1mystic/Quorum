@@ -15,6 +15,17 @@ import { ChevronDown } from 'lucide-vue-next'
 // ancestors (the topbar's role switcher, a scrolling sidebar) otherwise
 // drifts away from its trigger. Position is recomputed on open and while
 // open on resize/scroll (capture, so it also catches a scrolling ancestor).
+//
+// A single nextTick() only guarantees Vue's own virtual-DOM patch has been
+// applied; it does not guarantee the browser has finished an actual
+// layout/paint pass, and it does not wait on anything outside Vue's own
+// render cycle, such as the webfonts this app loads with `display=swap`
+// (index.html) swapping in after first paint and reflowing the trigger.
+// So the popover is mounted invisible (off-screen and visibility:hidden),
+// measured after nextTick() *and* two animation frames (guaranteeing at
+// least one committed layout+paint), and only then revealed at its final
+// position - there is never a frame where it is visible in the wrong
+// place, on the first open of a session or any other.
 
 const props = defineProps({
   modelValue: { type: [String, Number], default: '' },
@@ -28,6 +39,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const open = ref(false)
+const ready = ref(false) // true only once the popover has been measured post-layout and positioned; gates visibility
 const activeIndex = ref(-1)
 const root = ref(null)
 const triggerRef = ref(null)
@@ -39,13 +51,36 @@ const selectedLabel = computed(() => (selected.value ? selected.value.label : pr
 
 const GAP = 6
 const MARGIN = 8
+const MIN_WIDTH = 160
+
+// Two rAFs, not one: the first fires before the browser has necessarily
+// painted the frame in which our DOM changes landed, the second is
+// guaranteed to run after that paint has been committed. This is the
+// standard "wait for a real layout" sequence and is what makes the
+// subsequent getBoundingClientRect()/offsetWidth reads trustworthy
+// regardless of session state. jsdom (the Vitest environment) has no
+// requestAnimationFrame, so this falls back to a macrotask there - it
+// cannot exercise real paint timing either way, only sequencing.
+const raf =
+  typeof requestAnimationFrame === 'function' ? requestAnimationFrame : (fn) => setTimeout(fn, 0)
+
+function doubleRaf() {
+  return new Promise((resolve) => {
+    raf(() => raf(resolve))
+  })
+}
 
 function placeList() {
   const trigger = triggerRef.value
-  if (!trigger) return
-  const rect = trigger.getBoundingClientRect()
   const listEl = listRef.value
-  const listWidth = Math.max(rect.width, (listEl && listEl.offsetWidth) || rect.width)
+  if (!trigger || !listEl) return
+  const rect = trigger.getBoundingClientRect()
+  // listEl.offsetWidth is read only after the double-rAF settle below, so it
+  // reflects the popover's *actual* rendered width, including any CSS rule
+  // that widens it past this component's own guess (e.g. the role
+  // switcher's longer option labels forcing `.role-switcher .select-list`'s
+  // min-width in style.css section 42) rather than an assumed constant.
+  const listWidth = Math.max(rect.width, listEl.offsetWidth || rect.width, MIN_WIDTH)
 
   let left = props.align === 'center' ? rect.left + rect.width / 2 - listWidth / 2 : rect.left
   left = Math.min(left, window.innerWidth - listWidth - MARGIN)
@@ -57,7 +92,7 @@ function placeList() {
   listStyle.value = {
     position: 'fixed',
     left: left + 'px',
-    width: Math.max(rect.width, 160) + 'px',
+    width: listWidth + 'px',
     ...(openUpward
       ? { bottom: window.innerHeight - rect.top + GAP + 'px' }
       : { top: rect.bottom + GAP + 'px' })
@@ -65,23 +100,47 @@ function placeList() {
 }
 
 function onReposition() {
-  if (open.value) placeList()
+  if (open.value && ready.value) placeList()
+}
+
+async function revealList() {
+  // Parked off-screen and hidden (see the template's :class="{ ready }")
+  // until we have measured against a settled layout, so a stale or
+  // pre-font-swap rect never gets a visible frame, on the first open of a
+  // session or any other.
+  await nextTick()
+  await doubleRaf()
+  if (!open.value) return // closed again before we finished measuring
+  placeList()
+  ready.value = true
+  const el = listRef.value && listRef.value.querySelector('[data-active="true"]')
+  // jsdom (Vitest) has no scrollIntoView implementation at all, unlike
+  // getBoundingClientRect which it stubs to zeros; guard rather than throw.
+  if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'nearest' })
 }
 
 function openList() {
   if (props.options.length === 0) return
   open.value = true
+  ready.value = false
+  listStyle.value = { position: 'fixed', left: '-9999px', top: '-9999px' }
   const idx = props.options.findIndex((o) => String(o.value) === String(props.modelValue))
   activeIndex.value = idx >= 0 ? idx : 0
-  nextTick(() => {
-    placeList()
-    const el = listRef.value && listRef.value.querySelector('[data-active="true"]')
-    if (el) el.scrollIntoView({ block: 'nearest' })
-  })
+  revealList()
+  // Defensive third pass: if a webfont is still loading when the two rAFs
+  // above run, the trigger/list boxes it measured can still resize once the
+  // real font swaps in. document.fonts is undefined in some test/SSR
+  // environments, so this stays a no-op there rather than throwing.
+  if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      if (open.value) placeList()
+    })
+  }
 }
 
 function closeList() {
   open.value = false
+  ready.value = false
 }
 
 function toggle() {
@@ -151,11 +210,15 @@ onBeforeUnmount(() => {
       @click="toggle"
       @keydown="onKeydown"
     >
+      <slot name="icon" />
       <span :class="{ placeholder: !selected }">{{ selectedLabel }}</span>
       <ChevronDown :size="16" class="select-chevron" />
     </button>
     <Teleport to="body">
-      <ul v-if="open" ref="listRef" class="select-list" role="listbox" :style="listStyle">
+      <ul
+        v-if="open" ref="listRef" class="select-list" :class="{ ready }"
+        role="listbox" :style="listStyle"
+      >
         <li
           v-for="(o, i) in options" :key="o.value"
           role="option"

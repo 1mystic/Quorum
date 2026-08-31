@@ -1342,17 +1342,7 @@ a.list-row:hover{
 .role-switcher{
   display:flex;
   align-items:center;
-  gap:var(--sp2);
-  padding:8px var(--sp3);
-  border-radius:var(--r-sm);
-  border:1px solid var(--hair-2);
   color:var(--ink-3);
-  cursor:pointer;
-  transition:border-color var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap);
-}
-.role-switcher:hover{
-  border-color:var(--accent);
-  color:var(--accent);
 }
 .role-switcher select{
   border:0;
@@ -2311,7 +2301,11 @@ html.qs-active::-webkit-scrollbar{
 .select-list{
   /* position:fixed and left/top/width are set inline by SelectField.vue's
      placeList(), computed from the trigger's getBoundingClientRect() since
-     this is teleported to <body> and cannot rely on an ancestor's flow. */
+     this is teleported to <body> and cannot rely on an ancestor's flow.
+     Starts hidden: SelectField mounts it off-screen, measures it against a
+     settled layout, then adds .ready. This is what keeps a first-open (or
+     any open, on any tenant) from ever painting at the wrong position. */
+  visibility:hidden;
   z-index:220;
   max-height:260px;
   overflow-y:auto;
@@ -2325,6 +2319,9 @@ html.qs-active::-webkit-scrollbar{
      be worth mounting useOverlayScrollbar's drag/fade thumb on */
   scrollbar-width:thin;
   scrollbar-color:var(--hair-2) transparent;
+}
+.select-list.ready{
+  visibility:visible;
 }
 .select-list::-webkit-scrollbar{
   width:7px;
@@ -2359,15 +2356,28 @@ html.qs-active::-webkit-scrollbar{
     transition:none;
   }
 }
-/* role-switcher's trigger is a SelectField wrapped in a smaller shell; see
-   section 32 for the `.role-switcher` container it sits inside. */
+/* role-switcher's trigger is a SelectField wrapped in a thin layout shell;
+   see section 32 for the `.role-switcher` container it sits inside. The
+   pill's own border/padding live on the trigger button itself (which now
+   also carries the leading icon via SelectField's #icon slot) rather than
+   on the outer wrapper, so getBoundingClientRect() on the trigger returns
+   the exact box the user sees as "the trigger" - previously the icon sat
+   outside the measured element and every open was anchored several pixels
+   right of the pill's visible left edge. */
 .role-switcher .select-trigger{
   min-height:0;
-  padding:0;
-  border:0;
+  gap:var(--sp2);
+  padding:8px var(--sp3);
+  border-radius:var(--r-sm);
+  border:1px solid var(--hair-2);
   background:transparent;
   font:500 12px/1 var(--font-text);
   color:var(--ink-2);
+  transition:border-color var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap);
+}
+.role-switcher .select-trigger:hover{
+  border-color:var(--accent);
+  color:var(--accent);
 }
 .role-switcher .select-list{
   min-width:180px;
