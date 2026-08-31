@@ -5,6 +5,9 @@ import TenantShell from '../components/layout/TenantShell.vue'
 import { tenantBySlug } from '../fixtures/tenants'
 import { membersFor } from '../fixtures/members'
 
+// TODO(frontend): still fixture-backed. app/api/member.py has no "list all
+// members of a tenant" route (only /me and /{member_id}), so there is no
+// single real endpoint this list maps onto; out of this session's scope.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))

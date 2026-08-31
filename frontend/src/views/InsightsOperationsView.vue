@@ -8,6 +8,12 @@ import ControlChart from '../components/evidence/ControlChart.vue'
 import { tenantBySlug } from '../fixtures/tenants'
 import { operationsPack } from '../fixtures/insights'
 
+// TODO(frontend): still fixture-backed. GET /api/t/{slug}/insights/{pack} is
+// real (app/api/insights.py) but there is no seeded tenant yet
+// (CONTEXT.md's C.19 seed script is still blocked on Pack 4 landing), so
+// every real row would currently read insufficient_data - not a demo worth
+// showing over the hand-built fixture. Swap is a one-line change per the
+// original breadth-pass note once seed data exists.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))

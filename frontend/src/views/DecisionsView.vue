@@ -5,6 +5,14 @@ import TenantShell from '../components/layout/TenantShell.vue'
 import { tenantBySlug } from '../fixtures/tenants'
 import { decisionsFor } from '../fixtures/decisions'
 
+// Still fixture-backed. GET /api/t/{slug}/decisions is real
+// (app/api/decision.py), but this page's whole point is the tabulated
+// voting.schulze result and turnout/eligible figures, which are a
+// materialized Pack 4 Evidence envelope with no seeded tenant to compute
+// them from yet (CONTEXT.md's C.19 is still blocked). Swapping only the raw
+// list to the real endpoint would break every link to DecisionDetailView
+// below, whose fixture ids ('dc-1') do not match real integer ids - so both
+// stay on fixtures together rather than half-wiring a broken cross-link.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))

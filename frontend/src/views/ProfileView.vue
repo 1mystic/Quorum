@@ -7,6 +7,13 @@ import { tenantBySlug } from '../fixtures/tenants'
 import { useAuthStore } from '../stores/auth'
 import { toast } from '../composables/useToast'
 
+// TODO(frontend): GET/PATCH /api/t/{slug}/member/me are real
+// (app/api/member.py), but MemberProfileResponse's real fields (bio,
+// interests, roll_no, branch, year) do not match this form's fields
+// (display name, preferred channel) - full_name is not part of
+// UpdateProfileRequest at all. Wiring this needs a form redesigned around
+// the actual schema, not a fixture swap, so it stays a stub for now.
+
 const route = useRoute()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))

@@ -6,6 +6,9 @@ import AuditLine from '../components/evidence/AuditLine.vue'
 import { tenantBySlug } from '../fixtures/tenants'
 import { comparisonPack } from '../fixtures/insights'
 
+// TODO(frontend): still fixture-backed. Pack 2 (bayes_ranking) has no
+// implemented statistician services yet at all (CONTEXT.md), so this pack
+// specifically has nothing real to call.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))

@@ -5,6 +5,11 @@ import TenantShell from '../components/layout/TenantShell.vue'
 import { tenantBySlug } from '../fixtures/tenants'
 import { requestsFor, requestStatuses } from '../fixtures/requests'
 
+// TODO(frontend): still fixture-backed. This tenant-wide breakdown needs
+// GET .../requests/group (app/api/request.py's leader queue, a different
+// shape and role scope than RequestsView.vue's member list) plus the
+// insights health endpoint for the "not currently trustworthy" panel; out
+// of this session's scope.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))

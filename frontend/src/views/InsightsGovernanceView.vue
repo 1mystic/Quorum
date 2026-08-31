@@ -6,6 +6,8 @@ import AuditLine from '../components/evidence/AuditLine.vue'
 import { tenantBySlug } from '../fixtures/tenants'
 import { governancePack } from '../fixtures/insights'
 
+// TODO(frontend): still fixture-backed, same reason as
+// InsightsOperationsView.vue.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))

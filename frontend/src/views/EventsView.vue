@@ -5,6 +5,11 @@ import TenantShell from '../components/layout/TenantShell.vue'
 import { tenantBySlug } from '../fixtures/tenants'
 import { eventsFor } from '../fixtures/events'
 
+// TODO(frontend): still fixture-backed. GET/POST /api/t/{slug}/events is
+// real (app/api/event.py) but was not in this session's scope (task focus
+// was auth, requests, ledger, decisions); the response shape does not match
+// this fixture's registrations/results fields one-to-one either, so this
+// needs its own pass rather than a one-line swap.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))

@@ -8,6 +8,9 @@ import { renderState } from '../utils/evidence'
 import { tenantBySlug } from '../fixtures/tenants'
 import { forecastPack } from '../fixtures/insights'
 
+// TODO(frontend): still fixture-backed, same reason as
+// InsightsOperationsView.vue - the real endpoint exists, no seeded tenant
+// data does yet.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))

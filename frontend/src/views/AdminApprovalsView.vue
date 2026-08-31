@@ -6,6 +6,9 @@ import { tenantBySlug } from '../fixtures/tenants'
 import { membersFor } from '../fixtures/members'
 import { toast } from '../composables/useToast'
 
+// TODO(frontend): still fixture-backed. app/api/group.py has membership
+// approval routes (.../groups/{id}/requests) but they are per-group, not
+// tenant-wide the way this page lists pending approvals; out of scope.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))

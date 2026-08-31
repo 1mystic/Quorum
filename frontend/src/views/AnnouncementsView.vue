@@ -4,6 +4,9 @@ import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
 import { announcementsFor } from '../fixtures/announcements'
 
+// TODO(frontend): still fixture-backed. GET /api/t/{slug}/announcements is
+// real (app/api/announcement.py); out of this session's scope, see
+// RequestsView.vue/LedgerView.vue for the pages that were swapped.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
 const list = computed(() => announcementsFor(slug.value).slice().sort((a, b) => (b.pinned - a.pinned) || (new Date(b.posted_at) - new Date(a.posted_at))))

@@ -10,6 +10,11 @@ import { decisionById } from '../fixtures/decisions'
 // voting.schulze card: when a cycle exists, it is shown alongside the
 // winner, never hidden behind whichever rule broke the tie. There is no
 // summary-collapse for this - it is a `callout`, not a `details.why`.
+//
+// Still fixture-backed, matching DecisionsView.vue: GET
+// /api/t/{slug}/decisions/{id} is real, but it returns the raw row, not the
+// tabulated Evidence this page exists to show, and there is no seeded
+// tenant with real ballots to materialize one from yet.
 
 const route = useRoute()
 const slug = computed(() => route.params.slug)
