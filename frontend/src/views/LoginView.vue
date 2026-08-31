@@ -1,32 +1,26 @@
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import AuthShell from '../components/layout/AuthShell.vue'
-import SelectField from '../components/ui/SelectField.vue'
 import { useFormValidation } from '../composables/useFormValidation'
-import { useAuthStore } from '../stores/auth'
-import { demoTenantList } from '../fixtures/tenants'
+import { useAuthSession } from '../composables/useAuthSession'
+import { login as loginRequest } from '../api/auth'
+import { ApiError, NetworkError } from '../api/client'
+import AuthShell from '../components/layout/AuthShell.vue'
 import { toast } from '../composables/useToast'
 
-const tenantOptions = demoTenantList.map((t) => ({ value: t.slug, label: t.name }))
+// Real POST /api/auth/login (app/api/auth.py). The tenant is not chosen
+// here: it rides inside the returned JWT's tenant_slug claim, decoded by
+// useAuthSession.completeSignIn, so a login form has no tenant field at all.
 
-// No backend yet (docs/STATS_API.md is a read surface only). This signs a
-// demo session into whichever fixture tenant is selected, per the OnboardView
-// pattern - the form shape matches what useAuthSession expects once
-// POST /api/auth/login exists.
-
-const router = useRouter()
-const auth = useAuthStore()
+const { completeSignIn } = useAuthSession()
 const { isValidEmail } = useFormValidation()
 
 const email = ref('')
 const password = ref('')
-const tenantSlug = ref(demoTenantList[0].slug)
 const passwordVisible = ref(false)
 const submitting = ref(false)
 const errorMessage = ref('')
 
-function submit() {
+async function submit() {
   if (!email.value.trim() || !password.value) {
     errorMessage.value = 'Enter your email and password.'
     return
@@ -38,21 +32,21 @@ function submit() {
   errorMessage.value = ''
   submitting.value = true
 
-  window.setTimeout(() => {
-    const tenant = demoTenantList.find((t) => t.slug === tenantSlug.value)
-    auth.setToken('demo-token')
-    auth.setUser({
-      name: email.value.split('@')[0],
-      email: email.value,
-      tenantSlug: tenant.slug,
-      tenantName: tenant.name,
-      initials: email.value.slice(0, 2).toUpperCase()
-    })
-    auth.setRole('member')
+  try {
+    const result = await loginRequest(email.value, password.value)
+    await completeSignIn(result)
+    toast.success('Signed in.')
+  } catch (err) {
+    if (err instanceof NetworkError) {
+      errorMessage.value = err.message
+    } else if (err instanceof ApiError) {
+      errorMessage.value = err.message
+    } else {
+      errorMessage.value = 'Something went wrong signing in.'
+    }
+  } finally {
     submitting.value = false
-    toast.success(`Signed in to ${tenant.name}`)
-    router.push(`/t/${tenant.slug}/dashboard`)
-  }, 300)
+  }
 }
 </script>
 
@@ -60,11 +54,6 @@ function submit() {
   <AuthShell title="Sign in" subtitle="Pick up where you left off.">
     <form class="form" @submit.prevent="submit">
       <p v-if="errorMessage" class="form-error">{{ errorMessage }}</p>
-
-      <div class="field">
-        <label for="tenant">Tenant</label>
-        <SelectField id="tenant" v-model="tenantSlug" :options="tenantOptions" />
-      </div>
 
       <div class="field">
         <label for="email">Email</label>

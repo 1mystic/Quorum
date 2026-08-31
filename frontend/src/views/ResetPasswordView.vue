@@ -1,17 +1,25 @@
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import AuthShell from '../components/layout/AuthShell.vue'
 import { useFormValidation } from '../composables/useFormValidation'
+import { resetPassword } from '../api/auth'
+import { ApiError, NetworkError } from '../api/client'
 import { toast } from '../composables/useToast'
 
+// Real POST /api/auth/reset-password (app/api/auth.py), reading the reset
+// token app/services/user.py's forgot_password mailed as ?token=... in the
+// link (see UserService._reset_url).
+
+const route = useRoute()
 const router = useRouter()
 const { isStrongEnough } = useFormValidation()
 const password = ref('')
 const confirm = ref('')
+const submitting = ref(false)
 const errorMessage = ref('')
 
-function submit() {
+async function submit() {
   if (!isStrongEnough(password.value)) {
     errorMessage.value = 'Password needs at least 8 characters.'
     return
@@ -20,9 +28,21 @@ function submit() {
     errorMessage.value = 'Passwords do not match.'
     return
   }
+  if (!route.query.token) {
+    errorMessage.value = 'This reset link is missing its token. Request a new one.'
+    return
+  }
   errorMessage.value = ''
-  toast.success('Password updated. Sign in with your new password.')
-  router.push('/login')
+  submitting.value = true
+  try {
+    await resetPassword(route.query.token, password.value, confirm.value)
+    toast.success('Password updated. Sign in with your new password.')
+    router.push('/login')
+  } catch (err) {
+    errorMessage.value = (err instanceof NetworkError || err instanceof ApiError) ? err.message : 'Something went wrong.'
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 
@@ -38,7 +58,9 @@ function submit() {
         <label for="confirm">Confirm password</label>
         <input id="confirm" v-model="confirm" type="password" autocomplete="new-password" />
       </div>
-      <button type="submit" class="btn btn-primary" style="width:100%"><span>Update password</span></button>
+      <button type="submit" class="btn btn-primary" :disabled="submitting" style="width:100%">
+        <span>{{ submitting ? 'Updating…' : 'Update password' }}</span>
+      </button>
     </form>
   </AuthShell>
 </template>

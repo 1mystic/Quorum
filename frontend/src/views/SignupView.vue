@@ -1,25 +1,31 @@
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import AuthShell from '../components/layout/AuthShell.vue'
 import { useFormValidation } from '../composables/useFormValidation'
+import { useAuthSession } from '../composables/useAuthSession'
+import { signup as signupRequest } from '../api/auth'
+import { ApiError, NetworkError } from '../api/client'
 import { toast } from '../composables/useToast'
 
-// Adds the explicit tenant_slug field per CONTEXT.md's decision log: a
-// housing society has no email domain to join by, so a member names the
-// tenant it wants to join, same as the URL does.
+// Real POST /api/auth/signup, always as a MEMBER joining an existing tenant
+// by slug (app/schemas/user.py's SignupRequest: a housing society has no
+// email domain to join by, so a member names the tenant, same as the URL
+// does - see CONTEXT.md's decision log). Creating a brand new tenant is a
+// separate TENANT_ADMIN flow, at /onboard.
 
-const router = useRouter()
+const route = useRoute()
+const { completeSignIn } = useAuthSession()
 const { isValidEmail, isStrongEnough, allFieldsFilled } = useFormValidation()
 
 const fullName = ref('')
 const email = ref('')
 const password = ref('')
-const tenantSlug = ref('')
+const tenantSlug = ref(route.query.tenant || '')
 const submitting = ref(false)
 const errorMessage = ref('')
 
-function submit() {
+async function submit() {
   if (!allFieldsFilled({ fullName: fullName.value, email: email.value, password: password.value, tenantSlug: tenantSlug.value })) {
     errorMessage.value = 'Fill in every field, including the tenant slug.'
     return
@@ -35,11 +41,26 @@ function submit() {
   errorMessage.value = ''
   submitting.value = true
 
-  window.setTimeout(() => {
+  try {
+    const result = await signupRequest({
+      fullName: fullName.value,
+      email: email.value,
+      password: password.value,
+      confirmPassword: password.value,
+      role: 'MEMBER',
+      tenantSlug: tenantSlug.value.trim()
+    })
+    await completeSignIn(result)
+    toast.success('Account created.')
+  } catch (err) {
+    if (err instanceof NetworkError || err instanceof ApiError) {
+      errorMessage.value = err.message
+    } else {
+      errorMessage.value = 'Something went wrong creating the account.'
+    }
+  } finally {
     submitting.value = false
-    toast.success('Account created. Awaiting tenant admin approval.')
-    router.push('/login')
-  }, 300)
+  }
 }
 </script>
 
