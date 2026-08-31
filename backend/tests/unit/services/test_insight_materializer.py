@@ -161,12 +161,15 @@ async def test_materialize_one_writes_a_real_number_into_the_run_row(monkeypatch
 
 
 @pytest.mark.asyncio
-async def test_materialize_one_is_honest_when_the_reducer_is_not_implemented():
+async def test_materialize_one_is_honest_when_a_service_is_not_yet_wired():
     """
-    Without the monkeypatch, `streams.reduce.request_spells` genuinely raises
-    `NotImplementedError` today. This is `docs/STATS_API.md` section 8's
-    documented failure mode: a visible insufficient row with a caveat naming
-    the failure, never a fabricated number and never a skipped row.
+    `streams.reduce.request_spells` is real now (card C.15's reducer work), so
+    this no longer proves the honest-degrade path with a Pack 1 service. Pack 2
+    is still 12 stubs, and its services do not take the (units, window, ...)
+    shape this worker builds, so `_compute` raises before ever reaching the
+    stub body. Same documented failure mode from `docs/STATS_API.md` section
+    8: a visible insufficient row with a caveat naming the failure, never a
+    fabricated number and never a skipped row.
     """
     window = default_window(now=NOW, tenant_timezone="Asia/Kolkata", lookback_days=200)
     materializer = _bare_materializer()
@@ -180,8 +183,8 @@ async def test_materialize_one_is_honest_when_the_reducer_is_not_implemented():
 
     materializer.run_repo = _FakeRunRepo()
 
-    spec = registry.get("survival.median_resolution_days")
-    atoms_by_stream = {"request_flow": _known_answer_events(), "ledger": (), "member_lifecycle": ()}
+    spec = registry.get("bayes.beta_binomial_shrink")
+    atoms_by_stream = {"request_flow": (), "ledger": (), "member_lifecycle": ()}
 
     row = await materializer.materialize_one(spec, window, atoms_by_stream)
 
@@ -189,7 +192,7 @@ async def test_materialize_one_is_honest_when_the_reducer_is_not_implemented():
     assert call["insufficient"] is True
     assert call["payload"]["insufficient_data"] is True
     assert call["payload"]["value"] is None
-    assert "streams.reduce.request_spells" in call["payload"]["caveats"][0]
+    assert "bayes.beta_binomial_shrink" in call["payload"]["caveats"][0]
 
 
 def test_compute_refuses_a_service_it_cannot_wire_yet():
