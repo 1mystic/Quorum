@@ -8,8 +8,15 @@ test database's RLS behaviour cannot silently drift from what a real
 deployment gets from the migration.
 """
 
+from sqlalchemy import text
+
 TENANT_SCOPED_TABLES = [
-    "tenant_admins",
+    # `tenant_admins` is deliberately excluded, same reasoning as `users`
+    # (see the tenancy migration's docstring): a TENANT_ADMIN's tenant_id is
+    # NULL until onboarding, signup creates this row before onboarding ever
+    # runs, and FORCE RLS's `tenant_id = current_setting(...)::int` check is
+    # never true for a NULL tenant_id, so it would fail closed against every
+    # admin signup, not just a cross-tenant read.
     "members",
     "groups",
     "events",
@@ -62,3 +69,21 @@ def disable_statements(tables: list[str] | None = None) -> list[str]:
 # tenancy migration already covered the rest.
 enable_statements_for = enable_statements
 disable_statements_for = disable_statements
+
+
+def policy_already_applied(bind, table: str) -> bool:
+    """
+    True when `tenant_isolation` is already on `table`. The squashed init
+    migration builds every table up front from ORM metadata, so a later
+    migration's own `enable_statements_for([...])` call can be reapplying a
+    policy the tenancy migration already created for that same table; this
+    guards that from failing with "policy already exists" on a fresh
+    database while remaining a no-op for a genuinely incremental upgrade.
+    """
+    row = bind.execute(
+        text(
+            "SELECT 1 FROM pg_policies WHERE tablename = :table AND policyname = :policy"
+        ),
+        {"table": table, "policy": POLICY_NAME},
+    ).first()
+    return row is not None

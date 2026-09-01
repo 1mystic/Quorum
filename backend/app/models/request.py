@@ -81,5 +81,6 @@ class Request(Base):
     event: Mapped["Event | None"] = relationship(back_populates="requests")
     merged_into: Mapped["Request | None"] = relationship(remote_side=[id])
     events: Mapped[list["RequestEventLog"]] = relationship(
-        back_populates="request", order_by="RequestEventLog.at", cascade="all, delete-orphan"
+        back_populates="request", order_by="RequestEventLog.at", cascade="all, delete-orphan",
+        foreign_keys="RequestEventLog.request_id",
     )

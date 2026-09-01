@@ -10,12 +10,14 @@ request, before any repository query runs. Every policy here reads that same
 setting. When it is unset (no session has called set_config), the comparison
 is NULL and every policy denies by default - fail closed, not open.
 
-`users` is deliberately excluded. It is the pre-tenant identity table: signup
-and login run before any tenant context exists (they are not under
-/api/t/{slug}), and a TENANT_ADMIN's tenant_id is NULL until onboarding. RLS
-on `users` would lock signup and login out of their own rows. Lookups on
-`users` are already scoped correctly in Python (by id or unique email), and
-it is never exposed as a generic cross-tenant list.
+`users` and `tenant_admins` are deliberately excluded. Both are pre-tenant
+identity tables: signup and login run before any tenant context exists (they
+are not under /api/t/{slug}), and a TENANT_ADMIN's tenant_id is NULL until
+onboarding. FORCE RLS's `tenant_id = current_setting(...)::int` is never true
+for a NULL tenant_id, so it would lock every admin signup out of its own row,
+not just a cross-tenant read. Lookups on both are already scoped correctly in
+Python (by id or unique email/user_id), and neither is ever exposed as a
+generic cross-tenant list.
 
 `group_links` is excluded for the same reason `users` is not a concern here
 but for the opposite one: it has no tenant_id column of its own (it is a

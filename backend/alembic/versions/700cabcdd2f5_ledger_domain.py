@@ -40,10 +40,18 @@ _TABLES = ["dues", "payments", "receipts", "contributions", "expenses"]
 
 def upgrade() -> None:
     bind = op.get_bind()
+    insp = sa.inspect(bind)
     _DUE_STATUS.create(bind, checkfirst=True)
     _INSTRUMENT.create(bind, checkfirst=True)
     _LEDGER_STATUS.create(bind, checkfirst=True)
     _CONTRIBUTION_KIND.create(bind, checkfirst=True)
+
+    # The squashed init migration already builds every one of these tables
+    # from ORM metadata on a fresh database; only create what is missing so
+    # this migration stays correct for a genuinely incremental upgrade too.
+    if insp.has_table("dues"):
+        _apply_rls_if_missing(bind)
+        return
 
     op.create_table(
         "dues",
@@ -137,8 +145,14 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
     )
 
-    for statement in rls.enable_statements_for(_TABLES):
-        op.execute(statement)
+    _apply_rls_if_missing(bind)
+
+
+def _apply_rls_if_missing(bind) -> None:
+    for table in _TABLES:
+        if not rls.policy_already_applied(bind, table):
+            for statement in rls.enable_statements_for([table]):
+                op.execute(statement)
 
 
 def downgrade() -> None:

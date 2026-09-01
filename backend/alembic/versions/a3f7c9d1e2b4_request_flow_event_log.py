@@ -47,6 +47,7 @@ _REQUEST_EVENT_KIND = sa.Enum(
 
 def upgrade() -> None:
     bind = op.get_bind()
+    insp = sa.inspect(bind)
 
     # requeststatus gains the two competing-risks terminals plus "merged".
     # Postgres requires ALTER TYPE ... ADD VALUE outside the value's own use,
@@ -55,52 +56,65 @@ def upgrade() -> None:
         op.execute(f"ALTER TYPE requeststatus ADD VALUE IF NOT EXISTS '{value}'")
 
     # requests.category: enum -> free string, validated in the service against
-    # the tenant's vertical adapter rather than a fixed database enum.
-    op.alter_column(
-        "requests", "category",
-        existing_type=sa.Enum(name="requestcategory"),
-        type_=sa.String(),
-        postgresql_using="category::text",
-    )
+    # the tenant's vertical adapter rather than a fixed database enum. On a
+    # fresh database the squashed init migration already built `requests`
+    # from ORM metadata with `category` as a plain string, so this cast is a
+    # no-op there; only run it when the column is still the old enum.
+    existing_columns = {c["name"]: c for c in insp.get_columns("requests")}
+    category_type = existing_columns["category"]["type"]
+    if isinstance(category_type, sa.Enum):
+        op.alter_column(
+            "requests", "category",
+            existing_type=sa.Enum(name="requestcategory"),
+            type_=sa.String(),
+            postgresql_using="category::text",
+        )
     op.execute("DROP TYPE IF EXISTS requestcategory")
 
-    op.add_column("requests", sa.Column("subcategory", sa.String(), nullable=True))
-    op.add_column("requests", sa.Column("priority", sa.String(), nullable=True))
-    op.add_column("requests", sa.Column("channel", sa.String(), nullable=True))
-    op.add_column("requests", sa.Column("location_ref", sa.String(), nullable=True))
-    op.add_column("requests", sa.Column("terminal_at", sa.DateTime(timezone=True), nullable=True))
-    op.add_column("requests", sa.Column("outcome", sa.String(), nullable=True))
-    op.add_column(
-        "requests",
-        sa.Column("merged_into_id", sa.Integer(), sa.ForeignKey("requests.id"), nullable=True),
-    )
+    for col_name, col_type in (
+        ("subcategory", sa.String()),
+        ("priority", sa.String()),
+        ("channel", sa.String()),
+        ("location_ref", sa.String()),
+        ("terminal_at", sa.DateTime(timezone=True)),
+        ("outcome", sa.String()),
+    ):
+        if col_name not in existing_columns:
+            op.add_column("requests", sa.Column(col_name, col_type, nullable=True))
+    if "merged_into_id" not in existing_columns:
+        op.add_column(
+            "requests",
+            sa.Column("merged_into_id", sa.Integer(), sa.ForeignKey("requests.id"), nullable=True),
+        )
 
     _REQUEST_EVENT_KIND.create(bind, checkfirst=True)
-    op.create_table(
-        "request_events",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("tenant_id", sa.Integer(), sa.ForeignKey("tenants.id"), nullable=False),
-        sa.Column("request_id", sa.Integer(), sa.ForeignKey("requests.id"), nullable=False),
-        sa.Column("kind", _REQUEST_EVENT_KIND, nullable=False),
-        sa.Column("at", sa.DateTime(timezone=True), nullable=False),
-        sa.Column("actor_id", sa.Integer(), sa.ForeignKey("members.id"), nullable=True),
-        sa.Column("assignee_id", sa.Integer(), sa.ForeignKey("members.id"), nullable=True),
-        sa.Column("category", sa.String(), nullable=True),
-        sa.Column("subcategory", sa.String(), nullable=True),
-        sa.Column("priority", sa.String(), nullable=True),
-        sa.Column("channel", sa.String(), nullable=True),
-        sa.Column("location_ref", sa.String(), nullable=True),
-        sa.Column("group_id", sa.Integer(), sa.ForeignKey("groups.id"), nullable=True),
-        sa.Column("parent_request_id", sa.Integer(), sa.ForeignKey("requests.id"), nullable=True),
-        sa.Column("at_precision", sa.String(), nullable=False, server_default="exact"),
-        sa.Column("at_upper", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False,
-                  server_default=sa.func.now()),
-    )
-    op.create_index("ix_request_events_request_at", "request_events", ["request_id", "at"])
+    if not insp.has_table("request_events"):
+        op.create_table(
+            "request_events",
+            sa.Column("id", sa.Integer(), primary_key=True),
+            sa.Column("tenant_id", sa.Integer(), sa.ForeignKey("tenants.id"), nullable=False),
+            sa.Column("request_id", sa.Integer(), sa.ForeignKey("requests.id"), nullable=False),
+            sa.Column("kind", _REQUEST_EVENT_KIND, nullable=False),
+            sa.Column("at", sa.DateTime(timezone=True), nullable=False),
+            sa.Column("actor_id", sa.Integer(), sa.ForeignKey("members.id"), nullable=True),
+            sa.Column("assignee_id", sa.Integer(), sa.ForeignKey("members.id"), nullable=True),
+            sa.Column("category", sa.String(), nullable=True),
+            sa.Column("subcategory", sa.String(), nullable=True),
+            sa.Column("priority", sa.String(), nullable=True),
+            sa.Column("channel", sa.String(), nullable=True),
+            sa.Column("location_ref", sa.String(), nullable=True),
+            sa.Column("group_id", sa.Integer(), sa.ForeignKey("groups.id"), nullable=True),
+            sa.Column("parent_request_id", sa.Integer(), sa.ForeignKey("requests.id"), nullable=True),
+            sa.Column("at_precision", sa.String(), nullable=False, server_default="exact"),
+            sa.Column("at_upper", sa.DateTime(timezone=True), nullable=True),
+            sa.Column("created_at", sa.DateTime(timezone=True), nullable=False,
+                      server_default=sa.func.now()),
+        )
+        op.create_index("ix_request_events_request_at", "request_events", ["request_id", "at"])
 
-    for statement in rls.enable_statements_for(["request_events"]):
-        op.execute(statement)
+    if not rls.policy_already_applied(bind, "request_events"):
+        for statement in rls.enable_statements_for(["request_events"]):
+            op.execute(statement)
 
 
 def downgrade() -> None:

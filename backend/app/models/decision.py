@@ -29,7 +29,7 @@ pure, once the adapter turns these rows into `Ballot`/`DecisionOption`/
 import enum
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, Enum, DateTime, Integer, UniqueConstraint, func
+from sqlalchemy import ForeignKey, Enum, DateTime, Integer, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -100,7 +100,7 @@ class DecisionOption(Base):
     decision_id: Mapped[int] = mapped_column(ForeignKey("decisions.id"))
     label: Mapped[str] = mapped_column()
     cost_minor: Mapped[int | None] = mapped_column()   # budget_allocation only
-    tags: Mapped[list[str]] = mapped_column(ARRAY(str), default=list, server_default="{}")
+    tags: Mapped[list[str]] = mapped_column(ARRAY(Text), default=list, server_default="{}")
     proposer_id: Mapped[int | None] = mapped_column(ForeignKey("members.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                  default=utcnow, server_default=func.now())

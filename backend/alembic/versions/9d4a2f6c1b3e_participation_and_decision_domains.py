@@ -46,9 +46,20 @@ _TABLES = ["participation_events", "decisions", "decision_options", "ballots"]
 
 def upgrade() -> None:
     bind = op.get_bind()
+    insp = sa.inspect(bind)
     _PARTICIPATION_KIND.create(bind, checkfirst=True)
     _DECISION_KIND.create(bind, checkfirst=True)
     _BALLOT_STYLE.create(bind, checkfirst=True)
+
+    # The squashed init migration already builds every one of these tables
+    # from ORM metadata on a fresh database; only create what is missing so
+    # this migration stays correct for a genuinely incremental upgrade too.
+    if insp.has_table("participation_events"):
+        for table in _TABLES:
+            if not rls.policy_already_applied(bind, table):
+                for statement in rls.enable_statements_for([table]):
+                    op.execute(statement)
+        return
 
     op.create_table(
         "participation_events",
