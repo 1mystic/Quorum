@@ -90,10 +90,20 @@ fetch. Statistics compute. The two never mix.
 
 ## Running it
 
+Fastest path, with two demo tenants already seeded and a real statistical worker running:
+
+```bash
+docker compose up
+```
+
+Then open `http://localhost:5173`. Full details, demo logins, and the manual (no Docker) path in
+[`docs/RUNNING_LOCALLY.md`](docs/RUNNING_LOCALLY.md).
+
 ```bash
 cd backend
 uv sync
 uv run alembic upgrade head
+uv run python scripts/seed_demo.py   # optional: the two demo tenants
 uv run uvicorn main:app --reload
 ```
 
@@ -139,6 +149,7 @@ tested against synthetic recovery or a theorem instead, in
 | [`docs/EVIDENCE_CONTRACT.md`](docs/EVIDENCE_CONTRACT.md) | The envelope every statistic travels in |
 | [`docs/VERTICALS.md`](docs/VERTICALS.md) | The seven community types Quorum ships with |
 | [`docs/STATS_API.md`](docs/STATS_API.md) | The read surface and the agent tool signatures |
+| [`docs/RUNNING_LOCALLY.md`](docs/RUNNING_LOCALLY.md) | Docker and manual local setup, with demo data |
 | [`design/BRAND.md`](design/BRAND.md) | Identity, palette, type, motion |
 
 ## Design
