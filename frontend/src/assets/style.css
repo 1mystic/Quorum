@@ -549,7 +549,17 @@ a{
 }
 
 /*  13. Progressive disclosure: the prose lives here, closed by default  */
+/* details.why's body is an anchored overlay, not inline flow: a StatTile
+   sits in a CSS grid row of siblings (.row.r-4), and if the body pushed the
+   details element's own height, opening one card would grow only that
+   grid item, leaving its row-mates short and the row ragged. Positioning
+   the body absolutely, anchored to details.why itself (position:relative),
+   means the trigger's own box - and so the card's box - never changes size
+   on toggle, open or closed; the explanation floats over whatever sits
+   below it instead of reflowing the grid. z-index:5 clears ordinary content
+   but stays under the sticky topbar (section 6, z-index:40). */
 details.why{
+  position:relative;
   border-top:1px solid var(--hair);
   padding-top:var(--sp4);
   margin-top:auto;
@@ -583,10 +593,21 @@ details.why[open] summary::after{
   transform:rotate(45deg);
 }
 details.why .body{
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(100% + var(--sp2));
+  z-index:5;
+  background:var(--panel);
+  border:1px solid var(--hair);
+  border-radius:var(--r);
+  box-shadow:var(--shadow-pop);
   font-size:14.5px;
   line-height:1.65;
   color:var(--ink-2);
-  padding-top:var(--sp4);
+  padding:var(--sp4);
+  max-height:260px;
+  overflow-y:auto;
 }
 details.why .body p + p{
   margin-top:var(--sp3);
