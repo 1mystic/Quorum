@@ -12,7 +12,7 @@ import { toast } from '../composables/useToast'
 // useAuthSession.completeSignIn, so a login form has no tenant field at all.
 
 const { completeSignIn } = useAuthSession()
-const { isValidEmail } = useFormValidation()
+const { isValidEmail, isStrongEnough, PASSWORD_MIN_LENGTH } = useFormValidation()
 
 const email = ref('')
 const password = ref('')
@@ -20,6 +20,10 @@ const passwordVisible = ref(false)
 const submitting = ref(false)
 const errorMessage = ref('')
 
+// Client-side checks catch the two shapes that used to reach the backend
+// and come back as a raw 422 (a malformed email, a too-short password):
+// mirrors app/schemas/user.py's LoginRequest constraints so the failure
+// shows up here, immediately, instead of after a round trip.
 async function submit() {
   if (!email.value.trim() || !password.value) {
     errorMessage.value = 'Enter your email and password.'
@@ -27,6 +31,10 @@ async function submit() {
   }
   if (!isValidEmail(email.value)) {
     errorMessage.value = 'Enter a valid email address.'
+    return
+  }
+  if (!isStrongEnough(password.value)) {
+    errorMessage.value = `Password must be at least ${PASSWORD_MIN_LENGTH} characters.`
     return
   }
   errorMessage.value = ''
@@ -40,7 +48,9 @@ async function submit() {
     if (err instanceof NetworkError) {
       errorMessage.value = err.message
     } else if (err instanceof ApiError) {
-      errorMessage.value = err.message
+      errorMessage.value = err.status === 404 || err.status === 401
+        ? 'No account matches that email and password.'
+        : err.message
     } else {
       errorMessage.value = 'Something went wrong signing in.'
     }
@@ -66,7 +76,7 @@ async function submit() {
           id="password"
           v-model="password"
           :type="passwordVisible ? 'text' : 'password'"
-          placeholder="Enter your password"
+          placeholder="At least 8 characters"
           autocomplete="current-password"
         />
         <button type="button" class="hint" style="align-self:flex-start;background:none;border:0;cursor:pointer;color:var(--brand)" @click="passwordVisible = !passwordVisible">

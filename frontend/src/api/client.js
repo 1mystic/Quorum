@@ -33,6 +33,30 @@ export class NetworkError extends Error {
   }
 }
 
+// Two error shapes reach here, and a view must never see raw JSON or a bare
+// "Request failed (422)" for either. The app's own AppException handler
+// (main.py) always replies {"message": "..."}. Pydantic's automatic request
+// validation, which fires before a route body even runs, replies
+// {"detail": [{"loc": [...], "msg": "...", "type": "..."}]} instead, a
+// completely different shape FastAPI builds without going through that
+// handler. A too-short password or a malformed email hits this second path.
+function describeErrorBody(data, status) {
+  if (data && typeof data === 'object') {
+    if (typeof data.message === 'string' && data.message) return data.message
+    if (Array.isArray(data.detail) && data.detail.length) {
+      return data.detail
+        .map(function readOne(item) {
+          const field = Array.isArray(item.loc) ? item.loc[item.loc.length - 1] : null
+          return field && typeof field === 'string' ? field + ': ' + item.msg : item.msg
+        })
+        .filter(Boolean)
+        .join(' ')
+    }
+    if (typeof data.detail === 'string' && data.detail) return data.detail
+  }
+  return 'Request failed (' + status + ').'
+}
+
 function buildUrl(path, params) {
   const url = new URL(path.startsWith('http') ? path : API_BASE_URL + path)
   if (params) {
@@ -90,8 +114,7 @@ async function request(path, { method = 'GET', body, params, auth: sendAuth = tr
   }
 
   if (!response.ok) {
-    const message = (data && typeof data === 'object' && data.message) || `Request failed (${response.status}).`
-    throw new ApiError(message, response.status, data)
+    throw new ApiError(describeErrorBody(data, response.status), response.status, data)
   }
 
   return data
