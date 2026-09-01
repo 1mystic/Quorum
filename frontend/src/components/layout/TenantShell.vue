@@ -1,6 +1,7 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { Menu, X } from 'lucide-vue-next'
 import { tenantBySlug, demoTenantList } from '../../fixtures/tenants'
 import { coreNav, insightNav, adminNav } from '../../fixtures/nav'
 import { useAuthStore } from '../../stores/auth'
@@ -47,11 +48,91 @@ function switchTenant(nextSlug) {
 const sideRef = ref(null)
 useOverlayScrollbar()
 useOverlayScrollbar(sideRef)
+
+// Below 1080px (style.css section 4) `.side` is an off-canvas drawer instead
+// of a static column: closed by default so a mobile page load never makes
+// you scroll past Community/Insights/Admin/footer before reaching content
+// (the bug this replaces). Opens as an overlay, never pushes `.main` down.
+const sidebarOpen = ref(false)
+const navToggleRef = ref(null)
+
+// Tracks the same 1080px cutoff as style.css section 4. Only used to decide
+// whether the closed drawer should be `inert` (untabbable, hidden from
+// assistive tech): on a laptop+ viewport `.side` is the normal always-open
+// column and must stay reachable regardless of `sidebarOpen`'s value.
+const isNarrow = ref(false)
+let narrowQuery = null
+function onNarrowChange(e) { isNarrow.value = e.matches }
+
+function openSidebar() {
+  sidebarOpen.value = true
+  nextTick(() => {
+    // Focus moves into the drawer on open, onto its own close button - the
+    // first element a keyboard/screen-reader user reaches, and an obvious
+    // way back out without hunting for Escape.
+    const closeBtn = sideRef.value && sideRef.value.querySelector('.side-close')
+    if (closeBtn) closeBtn.focus()
+  })
+}
+
+function closeSidebar() {
+  if (!sidebarOpen.value) return
+  sidebarOpen.value = false
+  // Focus returns to the trigger that opened the drawer, not left stranded
+  // on a now-hidden element inside it.
+  if (navToggleRef.value) navToggleRef.value.focus()
+}
+
+function toggleSidebar() {
+  if (sidebarOpen.value) closeSidebar()
+  else openSidebar()
+}
+
+// A tap on any nav link or the tenant switcher closes the drawer instead of
+// leaving it open over the page it just navigated to. Delegated on the
+// `<aside>` itself rather than wired onto every link individually.
+function onAsideClick(e) {
+  if (e.target.closest('a.ni, button.tn')) closeSidebar()
+}
+
+function onKeydown(e) {
+  if (e.key === 'Escape' && sidebarOpen.value) closeSidebar()
+}
+
+// Route changes (including the tenant switcher's router.push, which does
+// not pass through onAsideClick's button) always close the drawer, so a
+// programmatic navigation can never leave it open over the new page.
+watch(() => route.fullPath, () => { sidebarOpen.value = false })
+
+onMounted(() => {
+  document.addEventListener('keydown', onKeydown)
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    narrowQuery = window.matchMedia('(max-width: 1080px)')
+    isNarrow.value = narrowQuery.matches
+    narrowQuery.addEventListener('change', onNarrowChange)
+  }
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', onKeydown)
+  if (narrowQuery) narrowQuery.removeEventListener('change', onNarrowChange)
+})
 </script>
 
 <template>
   <div class="app">
-    <aside ref="sideRef" class="side scroll-none">
+    <div
+      class="side-backdrop" :class="{ open: sidebarOpen }"
+      aria-hidden="true"
+      @click="closeSidebar"
+    />
+    <aside
+      ref="sideRef" class="side scroll-none" :class="{ open: sidebarOpen }"
+      :inert="isNarrow && !sidebarOpen"
+      @click="onAsideClick"
+    >
+      <button type="button" class="tgl icon-tgl side-close" aria-label="Close menu" @click="closeSidebar">
+        <X :size="18" />
+      </button>
       <router-link class="brand" :to="`/t/${slug}/dashboard`">
         <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
           <circle cx="16" cy="16" r="12.5" fill="none" stroke="currentColor" stroke-width="2.4" />
@@ -91,6 +172,13 @@ useOverlayScrollbar(sideRef)
 
     <div class="main">
       <div class="topbar">
+        <button
+          ref="navToggleRef" type="button" class="tgl icon-tgl nav-toggle"
+          aria-label="Open menu" :aria-expanded="sidebarOpen"
+          @click="openSidebar"
+        >
+          <Menu :size="18" />
+        </button>
         <div>
           <h1>{{ title }}</h1>
           <div v-if="subtitle" class="sub">{{ subtitle }}</div>

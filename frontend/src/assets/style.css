@@ -139,12 +139,34 @@ a{
   width:0;
   height:0;
 }
+/* Below 1080px a 264px sidebar plus readable content no longer fit side by
+   side (section 1's named exception), so instead of the old behaviour -
+   `.side` falling to `position:static` and stacking above the page, forcing
+   every page load through the whole nav before any content - it becomes a
+   fixed, off-canvas drawer (closed by default, section 43 has the toggle
+   and backdrop that open it). `width` uses the same min(px,vw) idea as
+   `.wrap`/`.content` so it never outgrows a narrow phone. */
 @media(max-width:1080px){
   .side{
-    position:static;
-    height:auto;
-    border-right:0;
-    border-bottom:1px solid var(--hair);
+    position:fixed;
+    top:0;
+    left:0;
+    width:min(320px,86vw);
+    height:100vh;
+    z-index:300;
+    border-right:1px solid var(--hair);
+    border-bottom:0;
+    box-shadow:var(--shadow-pop);
+    transform:translateX(-100%);
+    transition:transform var(--t-fill) var(--ease-snap);
+  }
+  .side.open{
+    transform:translateX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .side{
+    transition:none;
   }
 }
 
@@ -2433,4 +2455,51 @@ html.qs-active::-webkit-scrollbar{
 }
 .role-switcher .select-list{
   min-width:180px;
+}
+
+/*  43. Mobile nav drawer  */
+/* The hamburger toggle and its backdrop for `.side` below 1080px (section
+   4). Hidden entirely above that width, where `.side` is the normal sticky
+   column and there is nothing to toggle. */
+.nav-toggle{
+  display:none;
+}
+@media(max-width:1080px){
+  .nav-toggle{
+    display:inline-flex;
+  }
+}
+.side-close{
+  display:none;
+  align-self:flex-end;
+  margin-bottom:calc(var(--sp6) * -1);
+}
+@media(max-width:1080px){
+  .side-close{
+    display:inline-flex;
+  }
+}
+.side-backdrop{
+  display:none;
+}
+@media(max-width:1080px){
+  .side-backdrop{
+    display:block;
+    position:fixed;
+    inset:0;
+    z-index:290;
+    background:color-mix(in srgb,var(--ink) 46%,transparent);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity var(--t-hover) var(--ease-snap);
+  }
+  .side-backdrop.open{
+    opacity:1;
+    pointer-events:auto;
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .side-backdrop{
+    transition:none;
+  }
 }

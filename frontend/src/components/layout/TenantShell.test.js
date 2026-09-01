@@ -1,0 +1,74 @@
+import { describe, test, expect } from 'vitest'
+import { mount } from '@vue/test-utils'
+import { createRouter, createMemoryHistory } from 'vue-router'
+import { createPinia } from 'pinia'
+import TenantShell from './TenantShell.vue'
+
+async function mountShell() {
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/t/:slug/dashboard', component: { template: '<div>dashboard</div>' } },
+      { path: '/t/:slug/requests', component: { template: '<div>requests</div>' } },
+      { path: '/t/:slug/:pathMatch(.*)*', component: { template: '<div />' } },
+      { path: '/methods', component: { template: '<div />' } },
+      { path: '/workspace', component: { template: '<div />' } }
+    ]
+  })
+  router.push('/t/vaikunth-heights/dashboard')
+  await router.isReady()
+  return mount(TenantShell, {
+    props: { title: 'Overview' },
+    global: { plugins: [router, createPinia()] },
+    slots: { default: '<div>page content</div>' }
+  })
+}
+
+describe('TenantShell mobile nav drawer', () => {
+  test('the drawer is closed by default', async () => {
+    const wrapper = await mountShell()
+    expect(wrapper.find('aside.side').classes()).not.toContain('open')
+  })
+
+  test('the hamburger opens the drawer', async () => {
+    const wrapper = await mountShell()
+    await wrapper.find('.nav-toggle').trigger('click')
+    expect(wrapper.find('aside.side').classes()).toContain('open')
+    expect(wrapper.find('.side-backdrop').classes()).toContain('open')
+  })
+
+  test('the close button closes the drawer and Escape closes it too', async () => {
+    const wrapper = await mountShell()
+    await wrapper.find('.nav-toggle').trigger('click')
+    await wrapper.find('.side-close').trigger('click')
+    expect(wrapper.find('aside.side').classes()).not.toContain('open')
+
+    await wrapper.find('.nav-toggle').trigger('click')
+    expect(wrapper.find('aside.side').classes()).toContain('open')
+    await document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('aside.side').classes()).not.toContain('open')
+  })
+
+  test('clicking the backdrop closes the drawer', async () => {
+    const wrapper = await mountShell()
+    await wrapper.find('.nav-toggle').trigger('click')
+    await wrapper.find('.side-backdrop').trigger('click')
+    expect(wrapper.find('aside.side').classes()).not.toContain('open')
+  })
+
+  test('clicking a nav link closes the drawer', async () => {
+    const wrapper = await mountShell()
+    await wrapper.find('.nav-toggle').trigger('click')
+    const requestsLink = wrapper.findAll('a.ni').find((a) => a.text() === 'Requests')
+    await requestsLink.trigger('click')
+    expect(wrapper.find('aside.side').classes()).not.toContain('open')
+  })
+
+  test('the sidebar carries one Insights section, not one per pack', async () => {
+    const wrapper = await mountShell()
+    const labels = wrapper.findAll('.navgrp > .lbl').map((l) => l.text())
+    expect(labels.filter((l) => l.startsWith('Pack ')).length).toBe(0)
+    expect(labels).toContain('Insights')
+  })
+})

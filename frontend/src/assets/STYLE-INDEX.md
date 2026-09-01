@@ -49,13 +49,14 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 40 | Landing: CTA band and footer (`.cta-band`, `.landing-foot`, `.foot`, `.colophon`) |
 | 41 | Landing: sweep-fill buttons and icon arrows (`.landing-body .btn`, `.arw`, `.tl`) |
 | 42 | Select field (`SelectField.vue`), replaces every native `<select>` (`.select-field`, `.select-trigger`, `.select-list`) |
+| 43 | Mobile nav drawer (`.nav-toggle`, `.side-close`, `.side-backdrop`); pairs with `.side`/`.side.open` in section 4 |
 
 ## Quick reference by concern
 
 | Concern | Sections |
 | --- | --- |
 | Evidence render states | 10, 11, 12, 13, 16, 17 |
-| Dashboard shell | 3, 4, 5, 6, 7 |
+| Dashboard shell | 3, 4, 5, 6, 7, 43 |
 | Cards and tables | 8, 18, 19 |
 | Buttons and toggles | 9 |
 | Charts (SurvivalCurve, ControlChart) | 15 |
