@@ -7,7 +7,7 @@ from app.repository import (
 from app.models import Event, EventStatus, GroupStatus, UserRole
 from app.schemas import (
     CreateEventRequest, UpdateEventRequest, CreateEventResponse, EventStatusResponse,
-    EventListItem, EventDetailResponse
+    EventListItem, EventDetailResponse, RejectContentRequest
 )
 from app.exceptions import (
     EventNotFoundError, EventActionNotAllowedError, GroupNotFoundError, GroupNotActiveError,
@@ -15,6 +15,11 @@ from app.exceptions import (
 )
 from app.core.messages import EventMessages
 from app.core.storage import Storage, EVENT_FOLDER
+
+# The editable states: a leader can still change the event while it has not
+# yet gone live. SUBMITTED and PUBLISHED are frozen until a review decision
+# (or, for PUBLISHED, a cancellation) moves it out of them.
+_EDITABLE = (EventStatus.DRAFT, EventStatus.REJECTED)
 
 
 class EventService:
@@ -115,6 +120,10 @@ class EventService:
             created_at=event.created_at,
             is_registered=registration is not None,
             my_registration_id=registration.id if registration else None,
+            submitted_at=event.submitted_at,
+            approved_at=event.approved_at,
+            rejected_at=event.rejected_at,
+            rejection_reason=event.rejection_reason,
         )
 
     async def update(self, payload: dict, event_id: int, data: UpdateEventRequest,
@@ -138,19 +147,56 @@ class EventService:
             await self.storage.delete_url(old_image_url)
         return await self.get(payload, event_id)
 
-    async def publish(self, payload: dict, event_id: int) -> EventStatusResponse:
+    async def submit_for_review(self, payload: dict, event_id: int) -> EventStatusResponse:
+        """The group leader's step: DRAFT (or a REJECTED event being resubmitted) -> SUBMITTED."""
         event = await self._managed_event(payload, event_id)
+        if event.status not in _EDITABLE:
+            raise EventActionNotAllowedError(
+                "Only a draft or a rejected event can be submitted for review"
+            )
+        await self.event_repo.submit_for_review(event)
+        return EventStatusResponse(
+            id=event.id, title=event.title, status=event.status,
+            message=EventMessages.SUBMITTED,
+        )
+
+    async def publish(self, payload: dict, event_id: int) -> EventStatusResponse:
+        """
+        TenantAdmin-only (router scope). Only callable from SUBMITTED: nothing
+        public-facing goes live without an explicit review, so a leader can no
+        longer publish straight from DRAFT.
+        """
+        event = await self._admin_event(payload, event_id)
         if event.status == EventStatus.CANCELLED:
             raise EventActionNotAllowedError("A cancelled event cannot be published")
         if event.status == EventStatus.PUBLISHED:
             raise EventActionNotAllowedError("Event is already published")
+        if event.status != EventStatus.SUBMITTED:
+            raise EventActionNotAllowedError("Only an event submitted for review can be published")
         if event.starts_at <= self._now():
             raise EventActionNotAllowedError("An event starting in the past cannot be published")
 
-        await self.event_repo.set_status(event, EventStatus.PUBLISHED)
+        await self.event_repo.approve(event, self._user_id(payload))
         return EventStatusResponse(
             id=event.id, title=event.title, status=event.status,
             message=EventMessages.PUBLISHED,
+        )
+
+    async def reject(self, payload: dict, event_id: int, reason: str) -> EventStatusResponse:
+        """
+        TenantAdmin-only. A rejection carries a reason (visible to the
+        submitter on the detail response) and lands on REJECTED rather than a
+        dead end: `submit_for_review` accepts a REJECTED event, so the leader
+        can revise and resubmit it.
+        """
+        event = await self._admin_event(payload, event_id)
+        if event.status != EventStatus.SUBMITTED:
+            raise EventActionNotAllowedError("Only an event submitted for review can be rejected")
+
+        await self.event_repo.reject(event, self._user_id(payload), reason)
+        return EventStatusResponse(
+            id=event.id, title=event.title, status=event.status,
+            message=EventMessages.REJECTED, rejection_reason=event.rejection_reason,
         )
 
     async def cancel(self, payload: dict, event_id: int) -> EventStatusResponse:
@@ -227,3 +273,20 @@ class EventService:
         if not await self.membership_repo.is_leader(member.id, event.group_id):
             raise NotGroupLeaderError()
         return event
+
+    async def _admin_event(self, payload: dict, event_id: int) -> Event:
+        """
+        For approve/reject: the router already checked TENANT_ADMIN scope, so
+        this only needs the tenant match, not a leader check - an admin
+        reviews every group's submissions, not just one they happen to lead.
+        """
+        event = await self.event_repo.get_by_id(event_id)
+        if not event:
+            raise EventNotFoundError()
+        if event.group.tenant_id != await self._tenant_id(payload):
+            raise EventNotFoundError()
+        return event
+
+    @staticmethod
+    def _user_id(payload: dict) -> int:
+        return int(payload.get("sub"))

@@ -17,6 +17,7 @@ from app.schemas.membership import (
     JoinResponse, RequestActionRequest, MembershipActionResponse, PendingRequestItem, MemberItem,
     RemoveMemberResponse
 )
+from app.schemas.approval import RejectContentRequest
 from app.schemas.event import (
     CreateEventRequest, UpdateEventRequest, CreateEventResponse, EventStatusResponse,
     EventListItem, EventDetailResponse

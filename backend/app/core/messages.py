@@ -39,7 +39,9 @@ class MembershipMessages:
 class EventMessages:
     CREATED = "Event created as a draft"
     UPDATED = "Event updated successfully"
+    SUBMITTED = "Event submitted for admin review"
     PUBLISHED = "Event published successfully"
+    REJECTED = "Event rejected"
     CANCELLED = "Event cancelled successfully"
 
 
@@ -52,7 +54,10 @@ class RegistrationMessages:
 
 
 class AnnouncementMessages:
-    POSTED = "Announcement posted successfully"
+    POSTED = "Announcement created as a draft"
+    SUBMITTED = "Announcement submitted for admin review"
+    APPROVED = "Announcement published successfully"
+    REJECTED = "Announcement rejected"
     PINNED = "Announcement pinned to the top of the feed"
     UNPINNED = "Announcement unpinned"
     DELETED = "Announcement deleted successfully"
@@ -96,6 +101,12 @@ class NotificationMessages:
     @staticmethod
     def certificate_issued(event_title: str) -> str:
         return f"Your certificate for {event_title} is ready to download"
+
+
+class DecisionMessages:
+    SUBMITTED = "Decision submitted for admin review"
+    APPROVED = "Decision approved and open for voting"
+    REJECTED = "Decision rejected"
 
 
 class LedgerMessages:

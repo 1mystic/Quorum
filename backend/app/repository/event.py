@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Event, EventStatus, EventRegistration, Group, RegistrationResult
 from sqlalchemy import select, func, or_
 from sqlalchemy.orm import selectinload
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class EventRepository:
@@ -114,4 +114,22 @@ class EventRepository:
 
     async def set_status(self, event: Event, status: EventStatus) -> Event:
         event.status = status
+        return event
+
+    async def submit_for_review(self, event: Event) -> Event:
+        event.status = EventStatus.SUBMITTED
+        event.submitted_at = datetime.now(timezone.utc)
+        return event
+
+    async def approve(self, event: Event, approved_by: int) -> Event:
+        event.status = EventStatus.PUBLISHED
+        event.approved_by = approved_by
+        event.approved_at = datetime.now(timezone.utc)
+        return event
+
+    async def reject(self, event: Event, rejected_by: int, reason: str) -> Event:
+        event.status = EventStatus.REJECTED
+        event.rejected_by = rejected_by
+        event.rejected_at = datetime.now(timezone.utc)
+        event.rejection_reason = reason
         return event

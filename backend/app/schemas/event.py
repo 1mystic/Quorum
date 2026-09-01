@@ -61,6 +61,7 @@ class EventStatusResponse(BaseModel):
     title: str
     status: EventStatus
     message: str
+    rejection_reason: str | None = None
 
 
 class EventListItem(BaseModel):
@@ -98,3 +99,7 @@ class EventDetailResponse(BaseModel):
     created_at: datetime
     is_registered: bool = False
     my_registration_id: int | None = None
+    submitted_at: datetime | None = None
+    approved_at: datetime | None = None
+    rejected_at: datetime | None = None
+    rejection_reason: str | None = None

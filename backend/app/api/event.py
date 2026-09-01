@@ -3,7 +3,7 @@ from app.schemas import (
     CreateEventRequest, UpdateEventRequest, CreateEventResponse, EventStatusResponse,
     EventListItem, EventDetailResponse, RegistrationConfirmation, UnregisterResponse,
     ParticipantItem, MarkAttendanceRequest, AttendanceResponse, DeclareResultsRequest,
-    DeclareResultsResponse, MyRegistrationItem, MyResultItem
+    DeclareResultsResponse, MyRegistrationItem, MyResultItem, RejectContentRequest
 )
 from app.services import EventService, EventRegistrationService
 from app.core.di import get_event_service, get_event_registration_service, get_user_info
@@ -72,13 +72,34 @@ async def edit_event(
     return await service.update(payload, event_id, parse_form_model(UpdateEventRequest, data), image)
 
 
-@event_router.patch("/{event_id}/publish", response_model=EventStatusResponse)
-async def publish_event(
+@event_router.patch("/{event_id}/submit-for-review", response_model=EventStatusResponse)
+async def submit_event_for_review(
     event_id: int,
     payload: dict = Security(get_user_info, scopes=["MEMBER"]),
     service: EventService = Depends(get_event_service),
 ):
+    return await service.submit_for_review(payload, event_id)
+
+
+@event_router.patch("/{event_id}/publish", response_model=EventStatusResponse,
+                    description="TenantAdmin only. Only callable once the event has been "
+                                "submitted for review.")
+async def publish_event(
+    event_id: int,
+    payload: dict = Security(get_user_info, scopes=["TENANT_ADMIN"]),
+    service: EventService = Depends(get_event_service),
+):
     return await service.publish(payload, event_id)
+
+
+@event_router.patch("/{event_id}/reject", response_model=EventStatusResponse)
+async def reject_event(
+    event_id: int,
+    data: RejectContentRequest,
+    payload: dict = Security(get_user_info, scopes=["TENANT_ADMIN"]),
+    service: EventService = Depends(get_event_service),
+):
+    return await service.reject(payload, event_id, data.reason)
 
 
 @event_router.patch("/{event_id}/cancel", response_model=EventStatusResponse)

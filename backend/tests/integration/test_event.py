@@ -77,7 +77,7 @@ async def outsider(client, seed_tenant):
 
 
 @pytest.fixture
-async def started_event(client, db_session, leader, member):
+async def started_event(client, db_session, leader, member, tenant_admin):
     """..."""
     from app.models import Event
 
@@ -92,7 +92,8 @@ async def started_event(client, db_session, leader, member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     registration = await client.post(f"/events/{event_id}/register", headers=member)
     registration_id = registration.json()["registration_id"]
 
@@ -128,7 +129,7 @@ async def second_member(client, leader):
 
 
 @pytest.fixture
-async def two_checked_in(client, db_session, leader, member, second_member):
+async def two_checked_in(client, db_session, leader, member, second_member, tenant_admin):
     """Two members registered and checked in, event already started."""
     from app.models import Event
     from datetime import datetime, timedelta, timezone
@@ -144,7 +145,8 @@ async def two_checked_in(client, db_session, leader, member, second_member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     # Register BOTH members while the event is still in the future
     first = await client.post(f"/events/{event_id}/register", headers=member)
@@ -171,7 +173,7 @@ async def two_checked_in(client, db_session, leader, member, second_member):
 
 
 @pytest.fixture
-async def three_checked_in(client, db_session, leader, member, second_member):
+async def three_checked_in(client, db_session, leader, member, second_member, tenant_admin):
     """Three members registered and checked in, for testing participants count math."""
     from app.models import Event
 
@@ -203,7 +205,8 @@ async def three_checked_in(client, db_session, leader, member, second_member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     r1 = await client.post(f"/events/{event_id}/register", headers=member)
     r2 = await client.post(f"/events/{event_id}/register", headers=second_member)
@@ -376,11 +379,11 @@ async def test_create_event_without_token_fails(client, leader):
     assert response.json()["detail"] == "Not authenticated"
 
 
-# ==== publish event ====
+# ==== submit for review ====
 
 @pytest.mark.asyncio
-async def test_publish_event_success(client, leader):
-    """Verify that a leader can publish a draft event"""
+async def test_submit_event_for_review_success(client, leader):
+    """Verify that a leader can submit a draft event for admin review"""
     headers, group_id = leader
     payload = {
         "group_id": group_id,
@@ -393,85 +396,16 @@ async def test_publish_event_success(client, leader):
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
 
-    response = await client.patch(f"/events/{event_id}/publish", headers=headers)
+    response = await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
     assert response.status_code == 200
     body = response.json()
     assert body["id"] == event_id
-    assert body["status"] == "PUBLISHED"
-    assert body["message"] == "Event published successfully"
+    assert body["status"] == "SUBMITTED"
 
 
 @pytest.mark.asyncio
-async def test_publish_event_starting_in_past_fails(client, leader):
-    """Confirm that an event whose start time has already passed cannot be published"""
-    headers, group_id = leader
-    create_payload = {
-        "group_id": group_id,
-        "title": "Late Notice Workshop",
-        "description": "An event created with a start time already in the past",
-        "venue": "Lab 204",
-        "starts_at": future_time(48),
-        "ends_at": future_time(50),
-    }
-    create = await client.post("/events", headers=headers, json=create_payload)
-    event_id = create.json()["id"]
-    
-    update_payload = {
-        "starts_at": past_time(1),
-        "ends_at": future_time(1),
-    }
-    await client.put(f"/events/{event_id}", headers=headers, json=update_payload)
-
-    response = await client.patch(f"/events/{event_id}/publish", headers=headers)
-    assert response.status_code == 403
-    assert response.json()["message"] == "An event starting in the past cannot be published"
-
-
-@pytest.mark.asyncio
-async def test_publish_event_twice_fails(client, leader):
-    """Confirm that publishing an already published event is rejected"""
-    headers, group_id = leader
-    payload = {
-        "group_id": group_id,
-        "title": "Line Follower Workshop",
-        "description": "Hands-on session on building a line follower bot",
-        "venue": "Lab 204, Main Block",
-        "starts_at": future_time(48),
-        "ends_at": future_time(50),
-    }
-    create = await client.post("/events", headers=headers, json=payload)
-    event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
-
-    response = await client.patch(f"/events/{event_id}/publish", headers=headers)
-    assert response.status_code == 403
-    assert response.json()["message"] == "Event is already published"
-
-
-@pytest.mark.asyncio
-async def test_publish_cancelled_event_fails(client, leader):
-    """Confirm that a cancelled event cannot be published"""
-    headers, group_id = leader
-    payload = {
-        "group_id": group_id,
-        "title": "Line Follower Workshop",
-        "description": "Hands-on session on building a line follower bot",
-        "venue": "Lab 204, Main Block",
-        "starts_at": future_time(48),
-        "ends_at": future_time(50),
-    }
-    create = await client.post("/events", headers=headers, json=payload)
-    event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/cancel", headers=headers)
-
-    response = await client.patch(f"/events/{event_id}/publish", headers=headers)
-    assert response.status_code == 403
-    assert response.json()["message"] == "A cancelled event cannot be published"
-
-
-@pytest.mark.asyncio
-async def test_publish_event_by_non_leader_fails(client, leader, member):
-    """Ensure that a non-leader cannot publish the group's event"""
+async def test_submit_event_for_review_by_non_leader_fails(client, leader, member):
+    """Ensure that a non-leader cannot submit the group's event for review"""
     leader_headers, group_id = leader
     payload = {
         "group_id": group_id,
@@ -484,14 +418,235 @@ async def test_publish_event_by_non_leader_fails(client, leader, member):
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
 
+    response = await client.patch(f"/events/{event_id}/submit-for-review", headers=member)
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_publish_directly_from_draft_fails(client, leader, tenant_admin):
+    """Confirm that publish can no longer be called straight from DRAFT, only from SUBMITTED"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Line Follower Workshop",
+        "description": "Hands-on session on building a line follower bot",
+        "venue": "Lab 204, Main Block",
+        "starts_at": future_time(48),
+        "ends_at": future_time(50),
+    }
+    create = await client.post("/events", headers=headers, json=payload)
+    event_id = create.json()["id"]
+
+    response = await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
+    assert response.status_code == 403
+    assert response.json()["message"] == "Only an event submitted for review can be published"
+
+
+# ==== publish event (tenant-admin only, from SUBMITTED) ====
+
+@pytest.mark.asyncio
+async def test_publish_event_success(client, leader, tenant_admin):
+    """Verify that a tenant admin can publish an event submitted for review"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Line Follower Workshop",
+        "description": "Hands-on session on building a line follower bot",
+        "venue": "Lab 204, Main Block",
+        "starts_at": future_time(48),
+        "ends_at": future_time(50),
+    }
+    create = await client.post("/events", headers=headers, json=payload)
+    event_id = create.json()["id"]
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+
+    response = await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["id"] == event_id
+    assert body["status"] == "PUBLISHED"
+    assert body["message"] == "Event published successfully"
+
+
+@pytest.mark.asyncio
+async def test_publish_event_starting_in_past_fails(client, leader, tenant_admin):
+    """Confirm that an event whose start time has already passed cannot be published"""
+    headers, group_id = leader
+    create_payload = {
+        "group_id": group_id,
+        "title": "Late Notice Workshop",
+        "description": "An event created with a start time already in the past",
+        "venue": "Lab 204",
+        "starts_at": future_time(48),
+        "ends_at": future_time(50),
+    }
+    create = await client.post("/events", headers=headers, json=create_payload)
+    event_id = create.json()["id"]
+
+    update_payload = {
+        "starts_at": past_time(1),
+        "ends_at": future_time(1),
+    }
+    await client.put(f"/events/{event_id}", headers=headers, json=update_payload)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+
+    response = await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
+    assert response.status_code == 403
+    assert response.json()["message"] == "An event starting in the past cannot be published"
+
+
+@pytest.mark.asyncio
+async def test_publish_event_twice_fails(client, leader, tenant_admin):
+    """Confirm that publishing an already published event is rejected"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Line Follower Workshop",
+        "description": "Hands-on session on building a line follower bot",
+        "venue": "Lab 204, Main Block",
+        "starts_at": future_time(48),
+        "ends_at": future_time(50),
+    }
+    create = await client.post("/events", headers=headers, json=payload)
+    event_id = create.json()["id"]
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
+
+    response = await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
+    assert response.status_code == 403
+    assert response.json()["message"] == "Event is already published"
+
+
+@pytest.mark.asyncio
+async def test_publish_cancelled_event_fails(client, leader, tenant_admin):
+    """Confirm that a cancelled event cannot be published"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Line Follower Workshop",
+        "description": "Hands-on session on building a line follower bot",
+        "venue": "Lab 204, Main Block",
+        "starts_at": future_time(48),
+        "ends_at": future_time(50),
+    }
+    create = await client.post("/events", headers=headers, json=payload)
+    event_id = create.json()["id"]
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/cancel", headers=headers)
+
+    response = await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
+    assert response.status_code == 403
+    assert response.json()["message"] == "A cancelled event cannot be published"
+
+
+@pytest.mark.asyncio
+async def test_publish_event_by_non_admin_fails(client, leader, member):
+    """Ensure that a plain member (even the leader who submitted it) cannot publish the event"""
+    leader_headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Line Follower Workshop",
+        "description": "Hands-on session on building a line follower bot",
+        "venue": "Lab 204, Main Block",
+        "starts_at": future_time(48),
+        "ends_at": future_time(50),
+    }
+    create = await client.post("/events", headers=leader_headers, json=payload)
+    event_id = create.json()["id"]
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+
     response = await client.patch(f"/events/{event_id}/publish", headers=member)
+    assert response.status_code == 401
+
+    response = await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    assert response.status_code == 401
+
+
+# ==== reject event ====
+
+@pytest.mark.asyncio
+async def test_reject_event_success_and_resubmit(client, leader, tenant_admin):
+    """A rejection carries a reason and returns the event to a resubmittable state, not a dead end"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Line Follower Workshop",
+        "description": "Hands-on session on building a line follower bot",
+        "venue": "Lab 204, Main Block",
+        "starts_at": future_time(48),
+        "ends_at": future_time(50),
+    }
+    create = await client.post("/events", headers=headers, json=payload)
+    event_id = create.json()["id"]
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+
+    response = await client.patch(
+        f"/events/{event_id}/reject", headers=tenant_admin, json={"reason": "Venue double-booked"}
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "REJECTED"
+    assert body["rejection_reason"] == "Venue double-booked"
+
+    detail = await client.get(f"/events/{event_id}", headers=headers)
+    assert detail.json()["rejection_reason"] == "Venue double-booked"
+
+    resubmit = await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    assert resubmit.status_code == 200
+    assert resubmit.json()["status"] == "SUBMITTED"
+
+    approve = await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
+    assert approve.status_code == 200
+    assert approve.json()["status"] == "PUBLISHED"
+
+
+@pytest.mark.asyncio
+async def test_reject_event_by_non_admin_fails(client, leader):
+    """Ensure that a group leader cannot reject their own submission"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Line Follower Workshop",
+        "description": "Hands-on session on building a line follower bot",
+        "venue": "Lab 204, Main Block",
+        "starts_at": future_time(48),
+        "ends_at": future_time(50),
+    }
+    create = await client.post("/events", headers=headers, json=payload)
+    event_id = create.json()["id"]
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+
+    response = await client.patch(
+        f"/events/{event_id}/reject", headers=headers, json={"reason": "Not allowed"}
+    )
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_reject_event_not_submitted_fails(client, leader, tenant_admin):
+    """Confirm that a draft event cannot be rejected before it is submitted"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Line Follower Workshop",
+        "description": "Hands-on session on building a line follower bot",
+        "venue": "Lab 204, Main Block",
+        "starts_at": future_time(48),
+        "ends_at": future_time(50),
+    }
+    create = await client.post("/events", headers=headers, json=payload)
+    event_id = create.json()["id"]
+
+    response = await client.patch(
+        f"/events/{event_id}/reject", headers=tenant_admin, json={"reason": "Too early"}
+    )
     assert response.status_code == 403
 
 
 # ==== cancel event ====
 
 @pytest.mark.asyncio
-async def test_cancel_event_success(client, leader):
+async def test_cancel_event_success(client, leader, tenant_admin):
     """Verify that a leader can cancel a published event"""
     headers, group_id = leader
     payload = {
@@ -504,7 +659,8 @@ async def test_cancel_event_success(client, leader):
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     response = await client.patch(f"/events/{event_id}/cancel", headers=headers)
     assert response.status_code == 200
@@ -740,7 +896,7 @@ async def test_edit_event_group_id_is_ignored(client, leader):
 
 
 @pytest.mark.asyncio
-async def test_edit_event_capacity_below_current_registrations(client, leader, member):
+async def test_edit_event_capacity_below_current_registrations(client, leader, member, tenant_admin):
     """Confirm behavior when editing capacity below the number of already-registered participants"""
     headers, group_id = leader
     create_payload = {
@@ -754,7 +910,8 @@ async def test_edit_event_capacity_below_current_registrations(client, leader, m
     }
     create = await client.post("/events", headers=headers, json=create_payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     edit_payload = {"capacity": 0}
@@ -765,7 +922,7 @@ async def test_edit_event_capacity_below_current_registrations(client, leader, m
 # ==== browse events ====
 
 @pytest.mark.asyncio
-async def test_browse_events_returns_published_events(client, leader, outsider):
+async def test_browse_events_returns_published_events(client, leader, outsider, tenant_admin):
     """Verify that browsing events returns a published event to a member"""
     leader_headers, group_id = leader
     payload = {
@@ -778,7 +935,8 @@ async def test_browse_events_returns_published_events(client, leader, outsider):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     response = await client.get("/events", headers=outsider)
     assert response.status_code == 200
@@ -787,7 +945,7 @@ async def test_browse_events_returns_published_events(client, leader, outsider):
 
 
 @pytest.mark.asyncio
-async def test_browse_events_search_matches_title(client, leader, outsider):
+async def test_browse_events_search_matches_title(client, leader, outsider, tenant_admin):
     """Confirm that the search filter matches an event by its title"""
     leader_headers, group_id = leader
     payload = {
@@ -800,7 +958,8 @@ async def test_browse_events_search_matches_title(client, leader, outsider):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     response = await client.get("/events", headers=outsider, params={"search": "Line Follower"})
     assert response.status_code == 200
@@ -808,7 +967,7 @@ async def test_browse_events_search_matches_title(client, leader, outsider):
 
 
 @pytest.mark.asyncio
-async def test_browse_events_search_no_match_returns_empty(client, leader, outsider):
+async def test_browse_events_search_no_match_returns_empty(client, leader, outsider, tenant_admin):
     """Confirm that the search filter returns an empty list when nothing matches"""
     leader_headers, group_id = leader
     payload = {
@@ -821,7 +980,8 @@ async def test_browse_events_search_no_match_returns_empty(client, leader, outsi
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     response = await client.get("/events", headers=outsider, params={"search": "Zumba"})
     assert response.status_code == 200
@@ -927,7 +1087,7 @@ async def test_browse_events_lowercase_status_fails(client, admin_token):
 
 
 @pytest.mark.asyncio
-async def test_browse_events_upcoming_only_combined_with_group_id(client, db_session, leader, outsider):
+async def test_browse_events_upcoming_only_combined_with_group_id(client, db_session, leader, outsider, tenant_admin):
     """Verify that upcoming_only and group_id filters can be combined"""
     from app.models import Event
 
@@ -942,7 +1102,8 @@ async def test_browse_events_upcoming_only_combined_with_group_id(client, db_ses
     }
     create = await client.post("/events", headers=leader_headers, json=create_payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     response = await client.get(
         "/events", headers=outsider, params={"group_id": group_id, "upcoming_only": "true"}
@@ -984,7 +1145,7 @@ async def test_browse_events_status_filter_ignored_for_members(client, leader, o
 # ==== view event ====
 
 @pytest.mark.asyncio
-async def test_view_event_shows_seats_left(client, leader, outsider):
+async def test_view_event_shows_seats_left(client, leader, outsider, tenant_admin):
     """Verify that event detail reports capacity, registration count and seats left"""
     leader_headers, group_id = leader
     payload = {
@@ -998,7 +1159,8 @@ async def test_view_event_shows_seats_left(client, leader, outsider):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     response = await client.get(f"/events/{event_id}", headers=outsider)
     assert response.status_code == 200
@@ -1061,7 +1223,7 @@ async def test_view_draft_event_by_outsider_fails(client, leader, outsider):
 # ==== register for event ====
 
 @pytest.mark.asyncio
-async def test_register_success(client, leader, member):
+async def test_register_success(client, leader, member, tenant_admin):
     """Verify that an approved group member can register for a published event"""
     leader_headers, group_id = leader
     payload = {
@@ -1075,7 +1237,8 @@ async def test_register_success(client, leader, member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     response = await client.post(f"/events/{event_id}/register", headers=member)
     assert response.status_code == 200
@@ -1088,7 +1251,7 @@ async def test_register_success(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_view_event_reflects_own_registration(client, leader, member):
+async def test_view_event_reflects_own_registration(client, leader, member, tenant_admin):
     """Confirm that event detail marks the caller as registered after they register"""
     leader_headers, group_id = leader
     payload = {
@@ -1102,7 +1265,8 @@ async def test_view_event_reflects_own_registration(client, leader, member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     registration = await client.post(f"/events/{event_id}/register", headers=member)
     registration_id = registration.json()["registration_id"]
 
@@ -1136,7 +1300,7 @@ async def test_register_for_draft_event_fails(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_register_for_cancelled_event_fails(client, leader, member):
+async def test_register_for_cancelled_event_fails(client, leader, member, tenant_admin):
     """Confirm that registration is rejected once the event has been cancelled"""
     leader_headers, group_id = leader
     payload = {
@@ -1149,7 +1313,8 @@ async def test_register_for_cancelled_event_fails(client, leader, member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.patch(f"/events/{event_id}/cancel", headers=leader_headers)
 
     response = await client.post(f"/events/{event_id}/register", headers=member)
@@ -1158,7 +1323,7 @@ async def test_register_for_cancelled_event_fails(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_register_by_non_member_fails(client, leader, outsider):
+async def test_register_by_non_member_fails(client, leader, outsider, tenant_admin):
     """Ensure that a member who is not an approved member of the group cannot register"""
     leader_headers, group_id = leader
     payload = {
@@ -1171,7 +1336,8 @@ async def test_register_by_non_member_fails(client, leader, outsider):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     response = await client.post(f"/events/{event_id}/register", headers=outsider)
     assert response.status_code == 403
@@ -1179,7 +1345,7 @@ async def test_register_by_non_member_fails(client, leader, outsider):
 
 
 @pytest.mark.asyncio
-async def test_register_twice_fails(client, leader, member):
+async def test_register_twice_fails(client, leader, member, tenant_admin):
     """Confirm that registering twice for the same event is rejected"""
     leader_headers, group_id = leader
     payload = {
@@ -1192,7 +1358,8 @@ async def test_register_twice_fails(client, leader, member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     response = await client.post(f"/events/{event_id}/register", headers=member)
@@ -1201,7 +1368,7 @@ async def test_register_twice_fails(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_register_when_full_fails(client, leader, member, outsider):
+async def test_register_when_full_fails(client, leader, member, outsider, tenant_admin):
     """Confirm that registration is rejected once the event has reached its capacity"""
     leader_headers, group_id = leader
     join = await client.post(f"/groups/{group_id}/join", headers=outsider)
@@ -1223,7 +1390,8 @@ async def test_register_when_full_fails(client, leader, member, outsider):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     first = await client.post(f"/events/{event_id}/register", headers=member)
     assert first.status_code == 200
@@ -1234,7 +1402,7 @@ async def test_register_when_full_fails(client, leader, member, outsider):
 
 
 @pytest.mark.asyncio
-async def test_register_without_token_fails(client, leader):
+async def test_register_without_token_fails(client, leader, tenant_admin):
     """Ensure that registering is rejected when no access token is supplied"""
     leader_headers, group_id = leader
     payload = {
@@ -1247,7 +1415,8 @@ async def test_register_without_token_fails(client, leader):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     response = await client.post(f"/events/{event_id}/register")
     assert response.status_code == 401
@@ -1255,7 +1424,7 @@ async def test_register_without_token_fails(client, leader):
 
 
 @pytest.mark.asyncio
-async def test_register_after_event_started_fails(client, db_session, leader, member):
+async def test_register_after_event_started_fails(client, db_session, leader, member, tenant_admin):
     """Confirm that registration is rejected once the event's start time has passed"""
     from app.models import Event
 
@@ -1270,7 +1439,8 @@ async def test_register_after_event_started_fails(client, db_session, leader, me
     }
     create = await client.post("/events", headers=leader_headers, json=create_payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     event = await db_session.get(Event, event_id)
     event.starts_at = datetime.now(timezone.utc) - timedelta(hours=1)
@@ -1285,7 +1455,7 @@ async def test_register_after_event_started_fails(client, db_session, leader, me
 # ==== unregister from event ====
 
 @pytest.mark.asyncio
-async def test_unregister_success(client, leader, member):
+async def test_unregister_success(client, leader, member, tenant_admin):
     """Verify that a registered member can cancel their registration"""
     leader_headers, group_id = leader
     payload = {
@@ -1298,7 +1468,8 @@ async def test_unregister_success(client, leader, member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     response = await client.delete(f"/events/{event_id}/register", headers=member)
@@ -1309,7 +1480,7 @@ async def test_unregister_success(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_unregister_frees_a_seat(client, leader, member, outsider):
+async def test_unregister_frees_a_seat(client, leader, member, outsider, tenant_admin):
     """Confirm that cancelling a registration releases the seat for another member"""
     leader_headers, group_id = leader
     join = await client.post(f"/groups/{group_id}/join", headers=outsider)
@@ -1331,7 +1502,8 @@ async def test_unregister_frees_a_seat(client, leader, member, outsider):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
     blocked = await client.post(f"/events/{event_id}/register", headers=outsider)
     assert blocked.status_code == 409
@@ -1342,7 +1514,7 @@ async def test_unregister_frees_a_seat(client, leader, member, outsider):
 
 
 @pytest.mark.asyncio
-async def test_unregister_without_registration_fails(client, leader, member):
+async def test_unregister_without_registration_fails(client, leader, member, tenant_admin):
     """Confirm that unregistering is rejected when the member never registered"""
     leader_headers, group_id = leader
     payload = {
@@ -1355,7 +1527,8 @@ async def test_unregister_without_registration_fails(client, leader, member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     response = await client.delete(f"/events/{event_id}/register", headers=member)
     assert response.status_code == 404
@@ -1363,7 +1536,7 @@ async def test_unregister_without_registration_fails(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_unregister_after_event_started_fails(client, db_session, leader, member):
+async def test_unregister_after_event_started_fails(client, db_session, leader, member, tenant_admin):
     """Confirm that unregistering is rejected once the event's start time has passed"""
     from app.models import Event
 
@@ -1378,7 +1551,8 @@ async def test_unregister_after_event_started_fails(client, db_session, leader, 
     }
     create = await client.post("/events", headers=leader_headers, json=create_payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     event = await db_session.get(Event, event_id)
@@ -1394,7 +1568,7 @@ async def test_unregister_after_event_started_fails(client, db_session, leader, 
 # ==== participants ====
 
 @pytest.mark.asyncio
-async def test_participants_list_success(client, leader, member):
+async def test_participants_list_success(client, leader, member, tenant_admin):
     """Verify that the leader can list the participants of their event"""
     leader_headers, group_id = leader
     payload = {
@@ -1407,7 +1581,8 @@ async def test_participants_list_success(client, leader, member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     response = await client.get(f"/events/{event_id}/registrations", headers=leader_headers)
@@ -1420,7 +1595,7 @@ async def test_participants_list_success(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_participants_list_by_non_leader_fails(client, leader, member):
+async def test_participants_list_by_non_leader_fails(client, leader, member, tenant_admin):
     """Ensure that a plain member cannot view the participant list"""
     leader_headers, group_id = leader
     payload = {
@@ -1433,7 +1608,8 @@ async def test_participants_list_by_non_leader_fails(client, leader, member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     response = await client.get(f"/events/{event_id}/registrations", headers=member)
     assert response.status_code == 403
@@ -1485,7 +1661,7 @@ async def test_unmark_attendance_resets_result(client, started_event):
 
 
 @pytest.mark.asyncio
-async def test_mark_attendance_before_event_starts_fails(client, leader, member):
+async def test_mark_attendance_before_event_starts_fails(client, leader, member, tenant_admin):
     """Confirm that attendance cannot be marked before the event has started"""
     leader_headers, group_id = leader
     create_payload = {
@@ -1498,7 +1674,8 @@ async def test_mark_attendance_before_event_starts_fails(client, leader, member)
     }
     create = await client.post("/events", headers=leader_headers, json=create_payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     registration = await client.post(f"/events/{event_id}/register", headers=member)
     registration_id = registration.json()["registration_id"]
 
@@ -1539,7 +1716,7 @@ async def test_mark_attendance_by_non_leader_fails(client, started_event, outsid
 
 
 @pytest.mark.asyncio
-async def test_mark_attendance_registration_from_different_event_fails(client, started_event, leader, member):
+async def test_mark_attendance_registration_from_different_event_fails(client, started_event, leader, member, tenant_admin):
     """Confirm that a registration from a different event cannot be marked via this event's attendance route"""
     leader_headers, event_id, _ = started_event
     _, group_id = leader
@@ -1554,7 +1731,8 @@ async def test_mark_attendance_registration_from_different_event_fails(client, s
     }
     other_event = await client.post("/events", headers=leader_headers, json=event_payload)
     other_event_id = other_event.json()["id"]
-    await client.patch(f"/events/{other_event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{other_event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{other_event_id}/publish", headers=tenant_admin)
     other_reg = await client.post(f"/events/{other_event_id}/register", headers=member)
     other_reg_id = other_reg.json()["registration_id"]
 
@@ -1573,7 +1751,7 @@ async def test_mark_attendance_registration_from_different_event_fails(client, s
 # ==== my registrations ====
 
 @pytest.mark.asyncio
-async def test_my_registrations_lists_registered_events(client, leader, member):
+async def test_my_registrations_lists_registered_events(client, leader, member, tenant_admin):
     """Verify that a member can list the events they are registered for"""
     leader_headers, group_id = leader
     create_payload = {
@@ -1586,7 +1764,8 @@ async def test_my_registrations_lists_registered_events(client, leader, member):
     }
     create = await client.post("/events", headers=leader_headers, json=create_payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     response = await client.get("/events/me/registrations", headers=member)
@@ -1688,7 +1867,7 @@ async def test_declare_results_same_registration_for_both_fails(client, two_chec
 
 
 @pytest.mark.asyncio
-async def test_declare_results_winner_not_checked_in_fails(client, db_session, leader, member, second_member):
+async def test_declare_results_winner_not_checked_in_fails(client, db_session, leader, member, second_member, tenant_admin):
     """Confirm that a registration which was never checked in cannot be declared winner"""
     from app.models import Event
     from datetime import datetime, timedelta, timezone
@@ -1704,7 +1883,8 @@ async def test_declare_results_winner_not_checked_in_fails(client, db_session, l
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     checked_in_reg = await client.post(f"/events/{event_id}/register", headers=member)
     checked_in_id = checked_in_reg.json()["registration_id"]

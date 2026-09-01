@@ -277,6 +277,41 @@ async def admin_token(client):
 
 
 @pytest_asyncio.fixture()
+async def tenant_admin(client, db_session, seed_tenant):
+    """
+    A TENANT_ADMIN bound to `seed_tenant`, headers ready for the review step
+    of the content approval workflow (event/announcement/decision
+    submit -> admin approve/reject). Unlike `admin_token`, which signs up an
+    admin with no tenant at all, this one is usable immediately against
+    `seed_tenant`'s own routes: the admin signs up, gets `tenant_id` set
+    directly (the same write `TenantService.onboarding` does, without
+    creating a second tenant), then re-logs in for a token carrying the real
+    tenant_id/tenant_slug claims `verify_tenant_scope` checks.
+    """
+    from sqlalchemy import select
+    from app.models import User
+
+    email = "reviewer@test-university.edu"
+    password = "Admin@1234"
+    payload = {
+        "email": email,
+        "full_name": "Tenant Reviewer",
+        "password": password,
+        "confirm_password": password,
+        "role": "TENANT_ADMIN",
+    }
+    await client.post("/auth/signup", json=payload)
+
+    user = (await db_session.execute(select(User).where(User.email == email))).scalar_one()
+    user.tenant_id = seed_tenant.id
+    await db_session.flush()
+
+    login = await client.post("/auth/login", json={"email": email, "password": password})
+    token = login.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest_asyncio.fixture()
 async def member_token(client, seed_tenant):
     payload = {
         "email": "group.member@knit.edu.in",

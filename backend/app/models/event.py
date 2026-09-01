@@ -7,7 +7,9 @@ from app.core import Base, utcnow
 
 class EventStatus(str, enum.Enum):
     DRAFT = "DRAFT"
+    SUBMITTED = "SUBMITTED"
     PUBLISHED = "PUBLISHED"
+    REJECTED = "REJECTED"
     CANCELLED = "CANCELLED"
 
 
@@ -26,6 +28,14 @@ class Event(Base):
     capacity: Mapped[int | None] = mapped_column()
     image_url: Mapped[str | None] = mapped_column()
     status: Mapped[EventStatus] = mapped_column(Enum(EventStatus))
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # References users.id, not members.id: the actor is a TENANT_ADMIN, who
+    # never gets a Member row (see UserService.signup).
+    approved_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    rejected_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    rejected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    rejection_reason: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                  default=utcnow,
                                                  server_default=func.now())
