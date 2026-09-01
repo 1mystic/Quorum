@@ -68,20 +68,40 @@ in [`docs/EVIDENCE_CONTRACT.md`](docs/EVIDENCE_CONTRACT.md).
 
 ## Architecture
 
-```
-docs/           specification: data spine, evidence contract, stats catalog, vertical manifests
-design/         tokens, logo system, the approved sample pages
-backend/        FastAPI, async SQLAlchemy 2, Postgres with row-level security
-  app/stats/    pure statistical services. no DB, no network, deterministic. this is the engine
-  app/models/   tenant-scoped domain models
-  app/verticals/adapters/   maps a tenant's real tables onto the six canonical streams
-frontend/       Vue 3, Vite, Pinia, one tokenized stylesheet
-reference/      the Campus Connect port source and the VibeCurb design protocols. read-only
+```mermaid
+flowchart TD
+    DOCS["docs/<br/>data spine, evidence contract,<br/>stats catalog, vertical manifests"]
+    DESIGN["design/<br/>tokens, logo system,<br/>approved sample pages"]
+    REF["reference/ (read only)<br/>Campus Connect port source,<br/>VibeCurb design protocols"]
+
+    subgraph BACKEND["backend: FastAPI, async SQLAlchemy 2, Postgres with row-level security"]
+        direction TB
+        API["api/<br/>routes, role checks"]
+        SERVICES["services/<br/>business rules"]
+        REPO["repository/<br/>tenant-scoped reads and writes"]
+        ADAPT["verticals/adapters/<br/>maps real tables onto<br/>the six canonical streams"]
+        STATS["stats/<br/>pure statistical services<br/>no DB, no network, deterministic"]
+
+        API --> SERVICES --> REPO
+        REPO --> ADAPT --> STATS
+    end
+
+    subgraph FRONTEND["frontend: Vue 3, Vite, Pinia"]
+        direction TB
+        VIEWS["views and components"]
+        TOKENS["one tokenized stylesheet"]
+        VIEWS --- TOKENS
+    end
+
+    DOCS -. specifies .-> STATS
+    DESIGN -. styles .-> TOKENS
+    REF -. ported from, historical .-> BACKEND
+    REF -. ported from, historical .-> FRONTEND
+    BACKEND -- "REST, /api/t/{slug}/..." --> FRONTEND
 ```
 
-Layering is `api -> services -> repository` on the backend. Every table carries `tenant_id`, every
-repository read goes through a tenant-scoped base class, and Postgres row-level security backs
-that as defense in depth. Routes are `/api/t/{slug}/...` and the slug in the URL must match the
+Every table carries `tenant_id`, every repository read goes through a tenant-scoped base class,
+and Postgres row-level security backs that as defense in depth. The slug in the URL must match the
 tenant claim in the JWT.
 
 `backend/app/stats/` is pure by rule, not by convention. A test walks every module under it and
