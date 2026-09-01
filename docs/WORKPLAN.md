@@ -86,7 +86,7 @@ whose only definition is inside a media query.
 | C.5 | **Tenant isolation test suite** | reviewer | C.4 | DONE, written and gate-checked offline, not yet run against a live Postgres |
 | C.6 | `app/stats/contracts.py` + `registry.py` + purity lint | statistician | C.4, A.8 | DONE, 81 services registered with method cards, purity lint verified against a planted violation |
 | C.7 | `app/stats/streams/` — canonical dataclasses + RWA and campus adapters | statistician | C.6 | DONE, ledger/decision declared empty pending their models, see CONTEXT constraints |
-| C.8 | `request_flow` domain end to end (Request model, service, API, UI) | backend-porter | C.7 | DONE backend half (model/service/repository/API); UI was already done against fixtures in the frontend breadth pass, see CONTEXT.md |
+| C.8 | `request_flow` domain end to end (Request model, service, API, UI) | backend-porter | C.7 | DONE. Backend half done; UI wired to the real API 2026-09-01 (`RequestsView`/`RequestNewView`/`RequestDetailView`), see CONTEXT.md |
 | C.9 | **Pack 1** implementation: `survival.py`, `spc.py`, `queueing.py` + known-answer tests | statistician | C.7 | DONE, all 19 Pack-1 services real, 122 known-answer tests, censoring regression passes |
 | C.10 | `insight_runs` table + materialization worker + cadence scheduler | backend-porter | C.9 | DONE, worker proven correct against a monkeypatched reducer since `streams/reduce.py` is still unimplemented; see CONTEXT.md |
 | C.11 | Frontend retheme against `design/tokens.css` + `StatisticTile` / `EvidenceCard` components | frontend | B.7, C.6 | DONE, brought forward ahead of B.7/C.6, built against local fixtures pending the real API |
