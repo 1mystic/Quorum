@@ -3,17 +3,21 @@ from app.repository import (
     AnnouncementRepository, GroupRepository, MembershipRepository,
     MemberRepository, UserRepository
 )
-from app.models import Announcement, AnnouncementCategory, GroupStatus, MembershipRole
+from app.models import Announcement, AnnouncementCategory, AnnouncementStatus, GroupStatus, MembershipRole
 from app.schemas import (
     CreateAnnouncementRequest, PinAnnouncementRequest, CreateAnnouncementResponse,
     AnnouncementItem, PinAnnouncementResponse, DeleteAnnouncementResponse,
-    UnreadCountResponse, MarkAnnouncementsReadResponse
+    UnreadCountResponse, MarkAnnouncementsReadResponse, AnnouncementStatusResponse
 )
 from app.exceptions import (
-    AnnouncementNotFoundError, GroupNotFoundError, GroupNotActiveError,
-    NotGroupLeaderError, MemberNotFoundError, TenantNotFoundError
+    AnnouncementNotFoundError, AnnouncementActionNotAllowedError, GroupNotFoundError,
+    GroupNotActiveError, NotGroupLeaderError, MemberNotFoundError, TenantNotFoundError
 )
 from app.core.messages import AnnouncementMessages
+
+# The editable states, same shape as EventService: a draft or a rejected
+# announcement being revised for resubmission.
+_EDITABLE = (AnnouncementStatus.DRAFT, AnnouncementStatus.REJECTED)
 
 
 class AnnouncementService:
@@ -49,16 +53,18 @@ class AnnouncementService:
         return CreateAnnouncementResponse(
             id=announcement.id, group_id=group.id, title=announcement.title,
             category=announcement.category, is_pinned=announcement.is_pinned,
-            message=AnnouncementMessages.POSTED,
+            status=announcement.status, message=AnnouncementMessages.POSTED,
         )
 
     async def feed(self, payload: dict, group_id: int | None = None,
                    category: AnnouncementCategory | None = None, search: str | None = None,
                    limit: int = 50, offset: int = 0) -> list[AnnouncementItem]:
+        # Member-facing feed: nothing goes live without admin approval, so
+        # only PUBLISHED announcements are ever shown here.
         member = await self._get_member(payload)
         rows = await self.announcement_repo.list_for_member(
             member.id, group_id=group_id, category=category, search=search,
-            limit=limit, offset=offset
+            limit=limit, offset=offset, statuses=[AnnouncementStatus.PUBLISHED],
         )
         return self._to_items(rows, member.announcements_seen_at)
 
@@ -104,6 +110,48 @@ class AnnouncementService:
             message=AnnouncementMessages.MARKED_READ,
         )
 
+    async def submit_for_review(self, payload: dict, announcement_id: int) -> AnnouncementStatusResponse:
+        """The author's/leader's step: DRAFT (or a REJECTED one being revised) -> SUBMITTED."""
+        announcement = await self._managed_announcement(payload, announcement_id)
+        if announcement.status not in _EDITABLE:
+            raise AnnouncementActionNotAllowedError(
+                "Only a draft or a rejected announcement can be submitted for review"
+            )
+        await self.announcement_repo.submit_for_review(announcement)
+        return AnnouncementStatusResponse(
+            id=announcement.id, title=announcement.title, status=announcement.status,
+            message=AnnouncementMessages.SUBMITTED,
+        )
+
+    async def approve(self, payload: dict, announcement_id: int) -> AnnouncementStatusResponse:
+        """TenantAdmin-only. Only callable from SUBMITTED, same gate as EventService.publish."""
+        announcement = await self._admin_announcement(payload, announcement_id)
+        if announcement.status != AnnouncementStatus.SUBMITTED:
+            raise AnnouncementActionNotAllowedError(
+                "Only an announcement submitted for review can be approved"
+            )
+        await self.announcement_repo.approve(announcement, self._user_id(payload))
+        return AnnouncementStatusResponse(
+            id=announcement.id, title=announcement.title, status=announcement.status,
+            message=AnnouncementMessages.APPROVED,
+        )
+
+    async def reject(self, payload: dict, announcement_id: int, reason: str) -> AnnouncementStatusResponse:
+        """
+        TenantAdmin-only. Lands on REJECTED with a reason, not a dead end:
+        `submit_for_review` accepts a REJECTED announcement for resubmission.
+        """
+        announcement = await self._admin_announcement(payload, announcement_id)
+        if announcement.status != AnnouncementStatus.SUBMITTED:
+            raise AnnouncementActionNotAllowedError(
+                "Only an announcement submitted for review can be rejected"
+            )
+        await self.announcement_repo.reject(announcement, self._user_id(payload), reason)
+        return AnnouncementStatusResponse(
+            id=announcement.id, title=announcement.title, status=announcement.status,
+            message=AnnouncementMessages.REJECTED, rejection_reason=announcement.rejection_reason,
+        )
+
     @staticmethod
     def _to_items(rows: list[tuple[Announcement, str, str]],
                   seen_at: datetime | None) -> list[AnnouncementItem]:
@@ -120,6 +168,11 @@ class AnnouncementService:
                 is_pinned=announcement.is_pinned,
                 unread=seen_at is None or announcement.created_at > seen_at,
                 created_at=announcement.created_at,
+                status=announcement.status,
+                submitted_at=announcement.submitted_at,
+                approved_at=announcement.approved_at,
+                rejected_at=announcement.rejected_at,
+                rejection_reason=announcement.rejection_reason,
             )
             for announcement, group_name, author_name in rows
         ]
@@ -146,3 +199,16 @@ class AnnouncementService:
         if not await self.membership_repo.is_leader(member.id, announcement.group_id):
             raise NotGroupLeaderError()
         return announcement
+
+    async def _admin_announcement(self, payload: dict, announcement_id: int) -> Announcement:
+        """For approve/reject: tenant match only, no leader check - an admin reviews every group's submissions."""
+        announcement = await self.announcement_repo.get_by_id(announcement_id)
+        if not announcement:
+            raise AnnouncementNotFoundError()
+        if announcement.group.tenant_id != await self._tenant_id(payload):
+            raise AnnouncementNotFoundError()
+        return announcement
+
+    @staticmethod
+    def _user_id(payload: dict) -> int:
+        return int(payload.get("sub"))

@@ -30,7 +30,7 @@ from app.schemas.event_registration import (
 from app.schemas.announcement import (
     CreateAnnouncementRequest, PinAnnouncementRequest, CreateAnnouncementResponse,
     AnnouncementItem, PinAnnouncementResponse, DeleteAnnouncementResponse,
-    UnreadCountResponse, MarkAnnouncementsReadResponse
+    UnreadCountResponse, MarkAnnouncementsReadResponse, AnnouncementStatusResponse
 )
 from app.schemas.request import (
     RaiseRequestRequest, ReplyRequestRequest, RaiseRequestResponse, RequestResponseInfo,

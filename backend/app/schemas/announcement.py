@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
-from app.models import AnnouncementCategory
+from app.models import AnnouncementCategory, AnnouncementStatus
 
 
 class CreateAnnouncementRequest(BaseModel):
@@ -21,6 +21,7 @@ class CreateAnnouncementResponse(BaseModel):
     title: str
     category: AnnouncementCategory
     is_pinned: bool
+    status: AnnouncementStatus
     message: str
 
 
@@ -36,6 +37,19 @@ class AnnouncementItem(BaseModel):
     is_pinned: bool
     unread: bool
     created_at: datetime
+    status: AnnouncementStatus
+    submitted_at: datetime | None = None
+    approved_at: datetime | None = None
+    rejected_at: datetime | None = None
+    rejection_reason: str | None = None
+
+
+class AnnouncementStatusResponse(BaseModel):
+    id: int
+    title: str
+    status: AnnouncementStatus
+    message: str
+    rejection_reason: str | None = None
 
 
 class PinAnnouncementResponse(BaseModel):

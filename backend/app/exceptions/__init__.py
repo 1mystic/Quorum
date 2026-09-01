@@ -16,7 +16,7 @@ from app.exceptions.event import (
     NotGroupMemberError, AttendanceNotAllowedError, NotCheckedInError,
     ResultsAlreadyDeclaredError
 )
-from app.exceptions.announcement import AnnouncementNotFoundError
+from app.exceptions.announcement import AnnouncementNotFoundError, AnnouncementActionNotAllowedError
 from app.exceptions.request import (
     RequestNotFoundError, RequestActionNotAllowedError, RequestCategoryInvalidError,
     RequestAlreadyTerminalError, RequestNotTerminalError, RequestMergeTargetInvalidError

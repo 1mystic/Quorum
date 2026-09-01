@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, Query, Security
 from app.schemas import (
     CreateAnnouncementRequest, PinAnnouncementRequest, CreateAnnouncementResponse,
     AnnouncementItem, PinAnnouncementResponse, DeleteAnnouncementResponse,
-    UnreadCountResponse, MarkAnnouncementsReadResponse
+    UnreadCountResponse, MarkAnnouncementsReadResponse, AnnouncementStatusResponse,
+    RejectContentRequest
 )
 from app.services import AnnouncementService
 from app.core.di import get_announcement_service, get_user_info
@@ -64,6 +65,34 @@ async def mark_announcements_read(
     service: AnnouncementService = Depends(get_announcement_service),
 ):
     return await service.mark_read(payload)
+
+
+@announcement_router.patch("/{announcement_id}/submit-for-review", response_model=AnnouncementStatusResponse)
+async def submit_announcement_for_review(
+    announcement_id: int,
+    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    service: AnnouncementService = Depends(get_announcement_service),
+):
+    return await service.submit_for_review(payload, announcement_id)
+
+
+@announcement_router.patch("/{announcement_id}/approve", response_model=AnnouncementStatusResponse)
+async def approve_announcement(
+    announcement_id: int,
+    payload: dict = Security(get_user_info, scopes=["TENANT_ADMIN"]),
+    service: AnnouncementService = Depends(get_announcement_service),
+):
+    return await service.approve(payload, announcement_id)
+
+
+@announcement_router.patch("/{announcement_id}/reject", response_model=AnnouncementStatusResponse)
+async def reject_announcement(
+    announcement_id: int,
+    data: RejectContentRequest,
+    payload: dict = Security(get_user_info, scopes=["TENANT_ADMIN"]),
+    service: AnnouncementService = Depends(get_announcement_service),
+):
+    return await service.reject(payload, announcement_id, data.reason)
 
 
 @announcement_router.patch("/{announcement_id}/pin", response_model=PinAnnouncementResponse)

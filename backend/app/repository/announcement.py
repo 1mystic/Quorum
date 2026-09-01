@@ -1,11 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import (
-    Announcement, AnnouncementCategory, Group, Membership, MembershipRole,
+    Announcement, AnnouncementCategory, AnnouncementStatus, Group, Membership, MembershipRole,
     MembershipStatus, Member, User
 )
 from sqlalchemy import select, func, or_
 from sqlalchemy.orm import selectinload
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class AnnouncementRepository:
@@ -27,10 +27,29 @@ class AnnouncementRepository:
             body=body,
             category=category,
             is_pinned=is_pinned,
+            status=AnnouncementStatus.DRAFT,
         )
         self.db.add(new_announcement)
         await self.db.flush()
         return new_announcement
+
+    async def submit_for_review(self, announcement: Announcement) -> Announcement:
+        announcement.status = AnnouncementStatus.SUBMITTED
+        announcement.submitted_at = datetime.now(timezone.utc)
+        return announcement
+
+    async def approve(self, announcement: Announcement, approved_by: int) -> Announcement:
+        announcement.status = AnnouncementStatus.PUBLISHED
+        announcement.approved_by = approved_by
+        announcement.approved_at = datetime.now(timezone.utc)
+        return announcement
+
+    async def reject(self, announcement: Announcement, rejected_by: int, reason: str) -> Announcement:
+        announcement.status = AnnouncementStatus.REJECTED
+        announcement.rejected_by = rejected_by
+        announcement.rejected_at = datetime.now(timezone.utc)
+        announcement.rejection_reason = reason
+        return announcement
 
     async def get_by_id(self, announcement_id: int) -> Announcement | None:
         result = await self.db.execute(
@@ -44,7 +63,9 @@ class AnnouncementRepository:
                                group_id: int | None = None,
                                category: AnnouncementCategory | None = None,
                                search: str | None = None, limit: int = 50,
-                               offset: int = 0) -> list[tuple[Announcement, str, str]]:
+                               offset: int = 0,
+                               statuses: list[AnnouncementStatus] | None = None
+                               ) -> list[tuple[Announcement, str, str]]:
         conditions = [
             Membership.member_id == member_id,
             Membership.status == MembershipStatus.APPROVED,
@@ -55,6 +76,8 @@ class AnnouncementRepository:
             conditions.append(Announcement.group_id == group_id)
         if category is not None:
             conditions.append(Announcement.category == category)
+        if statuses is not None:
+            conditions.append(Announcement.status.in_(statuses))
         if search:
             pattern = f"%{search}%"
             conditions.append(
@@ -78,6 +101,7 @@ class AnnouncementRepository:
         conditions = [
             Membership.member_id == member_id,
             Membership.status == MembershipStatus.APPROVED,
+            Announcement.status == AnnouncementStatus.PUBLISHED,
         ]
         if seen_at is not None:
             conditions.append(Announcement.created_at > seen_at)

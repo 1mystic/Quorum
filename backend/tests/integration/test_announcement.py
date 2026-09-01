@@ -86,7 +86,8 @@ async def test_post_announcement_success(client, leader):
     assert body["title"] == "Lab equipment rules"
     assert body["category"] == "RESOURCE"
     assert body["is_pinned"] is False
-    assert body["message"] == "Announcement posted successfully"
+    assert body["status"] == "DRAFT"
+    assert body["message"] == "Announcement created as a draft"
 
 
 @pytest.mark.asyncio
@@ -361,10 +362,181 @@ async def test_post_announcement_without_token_fails(client, leader):
     assert response.json()["detail"] == "Not authenticated"
 
 
+# ==== submit / approve / reject ====
+
+@pytest.mark.asyncio
+async def test_submit_announcement_for_review_success(client, leader):
+    """Verify that a leader can submit a draft announcement for admin review"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Draft to submit",
+        "body": "This announcement is about to be submitted for review",
+        "category": "GENERAL",
+    }
+    posted = await client.post("/announcements", headers=headers, json=payload)
+    announcement_id = posted.json()["id"]
+
+    response = await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "SUBMITTED"
+
+
+@pytest.mark.asyncio
+async def test_draft_announcement_hidden_from_member_feed(client, leader, member):
+    """Confirm that a draft, never submitted or approved, never reaches the member feed"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Still a draft",
+        "body": "This announcement has never been submitted for review",
+        "category": "GENERAL",
+    }
+    posted = await client.post("/announcements", headers=headers, json=payload)
+    announcement_id = posted.json()["id"]
+
+    response = await client.get("/announcements", headers=member)
+    assert response.status_code == 200
+    ids = [item["id"] for item in response.json()]
+    assert announcement_id not in ids
+
+
+@pytest.mark.asyncio
+async def test_submitted_announcement_still_hidden_until_approved(client, leader, member):
+    """Confirm that a submitted-but-not-yet-approved announcement stays out of the member feed"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Awaiting review",
+        "body": "This announcement has been submitted but not approved",
+        "category": "GENERAL",
+    }
+    posted = await client.post("/announcements", headers=headers, json=payload)
+    announcement_id = posted.json()["id"]
+    await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+
+    response = await client.get("/announcements", headers=member)
+    assert response.status_code == 200
+    ids = [item["id"] for item in response.json()]
+    assert announcement_id not in ids
+
+
+@pytest.mark.asyncio
+async def test_approve_announcement_success(client, leader, member, tenant_admin):
+    """Verify that a tenant admin can approve a submitted announcement, making it visible to members"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Ready for approval",
+        "body": "This announcement is ready for a tenant admin to approve",
+        "category": "GENERAL",
+    }
+    posted = await client.post("/announcements", headers=headers, json=payload)
+    announcement_id = posted.json()["id"]
+    await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+
+    response = await client.patch(f"/announcements/{announcement_id}/approve", headers=tenant_admin)
+    assert response.status_code == 200
+    assert response.json()["status"] == "PUBLISHED"
+
+    feed = await client.get("/announcements", headers=member)
+    ids = [item["id"] for item in feed.json()]
+    assert announcement_id in ids
+
+
+@pytest.mark.asyncio
+async def test_approve_draft_announcement_fails(client, leader, tenant_admin):
+    """Confirm that a draft announcement cannot be approved before it is submitted"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Not yet submitted",
+        "body": "This announcement was never submitted for review",
+        "category": "GENERAL",
+    }
+    posted = await client.post("/announcements", headers=headers, json=payload)
+    announcement_id = posted.json()["id"]
+
+    response = await client.patch(f"/announcements/{announcement_id}/approve", headers=tenant_admin)
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_approve_announcement_by_non_admin_fails(client, leader):
+    """Ensure that a group leader cannot approve their own submission"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Self approval attempt",
+        "body": "A leader should not be able to approve their own announcement",
+        "category": "GENERAL",
+    }
+    posted = await client.post("/announcements", headers=headers, json=payload)
+    announcement_id = posted.json()["id"]
+    await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+
+    response = await client.patch(f"/announcements/{announcement_id}/approve", headers=headers)
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_reject_announcement_success_and_resubmit(client, leader, member, tenant_admin):
+    """A rejection carries a reason and returns the announcement to a resubmittable state"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Needs rework",
+        "body": "This announcement will be rejected and then revised",
+        "category": "GENERAL",
+    }
+    posted = await client.post("/announcements", headers=headers, json=payload)
+    announcement_id = posted.json()["id"]
+    await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+
+    response = await client.patch(
+        f"/announcements/{announcement_id}/reject", headers=tenant_admin,
+        json={"reason": "Please cite the source of this claim"},
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "REJECTED"
+    assert response.json()["rejection_reason"] == "Please cite the source of this claim"
+
+    feed = await client.get("/announcements", headers=member)
+    assert announcement_id not in [item["id"] for item in feed.json()]
+
+    resubmit = await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+    assert resubmit.status_code == 200
+    assert resubmit.json()["status"] == "SUBMITTED"
+
+    approve = await client.patch(f"/announcements/{announcement_id}/approve", headers=tenant_admin)
+    assert approve.status_code == 200
+    assert approve.json()["status"] == "PUBLISHED"
+
+
+@pytest.mark.asyncio
+async def test_reject_announcement_not_submitted_fails(client, leader, tenant_admin):
+    """Confirm that a draft announcement cannot be rejected before it is submitted"""
+    headers, group_id = leader
+    payload = {
+        "group_id": group_id,
+        "title": "Not yet submitted",
+        "body": "This announcement was never submitted for review",
+        "category": "GENERAL",
+    }
+    posted = await client.post("/announcements", headers=headers, json=payload)
+    announcement_id = posted.json()["id"]
+
+    response = await client.patch(
+        f"/announcements/{announcement_id}/reject", headers=tenant_admin, json={"reason": "Too early"}
+    )
+    assert response.status_code == 403
+
+
 # ==== feed ====
 
 @pytest.mark.asyncio
-async def test_feed_returns_approved_member_announcements(client, leader, member):
+async def test_feed_returns_approved_member_announcements(client, leader, member, tenant_admin):
     """Verify that an approved member sees announcements from their joined group in the feed"""
     headers, group_id = leader
     payload = {
@@ -375,6 +547,8 @@ async def test_feed_returns_approved_member_announcements(client, leader, member
     }
     posted = await client.post("/announcements", headers=headers, json=payload)
     announcement_id = posted.json()["id"]
+    await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+    await client.patch(f"/announcements/{announcement_id}/approve", headers=tenant_admin)
 
     response = await client.get("/announcements", headers=member)
     assert response.status_code == 200
@@ -418,7 +592,7 @@ async def test_feed_empty_for_member_with_no_groups(client, outsider):
 
 
 @pytest.mark.asyncio
-async def test_feed_pinned_announcements_appear_first(client, leader, member):
+async def test_feed_pinned_announcements_appear_first(client, leader, member, tenant_admin):
     """Verify that pinned announcements are ordered before unpinned ones in the feed"""
     headers, group_id = leader
     unpinned_payload = {
@@ -429,6 +603,8 @@ async def test_feed_pinned_announcements_appear_first(client, leader, member):
     }
     unpinned = await client.post("/announcements", headers=headers, json=unpinned_payload)
     unpinned_id = unpinned.json()["id"]
+    await client.patch(f"/announcements/{unpinned_id}/submit-for-review", headers=headers)
+    await client.patch(f"/announcements/{unpinned_id}/approve", headers=tenant_admin)
 
     pinned_payload = {
         "group_id": group_id,
@@ -439,6 +615,8 @@ async def test_feed_pinned_announcements_appear_first(client, leader, member):
     }
     pinned = await client.post("/announcements", headers=headers, json=pinned_payload)
     pinned_id = pinned.json()["id"]
+    await client.patch(f"/announcements/{pinned_id}/submit-for-review", headers=headers)
+    await client.patch(f"/announcements/{pinned_id}/approve", headers=tenant_admin)
 
     response = await client.get("/announcements", headers=member)
     assert response.status_code == 200
@@ -447,7 +625,7 @@ async def test_feed_pinned_announcements_appear_first(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_feed_filter_by_group_id(client, leader, member):
+async def test_feed_filter_by_group_id(client, leader, member, tenant_admin):
     """Verify that filtering the feed by group_id returns only that group's announcements"""
     headers, group_id = leader
     payload = {
@@ -458,6 +636,8 @@ async def test_feed_filter_by_group_id(client, leader, member):
     }
     posted = await client.post("/announcements", headers=headers, json=payload)
     announcement_id = posted.json()["id"]
+    await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+    await client.patch(f"/announcements/{announcement_id}/approve", headers=tenant_admin)
 
     response = await client.get("/announcements", headers=member, params={"group_id": group_id})
     assert response.status_code == 200
@@ -466,7 +646,7 @@ async def test_feed_filter_by_group_id(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_feed_filter_by_category(client, leader, member):
+async def test_feed_filter_by_category(client, leader, member, tenant_admin):
     """Verify that filtering the feed by category returns only matching announcements"""
     headers, group_id = leader
     resource_payload = {
@@ -477,6 +657,8 @@ async def test_feed_filter_by_category(client, leader, member):
     }
     resource = await client.post("/announcements", headers=headers, json=resource_payload)
     resource_id = resource.json()["id"]
+    await client.patch(f"/announcements/{resource_id}/submit-for-review", headers=headers)
+    await client.patch(f"/announcements/{resource_id}/approve", headers=tenant_admin)
 
     general_payload = {
         "group_id": group_id,
@@ -486,6 +668,8 @@ async def test_feed_filter_by_category(client, leader, member):
     }
     general = await client.post("/announcements", headers=headers, json=general_payload)
     general_id = general.json()["id"]
+    await client.patch(f"/announcements/{general_id}/submit-for-review", headers=headers)
+    await client.patch(f"/announcements/{general_id}/approve", headers=tenant_admin)
 
     response = await client.get("/announcements", headers=member, params={"category": "RESOURCE"})
     assert response.status_code == 200
@@ -495,7 +679,7 @@ async def test_feed_filter_by_category(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_feed_search_matches_title(client, leader, member):
+async def test_feed_search_matches_title(client, leader, member, tenant_admin):
     """Verify that the search filter matches an announcement by its title"""
     headers, group_id = leader
     payload = {
@@ -506,6 +690,8 @@ async def test_feed_search_matches_title(client, leader, member):
     }
     posted = await client.post("/announcements", headers=headers, json=payload)
     announcement_id = posted.json()["id"]
+    await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+    await client.patch(f"/announcements/{announcement_id}/approve", headers=tenant_admin)
 
     response = await client.get("/announcements", headers=member, params={"search": "equipment"})
     assert response.status_code == 200
@@ -514,7 +700,7 @@ async def test_feed_search_matches_title(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_feed_search_matches_body(client, leader, member):
+async def test_feed_search_matches_body(client, leader, member, tenant_admin):
     """Verify that the search filter matches an announcement by its body text"""
     headers, group_id = leader
     payload = {
@@ -525,6 +711,8 @@ async def test_feed_search_matches_body(client, leader, member):
     }
     posted = await client.post("/announcements", headers=headers, json=payload)
     announcement_id = posted.json()["id"]
+    await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+    await client.patch(f"/announcements/{announcement_id}/approve", headers=tenant_admin)
 
     response = await client.get("/announcements", headers=member, params={"search": "soldering"})
     assert response.status_code == 200
@@ -613,7 +801,7 @@ async def test_mine_without_token_fails(client):
 # ==== unread count ====
 
 @pytest.mark.asyncio
-async def test_unread_count_reflects_new_announcement(client, leader, member):
+async def test_unread_count_reflects_new_announcement(client, leader, member, tenant_admin):
     """Verify that unread-count increases after a new announcement is posted"""
     headers, group_id = leader
     before = await client.get("/announcements/unread-count", headers=member)
@@ -626,7 +814,10 @@ async def test_unread_count_reflects_new_announcement(client, leader, member):
         "body": "This announcement should increase the unread count",
         "category": "GENERAL",
     }
-    await client.post("/announcements", headers=headers, json=payload)
+    posted = await client.post("/announcements", headers=headers, json=payload)
+    announcement_id = posted.json()["id"]
+    await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+    await client.patch(f"/announcements/{announcement_id}/approve", headers=tenant_admin)
 
     after = await client.get("/announcements/unread-count", headers=member)
     assert after.status_code == 200
@@ -669,7 +860,7 @@ async def test_mark_read_all_success(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_new_announcement_after_read_all_is_unread_again(client, db_session, leader, member):
+async def test_new_announcement_after_read_all_is_unread_again(client, db_session, leader, member, tenant_admin):
     """Confirm that an announcement posted after read-all is marked unread"""
     from datetime import datetime, timedelta, timezone
     from app.models import Announcement
@@ -692,6 +883,8 @@ async def test_new_announcement_after_read_all_is_unread_again(client, db_sessio
     }
     posted = await client.post("/announcements", headers=headers, json=second_payload)
     announcement_id = posted.json()["id"]
+    await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+    await client.patch(f"/announcements/{announcement_id}/approve", headers=tenant_admin)
 
     announcement = await db_session.get(Announcement, announcement_id)
     announcement.created_at = datetime.now(timezone.utc) + timedelta(seconds=5)
@@ -938,7 +1131,7 @@ async def test_feed_offset_negative_fails(client, member):
 
 
 @pytest.mark.asyncio
-async def test_feed_limit_caps_returned_items(client, leader, member):
+async def test_feed_limit_caps_returned_items(client, leader, member, tenant_admin):
     """Confirm that limit actually caps the number of announcements returned, not just accepted"""
     headers, group_id = leader
     for i in range(3):
@@ -948,7 +1141,10 @@ async def test_feed_limit_caps_returned_items(client, leader, member):
             "body": f"Announcement number {i} used to test the limit cap",
             "category": "GENERAL",
         }
-        await client.post("/announcements", headers=headers, json=payload)
+        posted = await client.post("/announcements", headers=headers, json=payload)
+        announcement_id = posted.json()["id"]
+        await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+        await client.patch(f"/announcements/{announcement_id}/approve", headers=tenant_admin)
 
     response = await client.get("/announcements", headers=member, params={"limit": 1})
     assert response.status_code == 200
@@ -991,7 +1187,7 @@ async def test_feed_group_id_for_unjoined_group_returns_empty(client, leader, me
 
 
 @pytest.mark.asyncio
-async def test_feed_unread_false_at_exact_seen_at_boundary(client, db_session, leader, member):
+async def test_feed_unread_false_at_exact_seen_at_boundary(client, db_session, leader, member, tenant_admin):
     """Confirm that an announcement created at the exact same instant as seen_at counts as read"""
     from app.models import Announcement, Member
 
@@ -1004,6 +1200,8 @@ async def test_feed_unread_false_at_exact_seen_at_boundary(client, db_session, l
     }
     posted = await client.post("/announcements", headers=headers, json=payload)
     announcement_id = posted.json()["id"]
+    await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+    await client.patch(f"/announcements/{announcement_id}/approve", headers=tenant_admin)
 
     await client.post("/announcements/read-all", headers=member)
 
@@ -1028,7 +1226,7 @@ async def test_feed_unread_false_at_exact_seen_at_boundary(client, db_session, l
 
 
 @pytest.mark.asyncio
-async def test_feed_search_percent_wildcard_behaves_as_wildcard(client, leader, member):
+async def test_feed_search_percent_wildcard_behaves_as_wildcard(client, leader, member, tenant_admin):
     """Confirm that a literal percent sign in the search term is treated as a SQL wildcard, not a literal character"""
     headers, group_id = leader
     payload = {
@@ -1039,6 +1237,8 @@ async def test_feed_search_percent_wildcard_behaves_as_wildcard(client, leader, 
     }
     posted = await client.post("/announcements", headers=headers, json=payload)
     announcement_id = posted.json()["id"]
+    await client.patch(f"/announcements/{announcement_id}/submit-for-review", headers=headers)
+    await client.patch(f"/announcements/{announcement_id}/approve", headers=tenant_admin)
 
     response = await client.get("/announcements", headers=member, params={"search": "100%off"})
     assert response.status_code == 200
