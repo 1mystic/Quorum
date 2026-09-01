@@ -1128,6 +1128,7 @@ _s(
         "is caught."
     ),
     min_n_expr="100 exposures per arm and 10 conversions per arm",
+    implemented=True,
 )
 
 _s(
@@ -1148,11 +1149,15 @@ _s(
     interval="Credible, from the same posteriors. The loss is an expectation over them.",
     refs=("Stucchio (2015) on expected loss", "Berger (1985), Statistical Decision Theory"),
     known=(
-        "The expected-loss integral for Beta posteriors has a closed form, asserted against "
-        "numerical integration to 1e-10, plus the identity that the loss is exactly zero when "
-        "the posteriors are identical."
+        "Stucchio's closed form for the Beta expected-loss integral, asserted against nested "
+        "quadrature of the same integral, plus the exact identity loss(A) - loss(B) = "
+        "E[theta_B] - E[theta_A]. The catalog previously claimed the loss is zero when the "
+        "posteriors are identical: it is not. Two independent Beta(1,1) posteriors leave a loss "
+        "of exactly 1/6 on each side, since E[(V - U)+] = 1/6 for two uniforms. What is zero at "
+        "that point is the DIFFERENCE between the two losses, and that is what is asserted."
     ),
     min_n_expr="inherits the A/B test's floor",
+    implemented=True,
 )
 
 _s(
@@ -1185,9 +1190,14 @@ _s(
         "A theorem: under the null, P(sup_t E_t >= 1/alpha) <= alpha by Ville's inequality. Many "
         "seeded null experiments monitored continuously must keep the empirical false-positive "
         "rate at or below alpha. The negative control is required: a fixed-horizon z-test "
-        "monitored the same way must exceed alpha substantially on the identical fixture."
+        "monitored the same way must exceed alpha substantially on the identical fixture. "
+        "Measured over 1000 seeded null experiments of 1200 exposures each, monitored after "
+        "EVERY observation: the e-value stops 0.0% of the time and the mSPRT 1.0%, against a "
+        "nominal 5%, while the naive z test peeked at every 25 observations stops 23.8% of the "
+        "time on the identical trials."
     ),
     min_n_expr="none by construction; that is the point of an always-valid method",
+    implemented=True,
 )
 
 _s(
@@ -1222,9 +1232,15 @@ _s(
         "against. Asserted instead: exact seed reproducibility, which is the property a committee "
         "actually depends on; cumulative regret growing as O(log T) and staying within a constant "
         "multiple of the Lai-Robbins lower bound, which is a theorem; and beating uniform "
-        "allocation on a seeded fixture without starving an arm below the floor."
+        "allocation on a seeded fixture without starving an arm below the floor. Measured on "
+        "two Bernoulli arms at 0.20 and 0.30, where the Lai-Robbins constant is 0.10 / "
+        "KL(0.2, 0.3) = 3.886: mean regret over 20 seeds rises 6.85, 8.64, 11.01, 12.76, 14.34 "
+        "across horizons 500 to 8000, a slope against log T of 2.70, which is 0.70 of the "
+        "asymptotic constant and under it at every finite horizon as a liminf bound allows. "
+        "Uniform allocation loses 200 at T=4000 where Thompson loses 9.8."
     ),
     min_n_expr="none to run; 30 exposures per arm before the pack acts on the allocation",
+    implemented=True,
 )
 
 _s(
@@ -1248,6 +1264,7 @@ _s(
         "allocation, asserted bit for bit. This is also the test that would fail first if "
         "someone added module-level state to app/stats/, so it doubles as a purity regression."
     ),
+    implemented=True,
 )
 
 _s(

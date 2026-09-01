@@ -2048,9 +2048,20 @@ caught.
 
 The decision-theoretic companion: the expected magnitude of the mistake if you pick each arm now.
 The stopping rule is "expected loss below the threshold of caring", which is a threshold the
-committee sets in the units of the metric, not a significance level. **known answer** the expected
-loss integral for Beta posteriors has a closed form, asserted against numerical integration to
-1e-10, plus the identity that expected loss is zero when the posteriors are identical.
+committee sets in the units of the metric, not a significance level. It is passed as the optional
+`threshold` argument; with no threshold the service reports the stake and says nothing about
+stopping, because the threshold belongs to the committee and is set before the loss is seen.
+
+**known answer** Stucchio's closed form for the Beta expected-loss integral, asserted against
+nested quadrature of the same integral, plus the exact identity
+`loss(A) - loss(B) = E[theta_B] - E[theta_A]`.
+
+**Correction.** This entry previously said the expected loss is zero when the posteriors are
+identical. **That is false.** For two independent Beta(1, 1) posteriors,
+`E[(theta_B - theta_A)^+] = 1/6` exactly, and in general the loss is `E|theta_B - theta_A| / 2` on
+each side: either arm might still be the worse one, and that residual regret is the whole reason to
+keep running. What *is* exactly zero when the posteriors are identical is the **difference** between
+the two losses, which is the identity the test now asserts to 1e-12.
 
 ---
 
@@ -2075,11 +2086,32 @@ if a fixed-horizon test is being monitored sequentially), `exposure-log-complete
 - *interval_meaning:* the confidence sequence covers the true effect at all times simultaneously with probability `1 - alpha`, which is a stronger and different guarantee from a fixed-sample interval. It is correspondingly wider, and the card explains why that width is the price of being allowed to look.
 - *references:* Ville (1939). Howard, Ramdas, McAuliffe and Sekhon (2021) Annals of Statistics 49:1055. Johari, Koomen, Pekelis and Walsh (2022) on always-valid inference.
 
+**method** Two always-valid constructions and one refusal. `method="evalue"` is Robbins' normal
+mixture over the Horvitz-Thompson contrast
+`psi_i = y_i (1{B}/pi_B - 1{A}/pi_A)`, which is exactly mean zero under the declared randomisation
+and bounded, so Hoeffding's lemma makes it sub-Gaussian and `E_t = sqrt(rho/(V_t+rho))
+exp(S_t^2 / 2(V_t+rho))` is a nonnegative supermartingale at every finite n. `method="msprt"` is the
+same mixture with the running empirical variance in place of the worst-case proxy, which is the
+Johari, Koomen, Pekelis and Walsh construction: tighter, and valid asymptotically rather than
+exactly, which the envelope says in a WARN. The mixture parameter `rho` is not a magic number: it is
+solved so the boundary is tightest at the declared `target_n`, from the fixed point
+`u = 2 log(1/alpha) + log(1 + u)`, and the test finds that minimum numerically on a grid.
+
+`method="fixed_horizon_z"` runs the naive rule and then **refuses to certify it** with a blocking
+check, because "stop the first time p < 0.05" is what everyone actually does and a service that
+pretends otherwise teaches nothing.
+
 **known answer** A theorem: under the null, `P(sup_t E_t >= 1/alpha) <= alpha` by Ville's
 inequality. The test simulates many seeded null experiments with continuous monitoring and asserts
 the empirical false-positive rate is at or below alpha within binomial tolerance. The negative
 control is required: **a fixed-horizon z-test monitored the same way must exceed alpha
 substantially** on the identical fixture, which proves the guarantee is doing work.
+
+**Measured.** Over 1000 seeded null experiments of 1200 exposures each, monitored after *every*
+observation: the e-value stops **0.0%** of the time and the mSPRT **1.0%**, against a nominal 5%.
+The naive z test, peeked at every 25 observations on the identical trials, stops **23.8%** of the
+time. Power is the price of the exact bound: on a 0.20 against 0.30 contrast the e-value stops in
+over 90% of runs by 8000 exposures where the mSPRT is there by 2000, and the Method Card says so.
 
 ---
 
@@ -2118,6 +2150,21 @@ Lai-Robbins lower bound `sum(delta_i / KL(p_i, p*)) * log T` across seeded runs.
 Thompson sampling must beat uniform allocation on cumulative reward on the same seeded fixture, and
 must not starve an arm below the floor. The regret bound is a theorem and therefore a real external
 truth; the rest are constructions and are labelled so in the Method Card.
+
+**Measured.** Two Bernoulli arms at 0.20 and 0.30, where `KL(0.2, 0.3) = 0.025732` nats and the
+Lai-Robbins constant is `0.10 / 0.025732 = 3.886`. Mean regret over 20 seeds: **6.85, 8.64, 11.01,
+12.76, 14.34** at horizons 500, 1000, 2000, 4000, 8000. Fitted against `log T` that is a slope of
+**2.70**, which is **0.70 of the asymptotic constant**, and the curve sits under `C log T` at every
+finite horizon, which is where a `liminf` bound leaves a finite run. Uniform allocation loses
+**200** at T = 4000 where Thompson loses **9.8**. The 5% floor's cost is asserted against its own
+closed form rather than waved at: forcing `k * floor` of rounds to be uniform must cost
+`floor * gap * T`, predicted **40.0** at T = 8000 and measured **38.5**.
+
+**The randomness is ours.** The Beta draws come from a Marsaglia-Tsang gamma sampler driven only by
+`random.Random(seed).random()`, not from `random.betavariate`. The Mersenne Twister's uniform stream
+is fixed and documented; the distribution helpers on top of it are implementation detail. A
+committee asking in 2029 why the system chose Tuesday evening reminders must get the same allocation
+back, not a different one because the interpreter was upgraded.
 
 ---
 
