@@ -235,7 +235,7 @@ async def test_approve_decision_by_non_admin_fails(client, leader):
     await client.patch(f"/decisions/{decision_id}/submit-for-review", headers=headers)
 
     response = await client.patch(f"/decisions/{decision_id}/approve", headers=headers)
-    assert response.status_code == 401
+    assert response.status_code == 403
 
 
 # ==== reject ====

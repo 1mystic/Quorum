@@ -1423,9 +1423,9 @@ async def test_approve_group_by_member_fails(client, member_token):
     group_id = create.json()["id"]
  
     response = await client.patch(f"/groups/{group_id}/approve", headers={"Authorization": f"Bearer {member_token}"})
-    assert response.status_code == 401
+    assert response.status_code == 403
     body = response.json()
-    assert body["message"] == "Invalid token"
+    assert body["message"] == "You do not have permission for this"
  
  
 @pytest.mark.asyncio
@@ -1638,9 +1638,9 @@ async def test_reject_group_by_member_fails(client, member_token):
     group_id = create.json()["id"]
  
     response = await client.patch(f"/groups/{group_id}/reject", headers={"Authorization": f"Bearer {member_token}"})
-    assert response.status_code == 401
+    assert response.status_code == 403
     body = response.json()
-    assert body["message"] == "Invalid token"
+    assert body["message"] == "You do not have permission for this"
  
  
 @pytest.mark.asyncio

@@ -85,9 +85,9 @@ async def test_onboarding_with_member_token_fails(client):
         json=onboarding_payload,
         headers={"Authorization": f"Bearer {member_token}"}
     )
-    assert response.status_code == 401
+    assert response.status_code == 403
     body = response.json()
-    assert body["message"] == "Invalid token"
+    assert body["message"] == "You do not have permission for this"
 
 
 @pytest.mark.asyncio

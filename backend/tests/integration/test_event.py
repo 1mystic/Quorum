@@ -556,10 +556,10 @@ async def test_publish_event_by_non_admin_fails(client, leader, member):
     await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
 
     response = await client.patch(f"/events/{event_id}/publish", headers=member)
-    assert response.status_code == 401
+    assert response.status_code == 403
 
     response = await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
-    assert response.status_code == 401
+    assert response.status_code == 403
 
 
 # ==== reject event ====
@@ -619,7 +619,7 @@ async def test_reject_event_by_non_admin_fails(client, leader):
     response = await client.patch(
         f"/events/{event_id}/reject", headers=headers, json={"reason": "Not allowed"}
     )
-    assert response.status_code == 401
+    assert response.status_code == 403
 
 
 @pytest.mark.asyncio

@@ -25,8 +25,8 @@ class AccountNotExistError(AppException):
     message = "Account does not exist"
     
 class AuthorizationError(AppException):
-    status_code = 401
-    message = "Invalid token"
+    status_code = 403
+    message = "You do not have permission for this"
 
 class InvalidGoogleTokenError(AppException):
     status_code = 401
