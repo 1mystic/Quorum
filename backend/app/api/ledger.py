@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, Security
+from fastapi import APIRouter, Depends, Header, Security
 
 from app.schemas import (
     CreateDueRequest, DueItem, RecordPaymentRequest, PaymentItem, ReceiptItem,
     AddContributionRequest, ContributionItem, AddExpenseRequest, ExpenseItem,
+    SettleDueRequest,
 )
 from app.services import LedgerService
 from app.core.di import get_ledger_service, get_user_info
@@ -36,13 +37,30 @@ async def record_payment(
     return await service.record_payment(payload, data)
 
 
-@ledger_router.patch("/payments/{payment_id}/verify", response_model=PaymentItem)
+@ledger_router.patch("/payments/{payment_id}/verify", response_model=PaymentItem,
+                     description="Row-locked and idempotent: a repeated call with the same "
+                                 "Idempotency-Key header returns the original result rather "
+                                 "than processing twice.")
 async def verify_payment(
     payment_id: int,
     payload: dict = Security(get_user_info, scopes=["MEMBER"]),
     service: LedgerService = Depends(get_ledger_service),
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
 ):
-    return await service.verify_payment(payload, payment_id)
+    return await service.verify_payment(payload, payment_id, idempotency_key)
+
+
+@ledger_router.patch("/dues/{due_id}/settle", response_model=DueItem,
+                     description="Direct settlement (paid off-book, waived, written off), "
+                                 "outside a payment. Row-locked and idempotent, same as verify.")
+async def settle_due(
+    due_id: int,
+    data: SettleDueRequest,
+    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    service: LedgerService = Depends(get_ledger_service),
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
+):
+    return await service.settle_due(payload, due_id, data, idempotency_key)
 
 
 @ledger_router.post("/payments/{payment_id}/receipt", response_model=ReceiptItem)

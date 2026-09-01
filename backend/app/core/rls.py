@@ -37,6 +37,7 @@ TENANT_SCOPED_TABLES = [
     "decisions",
     "decision_options",
     "ballots",
+    "idempotency_records",
 ]
 
 POLICY_NAME = "tenant_isolation"

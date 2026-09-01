@@ -113,6 +113,7 @@ class LedgerMessages:
     DUE_RAISED = "Due raised"
     PAYMENT_RECORDED = "Payment recorded, awaiting verification"
     PAYMENT_VERIFIED = "Payment verified and settled"
+    DUE_SETTLED = "Due settled"
     RECEIPT_ISSUED = "Receipt issued"
     RECEIPT_COLLECTED = "Receipt marked as collected"
     CONTRIBUTION_ADDED = "Contribution recorded"

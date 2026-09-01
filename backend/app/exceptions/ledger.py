@@ -16,6 +16,11 @@ class PaymentAlreadySettledError(AppException):
     message = "This payment was already verified and settled"
 
 
+class DueAlreadySettledError(AppException):
+    status_code = 409
+    message = "This due was already settled (paid, waived or written off)"
+
+
 class ReceiptAlreadyIssuedError(AppException):
     status_code = 409
     message = "A receipt was already issued for this payment"

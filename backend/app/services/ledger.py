@@ -2,16 +2,21 @@ from app.repository import LedgerRepository, MemberRepository, UserRepository
 from app.schemas import (
     CreateDueRequest, DueItem, RecordPaymentRequest, PaymentItem, ReceiptItem,
     AddContributionRequest, ContributionItem, AddExpenseRequest, ExpenseItem,
-    LedgerActionResponse,
+    LedgerActionResponse, SettleDueRequest,
 )
 from app.exceptions import (
     DueNotFoundError, PaymentNotFoundError, PaymentAlreadySettledError,
     ReceiptAlreadyIssuedError, MemberNotFoundError, TenantNotFoundError,
-    LedgerCategoryInvalidError,
+    LedgerCategoryInvalidError, DueAlreadySettledError,
 )
-from app.models import LedgerStatus
+from app.models import LedgerStatus, DueStatus
 from app.core.messages import LedgerMessages
 from app.verticals.adapters import get_adapter
+
+# The settled/terminal Due statuses: a due already in one of these cannot be
+# re-verified or re-settled, the same "already terminal" idea
+# PaymentAlreadySettledError applies to a Payment.
+_DUE_TERMINAL = (DueStatus.PAID, DueStatus.WAIVED, DueStatus.WRITTEN_OFF)
 
 
 class LedgerService:
@@ -57,15 +62,66 @@ class LedgerService:
         )
         return self._payment_item(payment)
 
-    async def verify_payment(self, payload: dict, payment_id: int) -> PaymentItem:
+    async def verify_payment(self, payload: dict, payment_id: int,
+                             idempotency_key: str | None = None) -> PaymentItem:
+        """
+        Concurrency control, deliberately in this order: (1) idempotency
+        first, a cheap read that lets a genuine retry of the same request
+        short-circuit before it competes for the row lock at all; (2) then
+        `SELECT ... FOR UPDATE` on the payment row, so two different callers
+        verifying the same payment serialize here rather than racing - the
+        second one blocks until the first's transaction commits, then
+        re-reads the now-SETTLED row and raises `PaymentAlreadySettledError`
+        instead of double-crediting the due. `LedgerRepository.verify_payment`
+        additionally locks the due row before recomputing its settled total,
+        covering the related race between two different payments settling
+        the same due at once.
+        """
+        if idempotency_key:
+            cached = await self.ledger_repo.get_idempotent_response("ledger.verify_payment", idempotency_key)
+            if cached is not None:
+                return PaymentItem.model_validate(cached)
+
         verifier = await self._get_member(payload)
-        payment = await self.ledger_repo.get_payment(payment_id)
+        payment = await self.ledger_repo.get_payment_for_update(payment_id)
         if not payment:
             raise PaymentNotFoundError()
         if payment.status == LedgerStatus.SETTLED:
             raise PaymentAlreadySettledError()
         payment = await self.ledger_repo.verify_payment(payment, verifier.id)
-        return self._payment_item(payment)
+        item = self._payment_item(payment)
+
+        if idempotency_key:
+            await self.ledger_repo.store_idempotent_response(
+                "ledger.verify_payment", idempotency_key, item.model_dump(mode="json")
+            )
+        return item
+
+    async def settle_due(self, payload: dict, due_id: int, data: SettleDueRequest,
+                         idempotency_key: str | None = None) -> DueItem:
+        """
+        Direct due settlement (paid off-book, waived, written off), the same
+        concurrency discipline as `verify_payment`: idempotency check first,
+        then a row lock on the due for the check-then-act window.
+        """
+        if idempotency_key:
+            cached = await self.ledger_repo.get_idempotent_response("ledger.settle_due", idempotency_key)
+            if cached is not None:
+                return DueItem.model_validate(cached)
+
+        due = await self.ledger_repo.get_due_for_update(due_id)
+        if not due:
+            raise DueNotFoundError()
+        if due.status in _DUE_TERMINAL:
+            raise DueAlreadySettledError()
+        due = await self.ledger_repo.settle_due(due, data.status)
+        item = self._due_item(due)
+
+        if idempotency_key:
+            await self.ledger_repo.store_idempotent_response(
+                "ledger.settle_due", idempotency_key, item.model_dump(mode="json")
+            )
+        return item
 
     async def issue_receipt(self, payload: dict, payment_id: int) -> ReceiptItem:
         issuer = await self._get_member(payload)

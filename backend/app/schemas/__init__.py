@@ -48,7 +48,7 @@ from app.schemas.ai import ChatMessage, AgentChatRequest, AgentChatResponse
 from app.schemas.ledger import (
     CreateDueRequest, DueItem, RecordPaymentRequest, PaymentItem, ReceiptItem,
     AddContributionRequest, ContributionItem, AddExpenseRequest, ExpenseItem,
-    LedgerActionResponse,
+    LedgerActionResponse, SettleDueRequest,
 )
 from app.schemas.insights import (
     PackSummary, PacksResponse, InsightEnvelopeResponse, InsightHealthResponse,

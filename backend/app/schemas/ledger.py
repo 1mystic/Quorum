@@ -52,6 +52,10 @@ class PaymentItem(BaseModel):
     settled_at: datetime | None
 
 
+class SettleDueRequest(BaseModel):
+    status: DueStatus = Field(..., description="PAID, WAIVED or WRITTEN_OFF; direct settlement outside a payment")
+
+
 class ReceiptItem(BaseModel):
     id: int
     payment_id: int

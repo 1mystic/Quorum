@@ -68,7 +68,18 @@ class ContributionKind(str, enum.Enum):
 
 
 class Due(Base):
-    """A receivable raised against a member. Settled by one or more Payments."""
+    """
+    A receivable raised against a member. Settled by one or more Payments.
+
+    `version` is SQLAlchemy's optimistic-locking column
+    (`__mapper_args__["version_id_col"]`): every UPDATE through the ORM
+    carries a `WHERE version = <the value this session read>` and bumps it,
+    so a writer that skipped the explicit `SELECT ... FOR UPDATE` row lock
+    (see `LedgerRepository.get_due_for_update`) still fails loudly with a
+    `StaleDataError` on a lost update rather than silently overwriting a
+    concurrent change. Money-moving tables only (`Due`, `Payment`), not every
+    model - this is deliberately not a house style.
+    """
     __tablename__ = "dues"
     __table_args__ = (
         Index("ix_dues_member_status", "member_id", "status"),
@@ -86,11 +97,14 @@ class Due(Base):
     due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     status: Mapped[DueStatus] = mapped_column(Enum(DueStatus), default=DueStatus.OPEN)
     reminders_sent: Mapped[int] = mapped_column(default=0, server_default="0")
+    version: Mapped[int] = mapped_column(default=1, server_default="1")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                  default=utcnow, server_default=func.now())
 
     member: Mapped["Member"] = relationship(foreign_keys=[member_id])
     payments: Mapped[list["Payment"]] = relationship(back_populates="due")
+
+    __mapper_args__ = {"version_id_col": version}
 
 
 class Payment(Base):
@@ -127,6 +141,8 @@ class Payment(Base):
     verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     verified_by_id: Mapped[int | None] = mapped_column(ForeignKey("members.id"))
     reconciled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    # Optimistic-locking column, same reasoning as Due.version above.
+    version: Mapped[int] = mapped_column(default=1, server_default="1")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                  default=utcnow, server_default=func.now())
 
@@ -135,6 +151,8 @@ class Payment(Base):
     verified_by: Mapped["Member | None"] = relationship(foreign_keys=[verified_by_id])
     reversal_of: Mapped["Payment | None"] = relationship(remote_side=[id])
     receipt: Mapped["Receipt | None"] = relationship(back_populates="payment", uselist=False)
+
+    __mapper_args__ = {"version_id_col": version}
 
 
 class Receipt(Base):

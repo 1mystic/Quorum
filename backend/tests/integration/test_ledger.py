@@ -109,6 +109,130 @@ async def test_a_due_in_an_undeclared_category_is_rejected(client, rwa_tenant):
 
 
 @pytest.mark.asyncio
+async def test_verify_payment_twice_without_idempotency_key_fails_the_second_time(client, rwa_tenant):
+    """Without an idempotency key, a second verify call on the same payment is a real conflict"""
+    slug = rwa_tenant.slug
+    headers, member_id = await _signup_member(client, slug, "resident3@vaikunth.example")
+
+    due_response = await client.post(
+        tenant_path(slug, "/ledger/dues"), headers=headers,
+        json={"member_id": member_id, "category": "maintenance_dues", "amount_minor": 500000,
+              "due_at": "2026-07-01T00:00:00Z"},
+    )
+    due_id = due_response.json()["id"]
+    payment_response = await client.post(
+        tenant_path(slug, "/ledger/payments"), headers=headers,
+        json={"amount_minor": 500000, "category": "maintenance_dues", "instrument": "upi",
+              "at": "2026-07-03T10:00:00Z", "due_id": due_id},
+    )
+    payment_id = payment_response.json()["id"]
+
+    first = await client.patch(tenant_path(slug, f"/ledger/payments/{payment_id}/verify"), headers=headers)
+    assert first.status_code == 200
+
+    second = await client.patch(tenant_path(slug, f"/ledger/payments/{payment_id}/verify"), headers=headers)
+    assert second.status_code == 409
+    assert second.json()["message"] == "This payment was already verified and settled"
+
+
+@pytest.mark.asyncio
+async def test_verify_payment_idempotency_key_returns_the_original_result(client, rwa_tenant):
+    """A repeated call carrying the same Idempotency-Key returns the original result, not a 409"""
+    slug = rwa_tenant.slug
+    headers, member_id = await _signup_member(client, slug, "resident4@vaikunth.example")
+
+    due_response = await client.post(
+        tenant_path(slug, "/ledger/dues"), headers=headers,
+        json={"member_id": member_id, "category": "maintenance_dues", "amount_minor": 500000,
+              "due_at": "2026-07-01T00:00:00Z"},
+    )
+    due_id = due_response.json()["id"]
+    payment_response = await client.post(
+        tenant_path(slug, "/ledger/payments"), headers=headers,
+        json={"amount_minor": 500000, "category": "maintenance_dues", "instrument": "upi",
+              "at": "2026-07-03T10:00:00Z", "due_id": due_id},
+    )
+    payment_id = payment_response.json()["id"]
+
+    idem_headers = {**headers, "Idempotency-Key": "client-retry-abc123"}
+    first = await client.patch(tenant_path(slug, f"/ledger/payments/{payment_id}/verify"), headers=idem_headers)
+    assert first.status_code == 200
+    first_body = first.json()
+
+    second = await client.patch(tenant_path(slug, f"/ledger/payments/{payment_id}/verify"), headers=idem_headers)
+    assert second.status_code == 200
+    assert second.json() == first_body, "a retried request must get back the exact original result"
+
+
+@pytest.mark.asyncio
+async def test_settle_due_directly_success(client, rwa_tenant):
+    """Verify that a due can be settled directly (waived), without a payment"""
+    slug = rwa_tenant.slug
+    headers, member_id = await _signup_member(client, slug, "resident5@vaikunth.example")
+
+    due_response = await client.post(
+        tenant_path(slug, "/ledger/dues"), headers=headers,
+        json={"member_id": member_id, "category": "maintenance_dues", "amount_minor": 500000,
+              "due_at": "2026-07-01T00:00:00Z"},
+    )
+    due_id = due_response.json()["id"]
+
+    response = await client.patch(
+        tenant_path(slug, f"/ledger/dues/{due_id}/settle"), headers=headers, json={"status": "WAIVED"}
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "WAIVED"
+
+
+@pytest.mark.asyncio
+async def test_settle_due_twice_fails(client, rwa_tenant):
+    """Confirm that a due already settled cannot be settled again"""
+    slug = rwa_tenant.slug
+    headers, member_id = await _signup_member(client, slug, "resident6@vaikunth.example")
+
+    due_response = await client.post(
+        tenant_path(slug, "/ledger/dues"), headers=headers,
+        json={"member_id": member_id, "category": "maintenance_dues", "amount_minor": 500000,
+              "due_at": "2026-07-01T00:00:00Z"},
+    )
+    due_id = due_response.json()["id"]
+    await client.patch(
+        tenant_path(slug, f"/ledger/dues/{due_id}/settle"), headers=headers, json={"status": "WRITTEN_OFF"}
+    )
+
+    response = await client.patch(
+        tenant_path(slug, f"/ledger/dues/{due_id}/settle"), headers=headers, json={"status": "PAID"}
+    )
+    assert response.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_settle_due_idempotency_key_returns_original_result(client, rwa_tenant):
+    """A repeated settle-due call carrying the same key returns the original result"""
+    slug = rwa_tenant.slug
+    headers, member_id = await _signup_member(client, slug, "resident7@vaikunth.example")
+
+    due_response = await client.post(
+        tenant_path(slug, "/ledger/dues"), headers=headers,
+        json={"member_id": member_id, "category": "maintenance_dues", "amount_minor": 500000,
+              "due_at": "2026-07-01T00:00:00Z"},
+    )
+    due_id = due_response.json()["id"]
+
+    idem_headers = {**headers, "Idempotency-Key": "settle-retry-xyz"}
+    first = await client.patch(
+        tenant_path(slug, f"/ledger/dues/{due_id}/settle"), headers=idem_headers, json={"status": "PAID"}
+    )
+    assert first.status_code == 200
+
+    second = await client.patch(
+        tenant_path(slug, f"/ledger/dues/{due_id}/settle"), headers=idem_headers, json={"status": "PAID"}
+    )
+    assert second.status_code == 200
+    assert second.json() == first.json()
+
+
+@pytest.mark.asyncio
 async def test_an_expense_and_a_contribution_can_be_recorded(client, rwa_tenant):
     slug = rwa_tenant.slug
     headers, _ = await _signup_member(client, slug, "treasurer@vaikunth.example")
