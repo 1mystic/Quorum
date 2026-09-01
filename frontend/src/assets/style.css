@@ -236,6 +236,48 @@ a{
 .navgrp > .lbl{
   padding:0 var(--sp4) var(--sp3);
 }
+
+/* Collapsible, directory-tree-style nav groups: the label doubles as a
+   toggle button (a plain <span> label has no click target, a <button>
+   needs its own reset), the chevron rotates open/closed, and the item
+   list's own height animates rather than snapping, matching the same
+   restraint as the mobile drawer's motion. */
+.navgrp-toggle{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:0 var(--sp4) var(--sp3);
+  background:none;
+  border:0;
+  cursor:pointer;
+  width:100%;
+  text-align:left;
+  font:inherit;
+  color:inherit;
+  letter-spacing:inherit;
+  text-transform:inherit;
+}
+.navgrp-toggle:hover{
+  color:var(--accent);
+}
+.navgrp-chevron{
+  flex:none;
+  transition:transform var(--t-hover) var(--ease-snap);
+}
+.navgrp-toggle[aria-expanded="true"] .navgrp-chevron{
+  transform:rotate(90deg);
+}
+.navgrp-items{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  overflow:hidden;
+}
+@media (prefers-reduced-motion: reduce){
+  .navgrp-chevron{
+    transition:none;
+  }
+}
 .ni{
   display:flex;
   align-items:center;

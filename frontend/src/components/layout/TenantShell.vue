@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Menu, X } from 'lucide-vue-next'
+import { Menu, X, ChevronRight } from 'lucide-vue-next'
 import { tenantBySlug, demoTenantList } from '../../fixtures/tenants'
 import { coreNav, insightNav, adminNav } from '../../fixtures/nav'
 import { useAuthStore } from '../../stores/auth'
@@ -34,6 +34,40 @@ const nav = computed(() => [
 
 function isActive(item) {
   return route.path === item.to || route.path.startsWith(item.to + '/')
+}
+
+// Collapsible, directory-tree-style groups: each labelled section (Community,
+// Insights, Admin) opens and closes independently, state keyed by label and
+// kept in localStorage so a collapsed group stays collapsed across visits.
+// A group containing the active route always forces itself open on load, so
+// navigating here never hides the page you are actually on.
+const STORAGE_KEY = 'quorum-nav-collapsed'
+function loadCollapsed() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
+const collapsed = ref(loadCollapsed())
+
+function isCollapsed(group) {
+  if (!group.label) return false
+  if (group.items.some(isActive)) return false
+  return Boolean(collapsed.value[group.label])
+}
+
+function toggleGroup(group) {
+  if (!group.label) return
+  const next = { ...collapsed.value, [group.label]: !isCollapsed(group) }
+  collapsed.value = next
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  } catch {
+    // Private browsing or storage disabled: the toggle still works for this
+    // session, it just does not persist. Not worth surfacing as an error.
+  }
 }
 
 function switchTenant(nextSlug) {
@@ -154,13 +188,22 @@ onBeforeUnmount(() => {
         </button>
       </div>
 
-      <div class="navgrp" v-for="(group, gi) in nav" :key="gi">
-        <span v-if="group.label" class="lbl">{{ group.label }}</span>
-        <router-link
-          v-for="item in group.items" :key="item.name"
-          class="ni" :class="{ on: isActive(item) }"
-          :to="item.to"
-        >{{ item.label }}<span v-if="item.pack" class="c">{{ item.pack }}</span></router-link>
+      <div class="navgrp" v-for="(group, gi) in nav" :key="gi" :class="{ collapsed: isCollapsed(group) }">
+        <button
+          v-if="group.label" type="button" class="lbl navgrp-toggle"
+          :aria-expanded="!isCollapsed(group)"
+          @click="toggleGroup(group)"
+        >
+          <ChevronRight :size="12" class="navgrp-chevron" />
+          {{ group.label }}
+        </button>
+        <div class="navgrp-items" v-show="!isCollapsed(group)">
+          <router-link
+            v-for="item in group.items" :key="item.name"
+            class="ni" :class="{ on: isActive(item) }"
+            :to="item.to"
+          >{{ item.label }}<span v-if="item.pack" class="c">{{ item.pack }}</span></router-link>
+        </div>
       </div>
 
       <div class="side-foot navgrp">
