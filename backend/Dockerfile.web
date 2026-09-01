@@ -1,0 +1,52 @@
+# The light API tier (PLAN.md: "web - light: FastAPI, no scientific stack.
+# Runs anywhere"). Builder stage is intentionally identical to
+# Dockerfile.worker's: today both tiers install the same dependency set
+# (backend/pyproject.toml has no numpy/scipy/pandas/statsmodels/lifelines -
+# every Pack 1-4 service in app/stats/ is written in pure Python on purpose,
+# see docs/STATS_CATALOG.md's known-answer notes). The two Dockerfiles exist
+# as a real split now so that the day a heavier method needs a real
+# scientific library, it is added to the worker's own dependency group and
+# this image never has to ship it. The runtime stages already diverge:
+# `web` serves the API and needs cairosvg's native libs for certificates;
+# `worker` runs the materializer loop and does not.
+
+# ---------- Builder stage ----------
+FROM python:3.12-slim AS builder
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+WORKDIR /app
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-install-project --no-dev
+
+COPY . .
+RUN uv sync --frozen --no-dev
+
+# ---------- Runtime stage ----------
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# cairosvg renders certificates through libcairo, and needs a real font on
+# disk to draw the text with. Only the web tier ever calls that code path.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libcairo2 \
+        fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+COPY --from=builder /app /app
+
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app
+
+RUN chown -R appuser:appuser /app
+USER appuser
+
+EXPOSE 8000
+
+CMD ["sh", "scripts/docker/web-entrypoint.sh"]

@@ -1,0 +1,101 @@
+# One `docker compose up` for a fully working local Quorum: Postgres with
+# the two demo tenants pre-seeded, the API, the materializer worker, and the
+# Vue dev server. See docs/RUNNING_LOCALLY.md for what to expect and the
+# non-Docker path for anyone without Docker.
+#
+# Every credential-shaped value below is a fixed, clearly-fake local-only
+# placeholder (the same convention backend/.env.example already uses) - this
+# file is meant to run with zero setup, not to be a template for a real
+# deployment. Never point these values at a real AWS/SMTP/Neon account.
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: quorum_dev
+    volumes:
+      - quorum_pgdata:/var/lib/postgresql/data
+      - ./deploy/postgres-init.sql:/docker-entrypoint-initdb.d/01-init-quorum-app.sql:ro
+    ports:
+      - "5544:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d quorum_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.web
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://quorum_app:quorum_app_local_password@postgres:5432/quorum_dev
+      TEST_DATABASE_URL: postgresql+asyncpg://quorum_app:quorum_app_local_password@postgres:5432/quorum_test
+      JWT_SECRET_KEY: local-docker-compose-dev-secret-do-not-use-in-production
+      JWT_ALGORITHM: HS256
+      FRONTEND_URL: http://localhost:5173
+      BACKEND_BASE_URL: http://localhost:8000
+      AWS_REGION: ap-south-1
+      S3_BUCKET_NAME: quorum-media
+      AWS_ACCESS_KEY_ID: AKIAIOSFODNN7EXAMPLE
+      AWS_SECRET_ACCESS_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: yourgmail@gmail.com
+      SMTP_PASSWORD: your_16_digit_app_password
+      MAIL_FROM: yourgmail@gmail.com
+    ports:
+      - "8000:8000"
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql+asyncpg://quorum_app:quorum_app_local_password@postgres:5432/quorum_dev
+      TEST_DATABASE_URL: postgresql+asyncpg://quorum_app:quorum_app_local_password@postgres:5432/quorum_test
+      JWT_SECRET_KEY: local-docker-compose-dev-secret-do-not-use-in-production
+      JWT_ALGORITHM: HS256
+      FRONTEND_URL: http://localhost:5173
+      BACKEND_BASE_URL: http://localhost:8000
+      AWS_REGION: ap-south-1
+      S3_BUCKET_NAME: quorum-media
+      AWS_ACCESS_KEY_ID: AKIAIOSFODNN7EXAMPLE
+      AWS_SECRET_ACCESS_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: yourgmail@gmail.com
+      SMTP_PASSWORD: your_16_digit_app_password
+      MAIL_FROM: yourgmail@gmail.com
+      # Short for local demoing so a fresh reader sees the worker do
+      # something without waiting an hour; a real deployment would leave
+      # this at its one-hour default (see materialize_insights.py).
+      MATERIALIZE_INTERVAL_SECONDS: "300"
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - quorum_frontend_node_modules:/app/node_modules
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  quorum_pgdata:
+  quorum_frontend_node_modules:

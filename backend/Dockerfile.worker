@@ -1,0 +1,41 @@
+# The heavy tier (PLAN.md: "worker - heavy: numpy, scipy, pandas,
+# scikit-learn, statsmodels, lifelines. Needs real memory"). See
+# Dockerfile.web's header comment for why the builder stage below is
+# currently identical to it and what would make the two diverge for real.
+#
+# This image runs scripts/materialize_insights.py, the only process that
+# calls into app/stats/ against live data - the API tier only ever reads the
+# insight_runs rows this one writes. It never serves HTTP and never renders
+# a certificate, so it skips the cairo/font packages Dockerfile.web installs.
+
+# ---------- Builder stage ----------
+FROM python:3.12-slim AS builder
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+WORKDIR /app
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-install-project --no-dev
+
+COPY . .
+RUN uv sync --frozen --no-dev
+
+# ---------- Runtime stage ----------
+FROM python:3.12-slim
+
+WORKDIR /app
+
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+COPY --from=builder /app /app
+
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app
+
+RUN chown -R appuser:appuser /app
+USER appuser
+
+CMD ["sh", "scripts/docker/worker-entrypoint.sh"]
