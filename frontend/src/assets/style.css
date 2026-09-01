@@ -7,6 +7,27 @@
    - one declaration per line
    - numbered section banners, searched by label (see STYLE-INDEX.md)
    - mobile-first; wide content scrolls inside its own container
+
+   Breakpoint scale (card frontend-responsive-sweep). CSS custom properties
+   cannot be read inside an @media condition, so this comment is the source
+   of truth; every @media below should cite one of these five numbers unless
+   the rule right above it says why not.
+     mobile   <=480px    phones
+     tablet   481-768px  tablets, large phones landscape
+     laptop   769-1200px small laptops, most desktops
+     desktop  1201-1920px full desktop
+     tv       >1920px    ultra-wide/TV; .content gets a max-width (section 6)
+     so it does not stretch edge to edge
+   Two named exceptions kept off this scale, not merged onto it without a
+   real browser to check against: 1080px (`--bp-nav` in spirit, section 4/33)
+   is the point a 264px sidebar plus readable content genuinely stop fitting
+   side by side, not a tier boundary, and it is now also the mobile/tablet
+   drawer threshold (section 33). 820px (section 34-40, landing only) is
+   where the landing page's own two-column rows (readout, metric bar,
+   footer) need slightly more room than the tablet tier gives them before
+   they stack; 860px and 940px, which were doing the identical "stack this
+   two-column landing row" job at two more arbitrary numbers, are folded
+   onto it below.
    ========================================================================= */
 
 /*  1. Reset and base  */
@@ -255,7 +276,7 @@ a{
   gap:var(--sp5);
   flex-wrap:wrap;
 }
-@media(max-width:720px){
+@media(max-width:768px){
   .topbar{
     padding:var(--sp5);
   }
@@ -286,9 +307,19 @@ a{
   flex-direction:column;
   gap:var(--sp5);
 }
-@media(max-width:720px){
+@media(max-width:768px){
   .content{
     padding:var(--sp5);
+  }
+}
+/* tv tier (>1920px): nothing else here constrains width, so a wide
+   dashboard would otherwise stretch its rows/tables edge to edge past a
+   comfortable reading measure. Same min(px,vw) idea as .wrap, just a wider
+   cap since this holds tables and charts rather than marketing copy. */
+@media(min-width:1921px){
+  .content{
+    width:min(1600px,94vw);
+    margin-inline:auto;
   }
 }
 
@@ -306,7 +337,7 @@ a{
 .r-23{
   grid-template-columns:1fr 2fr;
 }
-@media(max-width:1240px){
+@media(max-width:1200px){
   .r-4{
     grid-template-columns:repeat(2,1fr);
   }
@@ -916,7 +947,7 @@ details.why .body b{
 .toast-move{
   transition:transform var(--t-hover) var(--ease-snap);
 }
-@media(max-width:767px){
+@media(max-width:768px){
   .toast-stack{
     top:12px;
     right:12px;
@@ -1035,7 +1066,7 @@ details.why .body b{
   grid-template-columns:1fr 1fr;
   gap:var(--sp4);
 }
-@media(max-width:520px){
+@media(max-width:480px){
   .form-row{
     grid-template-columns:1fr;
   }
@@ -1905,7 +1936,7 @@ html.qs-active::-webkit-scrollbar{
   gap:var(--sp8);
   align-items:center;
 }
-@media(max-width:940px){
+@media(max-width:820px){
   .uncert{
     grid-template-columns:1fr;
   }
@@ -2024,7 +2055,7 @@ html.qs-active::-webkit-scrollbar{
   grid-template-columns:repeat(3,1fr);
   gap:var(--sp6);
 }
-@media(max-width:860px){
+@media(max-width:820px){
   .steps{
     grid-template-columns:1fr;
   }
