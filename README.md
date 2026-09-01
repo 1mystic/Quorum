@@ -96,30 +96,49 @@ Fastest path, with two demo tenants already seeded and a real statistical worker
 docker compose up
 ```
 
-Then open `http://localhost:5173`. Full details, demo logins, and the manual (no Docker) path in
+Then open `http://localhost:5173` and sign in with one of the seeded demo accounts below.
+
+**Demo logins.** Password for every seeded account, admin and member alike, is **`Demo12345!`**.
+
+| Tenant | Vertical | Admin login | Sample member login |
+|---|---|---|---|
+| Vaikunth Heights | housing society | `admin@vaikunth-heights.demo` | `resident1@vaikunth-heights.demo` |
+| Aavartan Robotics | campus club | `admin@aavartan-robotics.demo` | `member1@aavartan-robotics.demo` |
+
+Member logins run `resident1@...` through `resident60@...` for Vaikunth Heights and `member1@...`
+through `member90@...` for Aavartan Robotics. Every account uses the same `Demo12345!` password.
+Full details, what each tenant contains, and the manual (no Docker) path are in
 [`docs/RUNNING_LOCALLY.md`](docs/RUNNING_LOCALLY.md).
+
+### Manual setup, no Docker
 
 ```bash
 cd backend
 uv sync
+cp .env.example .env   # then fill in the values, see docs/RUNNING_LOCALLY.md
 uv run alembic upgrade head
-uv run python scripts/seed_demo.py   # optional: the two demo tenants
+uv run python scripts/seed_demo.py   # loads the two demo tenants above
 uv run uvicorn main:app --reload
 ```
 
 ```bash
 cd frontend
+cp .env.example .env   # VITE_API_BASE_URL, see .env.example for the default
 npm install
 npm run dev
 ```
+
+Open `http://localhost:5173` and sign in with a demo login from the table above.
+
+### Running the tests
 
 ```bash
 cd backend && uv run pytest
 cd frontend && npm run test
 ```
 
-Copy `backend/.env.example` to `backend/.env` and fill in the values first. Secrets are never
-committed.
+Secrets are never committed. `.env.example` in both `backend/` and `frontend/` is the contract for
+every variable a real deploy needs.
 
 ## Statistical correctness, checked against known answers
 
