@@ -14,7 +14,7 @@ from app.schemas.group import (
     TrendingGroupItem
 )
 from app.schemas.membership import (
-    JoinResponse, RequestActionRequest, RequestActionResponse, PendingRequestItem, MemberItem,
+    JoinResponse, RequestActionRequest, MembershipActionResponse, PendingRequestItem, MemberItem,
     RemoveMemberResponse
 )
 from app.schemas.event import (

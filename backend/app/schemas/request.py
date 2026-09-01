@@ -10,6 +10,7 @@ class RaiseRequestRequest(BaseModel):
     # request_categories), not a fixed Campus Connect enum. See
     # app.verticals.adapters.get_adapter.
     category: str = Field(..., min_length=1, max_length=64)
+    subcategory: str | None = Field(None, max_length=64)
     priority: str | None = Field(None, max_length=32)
     channel: str | None = Field(None, max_length=32)
     location_ref: str | None = Field(None, max_length=64)

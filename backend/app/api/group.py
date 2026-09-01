@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, File, Form, Query, Security, UploadFile
 from app.schemas import (
     CreateGroupRequest, UpdateGroupRequest, CreateGroupResponse, GroupStatusResponse,
-    GroupListItem, GroupDetailResponse, JoinResponse, RequestActionRequest, RequestActionResponse,
+    GroupListItem, GroupDetailResponse, JoinResponse, RequestActionRequest, MembershipActionResponse,
     PendingRequestItem, MemberItem, MyGroupItem, RemoveMemberResponse, TrendingGroupItem
 )
 from app.services import GroupService, MembershipService
@@ -136,7 +136,7 @@ async def pending_requests(
     return await service.pending_requests(payload, group_id)
 
 
-@group_router.patch("/{group_id}/requests/{membership_id}", response_model=RequestActionResponse)
+@group_router.patch("/{group_id}/requests/{membership_id}", response_model=MembershipActionResponse)
 async def handle_request(
     group_id: int,
     membership_id: int,

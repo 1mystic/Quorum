@@ -19,7 +19,7 @@ class RequestActionRequest(BaseModel):
         return self
 
 
-class RequestActionResponse(BaseModel):
+class MembershipActionResponse(BaseModel):
     id: int
     member_id: int
     group_id: int

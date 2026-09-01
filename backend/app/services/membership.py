@@ -4,7 +4,7 @@ from app.repository import (
 )
 from app.models import GroupStatus, MembershipRole, MembershipStatus, NotificationType
 from app.schemas import (
-    JoinResponse, RequestActionRequest, RequestActionResponse, PendingRequestItem, MemberItem,
+    JoinResponse, RequestActionRequest, MembershipActionResponse, PendingRequestItem, MemberItem,
     RemoveMemberResponse
 )
 from app.exceptions import (
@@ -67,7 +67,7 @@ class MembershipService:
         ]
 
     async def handle_request(self, payload: dict, group_id: int, membership_id: int,
-                             data: RequestActionRequest) -> RequestActionResponse:
+                             data: RequestActionRequest) -> MembershipActionResponse:
         member = await self._get_member(payload)
         await self._assert_leader(member.id, group_id)
 
@@ -96,7 +96,7 @@ class MembershipService:
             if approved
             else MembershipMessages.REQUEST_REJECTED
         )
-        return RequestActionResponse(
+        return MembershipActionResponse(
             id=membership.id,
             member_id=membership.member_id,
             group_id=membership.group_id,
