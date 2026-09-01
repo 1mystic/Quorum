@@ -26,6 +26,7 @@ async def leader(client, seed_tenant):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -50,6 +51,7 @@ async def member(client, seed_tenant, leader):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -74,6 +76,7 @@ async def second_member(client, leader):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -97,6 +100,7 @@ async def outsider(client, seed_tenant):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     return {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -144,11 +148,12 @@ async def two_checked_in(client, db_session, leader, member, second_member):
 
 
 @pytest.fixture
-async def certificate_for_member(db_session, two_checked_in):
+async def certificate_for_member(db_session, two_checked_in, seed_tenant):
     """Directly creates a Certificate row for the winner registration from two_checked_in."""
     _, event_id, member_registration_id, _ = two_checked_in
 
     certificate = Certificate(
+        tenant_id=seed_tenant.id,
         registration_id=member_registration_id,
         serial="CC-LFW-2026-00001",
         result=RegistrationResult.WINNER,
@@ -195,7 +200,8 @@ async def test_my_certificates_by_non_member_fails(client, admin_token):
     """Ensure that a non-member cannot access the member certificate list"""
     headers = {"Authorization": f"Bearer {admin_token}"}
     response = await client.get("/certificates/me", headers=headers)
-    assert response.status_code == 401
+    assert response.status_code == 403
+    assert response.json()["message"] == "Tenant mismatch"
 
 
 # ==== verify certificate ====
@@ -263,11 +269,12 @@ async def test_download_certificate_without_token_fails(client, certificate_for_
 # ==== multiple certificates ====
 
 @pytest.mark.asyncio
-async def test_my_certificates_lists_multiple_earned_certificates(client, db_session, two_checked_in, member):
+async def test_my_certificates_lists_multiple_earned_certificates(client, db_session, two_checked_in, member, seed_tenant):
     """Verify that a member with certificates from multiple events receives all of them"""
     _, event_id, member_registration_id, second_registration_id = two_checked_in
 
     first_certificate = Certificate(
+        tenant_id=seed_tenant.id,
         registration_id=member_registration_id,
         serial="CC-LFW-2026-00001",
         result=RegistrationResult.WINNER,
@@ -276,6 +283,7 @@ async def test_my_certificates_lists_multiple_earned_certificates(client, db_ses
     db_session.add(first_certificate)
 
     second_certificate = Certificate(
+        tenant_id=seed_tenant.id,
         registration_id=second_registration_id,
         serial="CC-LFW-2026-00002",
         result=RegistrationResult.RUNNER_UP,
@@ -292,7 +300,7 @@ async def test_my_certificates_lists_multiple_earned_certificates(client, db_ses
 
 
 @pytest.mark.asyncio
-async def test_my_certificates_lists_multiple_events_same_member(client, db_session, leader, member):
+async def test_my_certificates_lists_multiple_events_same_member(client, db_session, leader, member, seed_tenant):
     """Verify that a member's certificates from two different events both appear in their list"""
     leader_headers, group_id = leader
 
@@ -314,6 +322,7 @@ async def test_my_certificates_lists_multiple_events_same_member(client, db_sess
 
     for i, (event_id, registration_id) in enumerate(events):
         certificate = Certificate(
+            tenant_id=seed_tenant.id,
             registration_id=registration_id,
             serial=f"CC-MULTI-2026-0000{i+1}",
             result=RegistrationResult.PARTICIPANT,
@@ -333,10 +342,11 @@ async def test_my_certificates_lists_multiple_events_same_member(client, db_sess
 # ==== result variations ====
 
 @pytest.mark.asyncio
-async def test_verify_certificate_runner_up_result(client, db_session, two_checked_in):
+async def test_verify_certificate_runner_up_result(client, db_session, two_checked_in, seed_tenant):
     """Verify that a RUNNER_UP-result certificate verifies correctly, not just WINNER"""
     _, event_id, _, second_registration_id = two_checked_in
     certificate = Certificate(
+        tenant_id=seed_tenant.id,
         registration_id=second_registration_id,
         serial="CC-LFW-2026-00050",
         result=RegistrationResult.RUNNER_UP,
@@ -351,10 +361,11 @@ async def test_verify_certificate_runner_up_result(client, db_session, two_check
 
 
 @pytest.mark.asyncio
-async def test_verify_certificate_participant_result(client, db_session, two_checked_in):
+async def test_verify_certificate_participant_result(client, db_session, two_checked_in, seed_tenant):
     """Verify that a PARTICIPANT-result certificate verifies correctly, not just WINNER"""
     _, event_id, _, second_registration_id = two_checked_in
     certificate = Certificate(
+        tenant_id=seed_tenant.id,
         registration_id=second_registration_id,
         serial="CC-LFW-2026-00099",
         result=RegistrationResult.PARTICIPANT,
@@ -369,10 +380,11 @@ async def test_verify_certificate_participant_result(client, db_session, two_che
 
 
 @pytest.mark.asyncio
-async def test_download_certificate_runner_up_result(client, db_session, two_checked_in, second_member):
+async def test_download_certificate_runner_up_result(client, db_session, two_checked_in, second_member, seed_tenant):
     """Verify that a RUNNER_UP certificate can be downloaded by its owning member"""
     _, event_id, _, second_registration_id = two_checked_in
     certificate = Certificate(
+        tenant_id=seed_tenant.id,
         registration_id=second_registration_id,
         serial="CC-LFW-2026-00051",
         result=RegistrationResult.RUNNER_UP,

@@ -12,6 +12,7 @@ async def leader(client, seed_tenant):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -36,6 +37,7 @@ async def member(client, seed_tenant, leader):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -59,6 +61,7 @@ async def outsider(client, seed_tenant):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     return {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -255,7 +258,8 @@ async def test_post_announcement_cross_tenant_group_fails(client, leader):
 
     tenant_payload = {
         "name": "Other Announce Tenant",
-        "email_suffix": "otherannounce.edu.in",
+        "slug": "announceme-other-announce-tenant",
+        "vertical": "campus_club",
         "description": "A separate tenant for announcement scoping tests",
     }
     await client.post(
@@ -269,6 +273,7 @@ async def test_post_announcement_cross_tenant_group_fails(client, leader):
         "password": "Leader@123",
         "confirm_password": "Leader@123",
         "role": "MEMBER",
+        "tenant_slug": "announceme-other-announce-tenant",
     }
     other_member_signup = await client.post("/auth/signup", json=other_member_payload)
     other_headers = {"Authorization": f"Bearer {other_member_signup.json()['access_token']}"}
@@ -303,6 +308,7 @@ async def test_post_announcement_pending_group_fails(client,seed_tenant):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -958,6 +964,7 @@ async def test_feed_group_id_for_unjoined_group_returns_empty(client, leader, me
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     signup = await client.post("/auth/signup", json=other_payload)
     other_headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}

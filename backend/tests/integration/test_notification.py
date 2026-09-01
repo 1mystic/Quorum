@@ -17,6 +17,7 @@ async def leader(client, seed_tenant):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -41,6 +42,7 @@ async def member(client, seed_tenant, leader):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -65,6 +67,7 @@ async def second_member(client, seed_tenant, leader):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -88,6 +91,7 @@ async def outsider(client, seed_tenant):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     return {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -401,6 +405,7 @@ async def test_mark_all_notifications_read_zero_when_none_unread(client, seed_te
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}

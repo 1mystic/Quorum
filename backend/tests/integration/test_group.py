@@ -259,11 +259,11 @@ async def test_create_group_with_admin_token_fails(client, admin_token):
         "type": "UNOFFICIAL"
     }
     response = await client.post("/groups", json=payload, headers={"Authorization": f"Bearer {admin_token}"})
-    assert response.status_code == 401
+    assert response.status_code == 403
     body = response.json()
-    assert body["message"] == "Invalid token"
- 
- 
+    assert body["message"] == "Tenant mismatch"
+
+
 @pytest.mark.asyncio
 async def test_create_group_whitespace_only_name_is_accepted(client, member_token):
     """Confirm that a whitespace-only name currently passes validation since it is not trimmed"""
@@ -446,19 +446,25 @@ async def test_browse_groups_scoped_to_own_tenant(client, member_token):
  
     tenant_payload = {
         "name": "Other Browse Tenant",
-        "email_suffix": "otherbrowse.edu.in",
+        "slug": "group-other-browse-tenant",
+        "vertical": "campus_club",
         "description": "A separate tenant for browse scoping tests"
     }
     await client.post(
         "/tenant/onboarding", json=tenant_payload, headers={"Authorization": f"Bearer {other_admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@otherbrowse.edu.in", "password": "Admin@123"}
+    )
+    other_admin_token = login.json()["access_token"]
  
     other_member_payload = {
         "email": "leader@otherbrowse.edu.in",
         "full_name": "Other Browse Leader",
         "password": "Leader@123",
         "confirm_password": "Leader@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "group-other-browse-tenant",
     }
     other_member_signup = await client.post("/auth/signup", json=other_member_payload)
     other_member_token = other_member_signup.json()["access_token"]
@@ -508,19 +514,25 @@ async def test_browse_groups_admin_can_filter_by_status(client, admin_token):
     """Verify that an admin can filter groups by a specific status"""
     tenant_payload = {
         "name": "Status Filter Tenant",
-        "email_suffix": "newtenant.edu",
+        "slug": "group-status-filter-tenant",
+        "vertical": "campus_club",
         "description": "Onboarding the admin's own tenant for the status filter test"
     }
     await client.post(
         "/tenant/onboarding", json=tenant_payload, headers={"Authorization": f"Bearer {admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@newtenant.edu", "password": "Admin@123"}
+    )
+    admin_token = login.json()["access_token"]
 
     member_payload = {
         "email": "leader@newtenant.edu",
         "full_name": "Status Filter Leader",
         "password": "Leader@123",
         "confirm_password": "Leader@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "group-status-filter-tenant",
     }
     member_signup = await client.post("/auth/signup", json=member_payload)
     member_token = member_signup.json()["access_token"]
@@ -643,19 +655,25 @@ async def test_view_group_cross_tenant_returns_404(client, member_token):
  
     tenant_payload = {
         "name": "Other View Tenant",
-        "email_suffix": "otherview.edu.in",
+        "slug": "group-other-view-tenant",
+        "vertical": "campus_club",
         "description": "A separate tenant for view scoping tests"
     }
     await client.post(
         "/tenant/onboarding", json=tenant_payload, headers={"Authorization": f"Bearer {other_admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@otherview.edu.in", "password": "Admin@123"}
+    )
+    other_admin_token = login.json()["access_token"]
  
     other_member_payload = {
         "email": "leader@otherview.edu.in",
         "full_name": "Other View Leader",
         "password": "Leader@123",
         "confirm_password": "Leader@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "group-other-view-tenant",
     }
     other_member_signup = await client.post("/auth/signup", json=other_member_payload)
     other_member_token = other_member_signup.json()["access_token"]
@@ -699,19 +717,25 @@ async def test_view_pending_group_by_admin_includes_head_info(client):
  
     tenant_payload = {
         "name": "Admin View Tenant",
-        "email_suffix": "adminview.edu.in",
+        "slug": "group-admin-view-tenant",
+        "vertical": "campus_club",
         "description": "A tenant used to test admin view of pending groups"
     }
     await client.post(
         "/tenant/onboarding", json=tenant_payload, headers={"Authorization": f"Bearer {admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@adminview.edu.in", "password": "Admin@123"}
+    )
+    admin_token = login.json()["access_token"]
  
     member_payload = {
         "email": "leader@adminview.edu.in",
         "full_name": "Leader Member",
         "password": "Leader@123",
         "confirm_password": "Leader@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "group-admin-view-tenant",
     }
     member_signup = await client.post("/auth/signup", json=member_payload)
     member_token = member_signup.json()["access_token"]
@@ -808,7 +832,8 @@ async def test_update_group_by_non_leader_fails(client, member_token):
         "full_name": "Second Member",
         "password": "Member@123",
         "confirm_password": "Member@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     other_signup = await client.post("/auth/signup", json=other_payload)
     other_token = other_signup.json()["access_token"]
@@ -1218,7 +1243,8 @@ async def test_delete_group_by_non_leader_fails(client, member_token):
         "full_name": "Third Member",
         "password": "Member@123",
         "confirm_password": "Member@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     other_signup = await client.post("/auth/signup", json=other_payload)
     other_token = other_signup.json()["access_token"]
@@ -1291,19 +1317,25 @@ async def test_approve_pending_group_success(client):
  
     tenant_payload = {
         "name": "Approve Tenant",
-        "email_suffix": "approve.edu.in",
+        "slug": "group-approve-tenant",
+        "vertical": "campus_club",
         "description": "A tenant used to test group approval"
     }
     await client.post(
         "/tenant/onboarding", json=tenant_payload, headers={"Authorization": f"Bearer {admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@approve.edu.in", "password": "Admin@123"}
+    )
+    admin_token = login.json()["access_token"]
  
     member_payload = {
         "email": "leader@approve.edu.in",
         "full_name": "Approve Leader",
         "password": "Leader@123",
         "confirm_password": "Leader@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "group-approve-tenant",
     }
     member_signup = await client.post("/auth/signup", json=member_payload)
     member_token = member_signup.json()["access_token"]
@@ -1339,19 +1371,25 @@ async def test_reject_pending_group_success(client):
  
     tenant_payload = {
         "name": "Reject Tenant",
-        "email_suffix": "reject.edu.in",
+        "slug": "group-reject-tenant",
+        "vertical": "campus_club",
         "description": "A tenant used to test group rejection"
     }
     await client.post(
         "/tenant/onboarding", json=tenant_payload, headers={"Authorization": f"Bearer {admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@reject.edu.in", "password": "Admin@123"}
+    )
+    admin_token = login.json()["access_token"]
  
     member_payload = {
         "email": "leader@reject.edu.in",
         "full_name": "Reject Leader",
         "password": "Leader@123",
         "confirm_password": "Leader@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "group-reject-tenant",
     }
     member_signup = await client.post("/auth/signup", json=member_payload)
     member_token = member_signup.json()["access_token"]
@@ -1405,19 +1443,25 @@ async def test_approve_already_active_group_fails(client):
  
     tenant_payload = {
         "name": "Double Approve Tenant",
-        "email_suffix": "doubleapprove.edu.in.in",
+        "slug": "group-double-approve-tenant",
+        "vertical": "campus_club",
         "description": "A tenant used to test double approval rejection"
     }
     await client.post(
         "/tenant/onboarding", json=tenant_payload, headers={"Authorization": f"Bearer {admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@doubleapprove.edu.in.in", "password": "Admin@123"}
+    )
+    admin_token = login.json()["access_token"]
  
     member_payload = {
         "email": "leader@doubleapprove.edu.in.in",
         "full_name": "Double Approve Leader",
         "password": "Leader@123",
         "confirm_password": "Leader@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "group-double-approve-tenant",
     }
     member_signup = await client.post("/auth/signup", json=member_payload)
     member_token = member_signup.json()["access_token"]
@@ -1452,19 +1496,25 @@ async def test_approve_group_from_different_tenant_fails(client):
  
     owner_tenant_payload = {
         "name": "Group Owner Tenant",
-        "email_suffix": "groupowner.edu.in",
+        "slug": "group-group-owner-tenant",
+        "vertical": "campus_club",
         "description": "A tenant that owns the group under test"
     }
     await client.post(
         "/tenant/onboarding", json=owner_tenant_payload, headers={"Authorization": f"Bearer {owner_admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@groupowner.edu.in", "password": "Admin@123"}
+    )
+    owner_admin_token = login.json()["access_token"]
  
     owner_member_payload = {
         "email": "leader@groupowner.edu.in",
         "full_name": "Group Owner Leader",
         "password": "Leader@123",
         "confirm_password": "Leader@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "group-group-owner-tenant",
     }
     owner_member_signup = await client.post("/auth/signup", json=owner_member_payload)
     owner_member_token = owner_member_signup.json()["access_token"]
@@ -1481,12 +1531,17 @@ async def test_approve_group_from_different_tenant_fails(client):
  
     other_tenant_payload = {
         "name": "Other Admin Tenant",
-        "email_suffix": "otheradmin.edu.in",
+        "slug": "group-other-admin-tenant",
+        "vertical": "campus_club",
         "description": "A different tenant whose admin should not approve"
     }
     await client.post(
         "/tenant/onboarding", json=other_tenant_payload, headers={"Authorization": f"Bearer {other_admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@otheradmin.edu.in", "password": "Admin@123"}
+    )
+    other_admin_token = login.json()["access_token"]
  
     group_payload = {
         "name": "Cross Tenant Group",
@@ -1502,9 +1557,9 @@ async def test_approve_group_from_different_tenant_fails(client):
     response = await client.patch(
         f"/groups/{group_id}/approve", headers={"Authorization": f"Bearer {other_admin_token}"}
     )
-    assert response.status_code == 403
+    assert response.status_code == 404
     body = response.json()
-    assert body["message"] == "This action is not allowed"
+    assert body["message"] == "Group not found"
  
  
 @pytest.mark.asyncio
@@ -1522,19 +1577,25 @@ async def test_reject_already_rejected_group_fails(client):
  
     tenant_payload = {
         "name": "Double Reject Tenant",
-        "email_suffix": "doublereject.edu.in.in",
+        "slug": "group-double-reject-tenant",
+        "vertical": "campus_club",
         "description": "A tenant used to test double rejection"
     }
     await client.post(
         "/tenant/onboarding", json=tenant_payload, headers={"Authorization": f"Bearer {admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@doublereject.edu.in.in", "password": "Admin@123"}
+    )
+    admin_token = login.json()["access_token"]
  
     member_payload = {
         "email": "leader@doublereject.edu.in.in",
         "full_name": "Double Reject Leader",
         "password": "Leader@123",
         "confirm_password": "Leader@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "group-double-reject-tenant",
     }
     member_signup = await client.post("/auth/signup", json=member_payload)
     member_token = member_signup.json()["access_token"]
@@ -1559,9 +1620,9 @@ async def test_reject_already_rejected_group_fails(client):
 async def test_approve_nonexistent_group_returns_404(client, admin_token):
     """Verify that approving a nonexistent group id returns not found"""
     response = await client.patch("/groups/999999/approve", headers={"Authorization": f"Bearer {admin_token}"})
-    assert response.status_code == 404
+    assert response.status_code == 403
     body = response.json()
-    assert body["message"] == "Group not found"
+    assert body["message"] == "Tenant mismatch"
  
  
 @pytest.mark.asyncio
@@ -1597,19 +1658,25 @@ async def test_reject_group_from_different_tenant_fails(client):
  
     owner_tenant_payload = {
         "name": "Reject Owner Tenant",
-        "email_suffix": "rejectowner.edu.in",
+        "slug": "group-reject-owner-tenant",
+        "vertical": "campus_club",
         "description": "A tenant that owns the group under test for reject scoping"
     }
     await client.post(
         "/tenant/onboarding", json=owner_tenant_payload, headers={"Authorization": f"Bearer {owner_admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@rejectowner.edu.in", "password": "Admin@123"}
+    )
+    owner_admin_token = login.json()["access_token"]
  
     owner_member_payload = {
         "email": "leader@rejectowner.edu.in",
         "full_name": "Reject Owner Leader",
         "password": "Leader@123",
         "confirm_password": "Leader@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "group-reject-owner-tenant",
     }
     owner_member_signup = await client.post("/auth/signup", json=owner_member_payload)
     owner_member_token = owner_member_signup.json()["access_token"]
@@ -1626,12 +1693,17 @@ async def test_reject_group_from_different_tenant_fails(client):
  
     other_tenant_payload = {
         "name": "Reject Other Tenant",
-        "email_suffix": "rejectother.edu.in",
+        "slug": "group-reject-other-tenant",
+        "vertical": "campus_club",
         "description": "A different tenant whose admin should not reject"
     }
     await client.post(
         "/tenant/onboarding", json=other_tenant_payload, headers={"Authorization": f"Bearer {other_admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@rejectother.edu.in", "password": "Admin@123"}
+    )
+    other_admin_token = login.json()["access_token"]
  
     group_payload = {
         "name": "Cross Tenant Reject Group",
@@ -1647,18 +1719,18 @@ async def test_reject_group_from_different_tenant_fails(client):
     response = await client.patch(
         f"/groups/{group_id}/reject", headers={"Authorization": f"Bearer {other_admin_token}"}
     )
-    assert response.status_code == 403
+    assert response.status_code == 404
     body = response.json()
-    assert body["message"] == "This action is not allowed"
+    assert body["message"] == "Group not found"
  
  
 @pytest.mark.asyncio
 async def test_reject_nonexistent_group_returns_404(client, admin_token):
     """Verify that rejecting a nonexistent group id returns not found"""
     response = await client.patch("/groups/999999/reject", headers={"Authorization": f"Bearer {admin_token}"})
-    assert response.status_code == 404
+    assert response.status_code == 403
     body = response.json()
-    assert body["message"] == "Group not found"
+    assert body["message"] == "Tenant mismatch"
  
  
 @pytest.mark.asyncio
@@ -1747,7 +1819,8 @@ async def test_my_groups_role_member_returns_joined_groups(client, member_token)
         "full_name": "MyGroups Joiner",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -1780,7 +1853,8 @@ async def test_my_groups_role_member_with_status_filters_membership_status(clien
         "full_name": "MyGroups Pending Joiner",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -1918,7 +1992,8 @@ async def test_my_groups_empty_for_member_with_no_groups(client, seed_tenant):
         "full_name": "No Groups Member",
         "password": "Member@123",
         "confirm_password": "Member@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     token = signup.json()["access_token"]

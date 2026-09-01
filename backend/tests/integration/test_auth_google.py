@@ -69,6 +69,7 @@ async def test_google_login_links_existing_password_account(client, seed_tenant,
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     await client.post("/auth/signup", json=signup_payload)
 
@@ -128,7 +129,7 @@ async def test_google_login_with_no_matching_tenant_fails(client, mock_google_to
     payload = {"id_token": "fake-token", "intent": "login"}
     response = await client.post("/auth/google", json=payload)
     assert response.status_code == 404
-    assert response.json()["message"] == "Tenant not registered"
+    assert response.json()["message"] == "Account does not exist"
 
 
 @pytest.mark.asyncio

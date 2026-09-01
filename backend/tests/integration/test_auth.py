@@ -10,7 +10,8 @@ async def test_signup_success(client, seed_tenant):
         "full_name": "Pawan Kumar",
         "password": "Pawan@123",
         "confirm_password": "Pawan@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     response = await client.post("/auth/signup", json=payload)
     assert response.status_code == 200
@@ -54,7 +55,8 @@ async def test_signup_subdomain_of_tenant_matches(client, seed_tenant):
         "full_name": "Subdomain Member",
         "password": "Test@1234",
         "confirm_password": "Test@1234",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     response = await client.post("/auth/signup", json=payload)
     assert response.status_code == 200
@@ -76,7 +78,8 @@ async def test_signup_email_case_insensitive_login(client, seed_tenant):
         "full_name": "Pawan Kumar",
         "password": "Pawan@123",
         "confirm_password": "Pawan@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup_response = await client.post("/auth/signup", json=payload)
     assert signup_response.status_code == 200
@@ -105,7 +108,8 @@ async def test_signup_max_length_name_succeeds(client, seed_tenant):
         "full_name": "A" * 100,
         "password": "Test@1234",
         "confirm_password": "Test@1234",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     response = await client.post("/auth/signup", json=payload)
     assert response.status_code == 200
@@ -127,7 +131,8 @@ async def test_signup_member_without_tenant_fails(client):
         "full_name": "Someone Unknown",
         "password": "Test@1234",
         "confirm_password": "Test@1234",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     response = await client.post("/auth/signup", json=payload)
     assert response.status_code == 404
@@ -143,7 +148,8 @@ async def test_signup_duplicate_email_fails(client, seed_tenant):
         "full_name": "Rohit Mehta",
         "password": "Rohit@123",
         "confirm_password": "Rohit@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     await client.post("/auth/signup", json=payload)
     response = await client.post("/auth/signup", json=payload)
@@ -153,8 +159,10 @@ async def test_signup_duplicate_email_fails(client, seed_tenant):
 
 
 @pytest.mark.asyncio
-async def test_signup_tenant_admin_with_existing_tenant_fails(client, seed_tenant):
-    """Verify that admin signup is rejected if a tenant already exists for that domain"""
+async def test_signup_tenant_admin_regardless_of_existing_tenants(client, seed_tenant):
+    """A TENANT_ADMIN self-registers before onboarding their own tenant by slug (never by
+    email domain, see docs/GLOSSARY.md), so an unrelated tenant already existing is no
+    reason to reject the signup."""
     payload = {
         "email": "admin.office@knit.edu.in",
         "full_name": "Admin Office",
@@ -163,9 +171,7 @@ async def test_signup_tenant_admin_with_existing_tenant_fails(client, seed_tenan
         "role": "TENANT_ADMIN"
     }
     response = await client.post("/auth/signup", json=payload)
-    assert response.status_code == 409
-    body = response.json()
-    assert body["message"] == "Tenant already registered"
+    assert response.status_code == 200
 
 
 @pytest.mark.asyncio
@@ -176,7 +182,8 @@ async def test_signup_password_mismatch_fails(client, seed_tenant):
         "full_name": "Amit Verma",
         "password": "Amit@123",
         "confirm_password": "Different@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     response = await client.post("/auth/signup", json=payload)
     assert response.status_code == 422
@@ -190,7 +197,8 @@ async def test_signup_invalid_email_fails(client):
         "full_name": "Vikram Singh",
         "password": "Vikram@123",
         "confirm_password": "Vikram@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     response = await client.post("/auth/signup", json=payload)
     assert response.status_code == 422
@@ -204,7 +212,8 @@ async def test_signup_short_name_fails(client):
         "full_name": "Raj",
         "password": "Raj@12345",
         "confirm_password": "Raj@12345",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     response = await client.post("/auth/signup", json=payload)
     assert response.status_code == 422
@@ -218,7 +227,8 @@ async def test_signup_short_password_fails(client):
         "full_name": "Suresh Rao",
         "password": "abc123",
         "confirm_password": "abc123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     response = await client.post("/auth/signup", json=payload)
     assert response.status_code == 422
@@ -265,7 +275,8 @@ async def test_signup_name_with_only_whitespace_fails(client, seed_tenant):
         "full_name": "     ",
         "password": "Test@1234",
         "confirm_password": "Test@1234",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     response = await client.post("/auth/signup", json=payload)
     assert response.status_code == 422
@@ -279,7 +290,8 @@ async def test_signup_over_max_length_name_fails(client):
         "full_name": "A" * 101,
         "password": "Test@1234",
         "confirm_password": "Test@1234",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     response = await client.post("/auth/signup", json=payload)
     assert response.status_code == 422
@@ -293,7 +305,8 @@ async def test_signup_over_max_length_password_fails(client):
         "full_name": "Long Pass User",
         "password": "A" * 256,
         "confirm_password": "A" * 256,
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     response = await client.post("/auth/signup", json=payload)
     assert response.status_code == 422
@@ -307,7 +320,8 @@ async def test_signup_password_whitespace_mismatch_fails(client, seed_tenant):
         "full_name": "Whitespace Test User",
         "password": "Test@123",
         "confirm_password": "Test@123 ",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     response = await client.post("/auth/signup", json=payload)
     assert response.status_code == 422
@@ -321,7 +335,8 @@ async def test_signup_login_special_characters_password(client, seed_tenant):
         "full_name": "Emoji Test User",
         "password": "P@ss w0rd! 🔥",
         "confirm_password": "P@ss w0rd! 🔥",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup_response = await client.post("/auth/signup", json=payload)
     assert signup_response.status_code == 200
@@ -349,7 +364,8 @@ async def test_login_success(client, seed_tenant):
         "full_name": "Manoj Tiwari",
         "password": "Manoj@123",
         "confirm_password": "Manoj@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     await client.post("/auth/signup", json=payload)
 
@@ -405,7 +421,8 @@ async def test_login_wrong_password_fails(client, seed_tenant):
         "full_name": "Deepak Yadav",
         "password": "Deepak@123",
         "confirm_password": "Deepak@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     await client.post("/auth/signup", json=payload)
 
@@ -429,7 +446,7 @@ async def test_login_nonexistent_user_fails(client):
     response = await client.post("/auth/login", json=payload)
     assert response.status_code == 404
     body = response.json()
-    assert body["message"] == "Tenant not registered"
+    assert body["message"] == "Account does not exist"
 
 
 @pytest.mark.asyncio
@@ -461,7 +478,8 @@ async def test_login_password_case_sensitive(client, seed_tenant):
         "full_name": "Casing Test User",
         "password": "SecretP@ss",
         "confirm_password": "SecretP@ss",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     await client.post("/auth/signup", json=payload)
 

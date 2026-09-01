@@ -34,9 +34,9 @@ async def test_get_my_profile_without_token_fails(client):
 async def test_get_my_profile_with_admin_token_fails(client, admin_token):
     """Verify that fetching own profile is rejected for a user with the campus admin role"""
     response = await client.get("/members/me", headers={"Authorization": f"Bearer {admin_token}"})
-    assert response.status_code == 401
+    assert response.status_code == 403
     body = response.json()
-    assert body["message"] == "Invalid token"
+    assert body["message"] == "Tenant mismatch"
 
 
 @pytest.mark.asyncio
@@ -335,9 +335,9 @@ async def test_update_my_profile_with_admin_token_fails(client, admin_token):
     response = await client.patch(
         "/members/me", json={"bio": "Admin attempt"}, headers={"Authorization": f"Bearer {admin_token}"}
     )
-    assert response.status_code == 401
+    assert response.status_code == 403
     body = response.json()
-    assert body["message"] == "Invalid token"
+    assert body["message"] == "Tenant mismatch"
 
 
 # ==== {member_id} (public profile) ====
@@ -350,7 +350,8 @@ async def test_view_public_profile_success_for_member(client, member_token, seed
         "full_name": "Public Target",
         "password": "Target@123",
         "confirm_password": "Target@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     other_signup = await client.post("/auth/signup", json=other_payload)
     other_token = other_signup.json()["access_token"]
@@ -376,19 +377,25 @@ async def test_view_public_profile_success_for_admin(client, admin_token):
     """Verify that a campus admin can view a member's public profile within their own tenant"""
     tenant_payload = {
         "name": "Admin Profile View Tenant",
-        "email_suffix": "newtenant.edu",
+        "slug": "member-admin-profile-view-tenant",
+        "vertical": "campus_club",
         "description": "Onboarding the admin's own tenant so it has a tenant_id for profile visibility"
     }
     await client.post(
         "/tenant/onboarding", json=tenant_payload, headers={"Authorization": f"Bearer {admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@newtenant.edu", "password": "Admin@123"}
+    )
+    admin_token = login.json()["access_token"]
 
     member_payload = {
         "email": "target@newtenant.edu",
         "full_name": "Admin View Target",
         "password": "Target@123",
         "confirm_password": "Target@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "member-admin-profile-view-tenant",
     }
     member_signup = await client.post("/auth/signup", json=member_payload)
     member_token = member_signup.json()["access_token"]
@@ -408,9 +415,9 @@ async def test_view_public_profile_admin_without_tenant_returns_404(client, admi
     member_id = my_profile.json()["member_id"]
 
     response = await client.get(f"/members/{member_id}", headers={"Authorization": f"Bearer {admin_token}"})
-    assert response.status_code == 404
+    assert response.status_code == 403
     body = response.json()
-    assert body["message"] == "Member profile not found"
+    assert body["message"] == "Tenant mismatch"
 
 
 @pytest.mark.asyncio
@@ -437,19 +444,25 @@ async def test_view_public_profile_cross_tenant_returns_404(client, member_token
 
     tenant_payload = {
         "name": "Other Member Tenant",
-        "email_suffix": "othermember.edu.in",
+        "slug": "member-other-member-tenant",
+        "vertical": "campus_club",
         "description": "A separate tenant for cross-tenant profile visibility tests"
     }
     await client.post(
         "/tenant/onboarding", json=tenant_payload, headers={"Authorization": f"Bearer {other_admin_token}"}
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@othermember.edu.in", "password": "Admin@123"}
+    )
+    other_admin_token = login.json()["access_token"]
 
     other_member_payload = {
         "email": "target@othermember.edu.in",
         "full_name": "Other Tenant Target",
         "password": "Target@123",
         "confirm_password": "Target@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "member-other-member-tenant",
     }
     other_member_signup = await client.post("/auth/signup", json=other_member_payload)
     other_member_token = other_member_signup.json()["access_token"]

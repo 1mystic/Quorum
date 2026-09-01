@@ -20,7 +20,8 @@ async def test_join_active_group_success(client, member_token):
         "full_name": "Joiner One",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -50,7 +51,8 @@ async def test_join_group_that_is_pending_fails(client, member_token):
         "full_name": "Joiner Pending",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -79,7 +81,8 @@ async def test_join_group_that_is_archived_fails(client, member_token):
         "full_name": "Joiner Archived",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -107,7 +110,8 @@ async def test_join_already_member_fails(client, member_token):
         "full_name": "Joiner Twice",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -182,7 +186,8 @@ async def test_view_pending_requests_by_leader_success(client, member_token):
         "full_name": "Joiner Pending View",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -212,7 +217,8 @@ async def test_pending_requests_by_non_leader_fails(client, member_token):
         "full_name": "Outsider Requests",
         "password": "Outsider@123",
         "confirm_password": "Outsider@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     other_signup = await client.post("/auth/signup", json=other_payload)
     other_token = other_signup.json()["access_token"]
@@ -240,7 +246,8 @@ async def test_pending_requests_ordered_by_creation_time(client, member_token):
         "full_name": "Joiner First",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     first_signup = await client.post("/auth/signup", json=first_joiner_payload)
     first_token = first_signup.json()["access_token"]
@@ -251,7 +258,8 @@ async def test_pending_requests_ordered_by_creation_time(client, member_token):
         "full_name": "Joiner Second",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     second_signup = await client.post("/auth/signup", json=second_joiner_payload)
     second_token = second_signup.json()["access_token"]
@@ -308,7 +316,8 @@ async def test_approve_join_request_success(client, member_token):
         "full_name": "Joiner Approve",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -344,7 +353,8 @@ async def test_reject_join_request_success(client, member_token):
         "full_name": "Joiner Reject",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -380,7 +390,8 @@ async def test_handle_request_by_non_leader_fails(client, member_token):
         "full_name": "Joiner Non Leader",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -392,7 +403,8 @@ async def test_handle_request_by_non_leader_fails(client, member_token):
         "full_name": "Outsider Handle",
         "password": "Outsider@123",
         "confirm_password": "Outsider@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     outsider_signup = await client.post("/auth/signup", json=outsider_payload)
     outsider_token = outsider_signup.json()["access_token"]
@@ -425,7 +437,8 @@ async def test_handle_already_handled_request_fails(client, member_token):
         "full_name": "Joiner Already Handled",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -478,7 +491,8 @@ async def test_handle_request_from_different_group_fails(client, member_token):
         "full_name": "Joiner Wrong Group",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -536,7 +550,8 @@ async def test_handle_request_invalid_action_value_fails(client, member_token):
         "full_name": "Joiner Invalid Action",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -569,7 +584,8 @@ async def test_handle_request_without_token_fails(client, member_token):
         "full_name": "Joiner No Token",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -601,7 +617,8 @@ async def test_view_group_members_success(client, member_token):
         "full_name": "Joiner Members List",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     joiner_signup = await client.post("/auth/signup", json=joiner_payload)
     joiner_token = joiner_signup.json()["access_token"]
@@ -638,7 +655,8 @@ async def test_members_list_excludes_pending_and_rejected(client, member_token):
         "full_name": "Joiner Still Pending",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     pending_signup = await client.post("/auth/signup", json=pending_payload)
     pending_token = pending_signup.json()["access_token"]
@@ -649,7 +667,8 @@ async def test_members_list_excludes_pending_and_rejected(client, member_token):
         "full_name": "Joiner Got Rejected",
         "password": "Joiner@123",
         "confirm_password": "Joiner@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     rejected_signup = await client.post("/auth/signup", json=rejected_payload)
     rejected_token = rejected_signup.json()["access_token"]

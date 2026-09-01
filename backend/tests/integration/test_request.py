@@ -17,6 +17,7 @@ async def leader(client, seed_tenant):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -41,6 +42,7 @@ async def member(client, seed_tenant, leader):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -64,6 +66,7 @@ async def outsider(client, seed_tenant):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     return {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -77,7 +80,7 @@ async def test_raise_request_success(client, leader, member):
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GROUP",
+        "category": "membership_query",
         "title": "Cannot access group resources",
         "description": "I am unable to view the shared drive for this group",
     }
@@ -86,7 +89,7 @@ async def test_raise_request_success(client, leader, member):
     body = response.json()
     assert body["group_id"] == group_id
     assert body["title"] == "Cannot access group resources"
-    assert body["category"] == "GROUP"
+    assert body["category"] == "membership_query"
     assert body["status"] == "OPEN"
     assert body["message"] == "Request submitted to the group leader"
 
@@ -108,14 +111,14 @@ async def test_raise_request_with_event_id_success(client, leader, member):
 
     payload = {
         "group_id": group_id,
-        "category": "EVENT",
+        "category": "event_logistics",
         "title": "Registration is not working",
         "description": "I keep getting an error when trying to register for this event",
         "event_id": event_id,
     }
     response = await client.post("/requests", headers=member, json=payload)
     assert response.status_code == 200
-    assert response.json()["category"] == "EVENT"
+    assert response.json()["category"] == "event_logistics"
 
 
 @pytest.mark.asyncio
@@ -124,7 +127,7 @@ async def test_raise_request_by_non_member_succeeds(client, leader, outsider):
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "General inquiry about the group",
         "description": "I have a question about this group even though I never joined",
     }
@@ -138,7 +141,7 @@ async def test_raise_request_title_min_length_boundary_succeeds(client, leader, 
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Abc",
         "description": "A title at the minimum length boundary for requests",
     }
@@ -153,7 +156,7 @@ async def test_raise_request_title_below_min_length_fails(client, leader, member
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Ab",
         "description": "A title that is one character too short for requests",
     }
@@ -167,7 +170,7 @@ async def test_raise_request_title_max_length_boundary_succeeds(client, leader, 
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "A" * 150,
         "description": "A title exactly at the maximum length boundary for requests",
     }
@@ -181,7 +184,7 @@ async def test_raise_request_title_over_max_length_fails(client, leader, member)
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "A" * 151,
         "description": "A title exceeding the maximum length boundary for requests",
     }
@@ -195,7 +198,7 @@ async def test_raise_request_description_min_length_boundary_succeeds(client, le
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Short description test",
         "description": "A" * 10,
     }
@@ -209,7 +212,7 @@ async def test_raise_request_description_below_min_length_fails(client, leader, 
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Too short description test",
         "description": "A" * 9,
     }
@@ -223,7 +226,7 @@ async def test_raise_request_description_over_max_length_fails(client, leader, m
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Too long description test",
         "description": "A" * 2001,
     }
@@ -273,7 +276,7 @@ async def test_raise_request_unknown_group_fails(client, member):
     """Confirm that raising an request is rejected when the group does not exist"""
     payload = {
         "group_id": 999999,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Ghost group request",
         "description": "This group does not exist at all in the system",
     }
@@ -291,6 +294,7 @@ async def test_raise_request_pending_group_fails(client, seed_tenant):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -306,7 +310,7 @@ async def test_raise_request_pending_group_fails(client, seed_tenant):
 
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Request against a pending group",
         "description": "This group is not active yet so this should fail",
     }
@@ -340,7 +344,7 @@ async def test_raise_request_event_from_different_group_fails(client, leader, me
 
     payload = {
         "group_id": group_id,
-        "category": "EVENT",
+        "category": "event_logistics",
         "title": "Wrong group event reference",
         "description": "This event_id belongs to a different group than group_id",
         "event_id": event_id,
@@ -356,7 +360,7 @@ async def test_raise_request_unknown_event_id_fails(client, leader, member):
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "EVENT",
+        "category": "event_logistics",
         "title": "Ghost event reference",
         "description": "This event_id does not exist anywhere in the system",
         "event_id": 999999,
@@ -372,7 +376,7 @@ async def test_raise_request_without_token_fails(client, leader):
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Anonymous request attempt",
         "description": "Raised without any authentication token provided",
     }
@@ -389,7 +393,7 @@ async def test_my_requests_returns_own_requests(client, leader, member):
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GROUP",
+        "category": "membership_query",
         "title": "My own request",
         "description": "This request was raised by the requesting member",
     }
@@ -414,7 +418,7 @@ async def test_my_requests_excludes_other_members_requests(client, leader, membe
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Outsider's own request",
         "description": "This request belongs to the outsider, not the member",
     }
@@ -433,7 +437,7 @@ async def test_my_requests_filter_by_status(client, leader, member):
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Status filter request",
         "description": "This request is used to test status filtering",
     }
@@ -455,7 +459,7 @@ async def test_my_requests_filter_by_group_id(client, leader, member):
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Group filter request",
         "description": "This request is used to test the group_id filter",
     }
@@ -520,7 +524,7 @@ async def test_group_queue_returns_led_group_requests(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GROUP",
+        "category": "membership_query",
         "title": "Leader queue visibility test",
         "description": "This request should appear in the leader's group queue",
     }
@@ -543,7 +547,7 @@ async def test_group_queue_empty_for_non_leader(client, leader, member):
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Not a leader queue test",
         "description": "This member does not lead any group",
     }
@@ -560,7 +564,7 @@ async def test_group_queue_filter_by_status(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Queue status filter test",
         "description": "This request is used to test the leader queue status filter",
     }
@@ -579,7 +583,7 @@ async def test_group_queue_filter_by_group_id(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Queue group_id filter test",
         "description": "This request is used to test the leader queue group_id filter",
     }
@@ -611,7 +615,7 @@ async def test_open_count_reflects_unresolved_requests(client, leader, member):
 
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Open count test request",
         "description": "This request should increase the leader's open count",
     }
@@ -633,7 +637,7 @@ async def test_open_count_counts_in_progress_as_open(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "In progress still open test",
         "description": "This request will be replied to but not resolved",
     }
@@ -666,7 +670,7 @@ async def test_reply_to_request_success(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Reply test request",
         "description": "This request will receive a reply from the leader",
     }
@@ -693,7 +697,7 @@ async def test_reply_min_length_boundary_succeeds(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Short reply boundary test",
         "description": "This request tests the minimum reply length boundary",
     }
@@ -711,7 +715,7 @@ async def test_reply_below_min_length_fails(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Too short reply test",
         "description": "This request tests rejection of too-short replies",
     }
@@ -729,7 +733,7 @@ async def test_reply_over_max_length_fails(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Too long reply test",
         "description": "This request tests rejection of too-long replies",
     }
@@ -747,7 +751,7 @@ async def test_reply_to_resolved_request_fails(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Resolved reply test",
         "description": "This request will be resolved before a reply is attempted",
     }
@@ -758,7 +762,7 @@ async def test_reply_to_resolved_request_fails(client, leader, member):
     reply_payload = {"reply": "Trying to reply after resolution"}
     response = await client.post(f"/requests/{request_id}/reply", headers=headers, json=reply_payload)
     assert response.status_code == 403
-    assert response.json()["message"] == "A resolved request cannot be replied to"
+    assert response.json()["message"] == "A closed request cannot be replied to"
 
 
 @pytest.mark.asyncio
@@ -777,7 +781,7 @@ async def test_reply_by_non_leader_fails(client, leader, member):
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Non leader reply test",
         "description": "A member should not be able to reply to this request",
     }
@@ -795,7 +799,7 @@ async def test_reply_missing_field_fails(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Missing reply field test",
         "description": "This request omits the required reply field",
     }
@@ -812,7 +816,7 @@ async def test_reply_without_token_fails(client, leader, member):
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "No token reply test",
         "description": "Trying to reply without any authentication",
     }
@@ -833,7 +837,7 @@ async def test_resolve_request_success(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Resolve test request",
         "description": "This request will be resolved by the leader",
     }
@@ -858,7 +862,7 @@ async def test_resolve_request_directly_from_open_succeeds(client, leader, membe
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Direct resolve test",
         "description": "This request skips the reply step and goes straight to resolved",
     }
@@ -876,7 +880,7 @@ async def test_resolve_already_resolved_request_fails(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Double resolve test",
         "description": "This request will be resolved more than once",
     }
@@ -885,8 +889,8 @@ async def test_resolve_already_resolved_request_fails(client, leader, member):
     await client.patch(f"/requests/{request_id}/resolve", headers=headers)
 
     response = await client.patch(f"/requests/{request_id}/resolve", headers=headers)
-    assert response.status_code == 403
-    assert response.json()["message"] == "Request is already resolved"
+    assert response.status_code == 409
+    assert response.json()["message"] == "This request already reached a terminal state"
 
 
 @pytest.mark.asyncio
@@ -904,7 +908,7 @@ async def test_resolve_by_non_leader_fails(client, leader, member):
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Non leader resolve test",
         "description": "A member should not be able to resolve this request",
     }
@@ -930,7 +934,8 @@ async def test_resolve_cross_tenant_request_fails(client, leader, member):
 
     tenant_payload = {
         "name": "Other Request Tenant",
-        "email_suffix": "otherrequest.edu.in",
+        "slug": "request-other-request-tenant",
+        "vertical": "campus_club",
         "description": "A separate tenant for request scoping tests",
     }
     await client.post(
@@ -944,6 +949,7 @@ async def test_resolve_cross_tenant_request_fails(client, leader, member):
         "password": "Leader@123",
         "confirm_password": "Leader@123",
         "role": "MEMBER",
+        "tenant_slug": "request-other-request-tenant",
     }
     other_member_signup = await client.post("/auth/signup", json=other_member_payload)
     other_headers = {"Authorization": f"Bearer {other_member_signup.json()['access_token']}"}
@@ -959,7 +965,7 @@ async def test_resolve_cross_tenant_request_fails(client, leader, member):
 
     request_payload = {
         "group_id": other_group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Foreign tenant request",
         "description": "This request belongs to a group in a different tenant",
     }
@@ -978,7 +984,7 @@ async def test_resolve_without_token_fails(client, leader, member):
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "No token resolve test",
         "description": "Trying to resolve without any authentication",
     }
@@ -1005,7 +1011,8 @@ async def test_reply_cross_tenant_request_fails(client, leader):
 
     tenant_payload = {
         "name": "Other Request Reply Tenant",
-        "email_suffix": "otherrequestreply.edu.in",
+        "slug": "request-other-request-reply-tenant",
+        "vertical": "campus_club",
         "description": "A separate tenant for request reply scoping tests",
     }
     await client.post(
@@ -1019,6 +1026,7 @@ async def test_reply_cross_tenant_request_fails(client, leader):
         "password": "Leader@123",
         "confirm_password": "Leader@123",
         "role": "MEMBER",
+        "tenant_slug": "request-other-request-reply-tenant",
     }
     other_member_signup = await client.post("/auth/signup", json=other_member_payload)
     other_headers = {"Authorization": f"Bearer {other_member_signup.json()['access_token']}"}
@@ -1034,7 +1042,7 @@ async def test_reply_cross_tenant_request_fails(client, leader):
 
     request_payload = {
         "group_id": other_group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Foreign tenant reply target",
         "description": "This request belongs to a group in a different tenant",
     }
@@ -1054,7 +1062,7 @@ async def test_reply_twice_updates_response_to_latest(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Double reply test",
         "description": "This request will receive two replies in a row",
     }
@@ -1082,7 +1090,7 @@ async def test_reply_then_resolve_succeeds(client, leader, member):
     headers, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Reply then resolve test",
         "description": "This request is replied to first, then resolved",
     }
@@ -1107,6 +1115,7 @@ async def test_group_queue_group_id_for_unled_group_returns_empty(client, leader
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     signup = await client.post("/auth/signup", json=other_leader_payload)
     other_headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -1121,7 +1130,7 @@ async def test_group_queue_group_id_for_unled_group_returns_empty(client, leader
 
     request_payload = {
         "group_id": other_group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Request in a group the caller does not lead",
         "description": "This should never appear in the original leader's filtered queue",
     }
@@ -1150,7 +1159,7 @@ async def test_open_count_aggregates_across_multiple_led_groups(client, leader, 
 
     first_payload = {
         "group_id": first_group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Request in first led group",
         "description": "An unresolved request in the first group the member leads",
     }
@@ -1158,7 +1167,7 @@ async def test_open_count_aggregates_across_multiple_led_groups(client, leader, 
 
     second_payload = {
         "group_id": second_group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Request in second led group",
         "description": "An unresolved request in the second group the member leads",
     }
@@ -1174,7 +1183,7 @@ async def test_my_requests_event_id_is_none_when_not_provided(client, leader, me
     _, group_id = leader
     payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "No event reference request",
         "description": "This request was raised without an associated event",
     }
@@ -1193,7 +1202,7 @@ async def test_my_requests_limit_caps_returned_items(client, leader, member):
     for i in range(3):
         payload = {
             "group_id": group_id,
-            "category": "GENERAL",
+            "category": "other",
             "title": f"Pagination request {i}",
             "description": f"Request number {i} used to test the limit cap",
         }
@@ -1221,7 +1230,7 @@ async def test_raise_request_against_draft_event_succeeds(client, leader, member
 
     payload = {
         "group_id": group_id,
-        "category": "EVENT",
+        "category": "event_logistics",
         "title": "Request against draft event",
         "description": "This event has never been published but the request should still be accepted",
         "event_id": event_id,
@@ -1256,7 +1265,7 @@ async def test_raise_request_against_past_event_succeeds(client, db_session, lea
 
     payload = {
         "group_id": group_id,
-        "category": "EVENT",
+        "category": "event_logistics",
         "title": "Request against concluded event",
         "description": "This event has already ended but the request should still be accepted",
         "event_id": event_id,
@@ -1283,7 +1292,7 @@ async def test_raise_request_by_non_registrant_succeeds(client, leader, member):
 
     payload = {
         "group_id": group_id,
-        "category": "EVENT",
+        "category": "event_logistics",
         "title": "Request without registering first",
         "description": "This member never registered for the event but still has a question about it",
         "event_id": event_id,
@@ -1298,7 +1307,7 @@ async def test_group_queue_open_sorts_before_in_progress(client, leader, member)
     headers, group_id = leader
     open_payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Still open request",
         "description": "This request remains untouched in the OPEN status",
     }
@@ -1307,7 +1316,7 @@ async def test_group_queue_open_sorts_before_in_progress(client, leader, member)
 
     in_progress_payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "In progress request",
         "description": "This request will be replied to, moving it to IN_PROGRESS",
     }
@@ -1329,7 +1338,7 @@ async def test_group_queue_full_status_order_open_in_progress_resolved(client, l
 
     resolved_payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Will be resolved",
         "description": "This request will be resolved directly",
     }
@@ -1339,7 +1348,7 @@ async def test_group_queue_full_status_order_open_in_progress_resolved(client, l
 
     in_progress_payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Will be in progress",
         "description": "This request will be replied to but not resolved",
     }
@@ -1349,7 +1358,7 @@ async def test_group_queue_full_status_order_open_in_progress_resolved(client, l
 
     open_payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Stays open",
         "description": "This request is left untouched in the OPEN status",
     }
@@ -1370,7 +1379,7 @@ async def test_group_queue_same_status_sorts_oldest_first(client, db_session, le
     headers, group_id = leader
     first_payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Raised first",
         "description": "This request is raised before the second one",
     }
@@ -1379,7 +1388,7 @@ async def test_group_queue_same_status_sorts_oldest_first(client, db_session, le
 
     second_payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "Raised second",
         "description": "This request is raised after the first one",
     }
@@ -1405,7 +1414,7 @@ async def test_my_requests_sorts_newest_first(client, db_session, leader, member
     _, group_id = leader
     first_payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "My first request",
         "description": "Raised before the second request",
     }
@@ -1414,7 +1423,7 @@ async def test_my_requests_sorts_newest_first(client, db_session, leader, member
 
     second_payload = {
         "group_id": group_id,
-        "category": "GENERAL",
+        "category": "other",
         "title": "My second request",
         "description": "Raised after the first request",
     }

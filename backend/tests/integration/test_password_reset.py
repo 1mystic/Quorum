@@ -17,7 +17,8 @@ async def test_forgot_password_registered_email_sends_mail(client, seed_tenant, 
         "full_name": "Forgot Test User",
         "password": "Forgot@123",
         "confirm_password": "Forgot@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     await client.post("/auth/signup", json=payload)
 
@@ -70,7 +71,8 @@ async def test_reset_password_success_flow(client, seed_tenant, db_session):
         "full_name": "Reset Flow User",
         "password": "OldPass@123",
         "confirm_password": "OldPass@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     await client.post("/auth/signup", json=signup_payload)
 
@@ -120,7 +122,8 @@ async def test_reset_password_token_single_use_fails_on_replay(client, seed_tena
         "full_name": "Replay Test User",
         "password": "OldPass@123",
         "confirm_password": "OldPass@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     await client.post("/auth/signup", json=signup_payload)
 
@@ -159,7 +162,8 @@ async def test_reset_password_expired_token_fails(client, seed_tenant, db_sessio
         "full_name": "Expired Test User",
         "password": "OldPass@123",
         "confirm_password": "OldPass@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     await client.post("/auth/signup", json=signup_payload)
 
@@ -192,7 +196,8 @@ async def test_reset_password_access_token_rejected(client, seed_tenant):
         "full_name": "Wrong Type Test User",
         "password": "OldPass@123",
         "confirm_password": "OldPass@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup_response = await client.post("/auth/signup", json=signup_payload)
     access_token = signup_response.json()["access_token"]
@@ -214,7 +219,8 @@ async def test_reset_password_refresh_token_rejected(client, seed_tenant):
         "full_name": "Refresh Type Test User",
         "password": "OldPass@123",
         "confirm_password": "OldPass@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup_response = await client.post("/auth/signup", json=signup_payload)
     refresh_token = signup_response.json()["refresh_token"]
@@ -248,7 +254,8 @@ async def test_reset_password_confirm_mismatch_fails(client, seed_tenant, db_ses
         "full_name": "Mismatch Test User",
         "password": "OldPass@123",
         "confirm_password": "OldPass@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     await client.post("/auth/signup", json=signup_payload)
 
@@ -279,7 +286,8 @@ async def test_reset_password_short_password_fails(client, seed_tenant, db_sessi
         "full_name": "Short Pass Test User",
         "password": "OldPass@123",
         "confirm_password": "OldPass@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     await client.post("/auth/signup", json=signup_payload)
 

@@ -21,6 +21,7 @@ async def leader(client, seed_tenant):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -45,6 +46,7 @@ async def member(client, seed_tenant, leader):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -68,6 +70,7 @@ async def outsider(client, seed_tenant):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": seed_tenant.slug,
     }
     signup = await client.post("/auth/signup", json=payload)
     return {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -110,6 +113,7 @@ async def second_member(client, leader):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     signup = await client.post("/auth/signup", json=payload)
     headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -178,6 +182,7 @@ async def three_checked_in(client, db_session, leader, member, second_member):
         "password": "Test@1234",
         "confirm_password": "Test@1234",
         "role": "MEMBER",
+        "tenant_slug": "test-university",
     }
     signup = await client.post("/auth/signup", json=third_payload)
     third_headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
@@ -860,7 +865,8 @@ async def test_browse_events_admin_can_filter_by_draft_status(client):
 
     onboard_payload = {
         "name": "Event Filter Tenant",
-        "email_suffix": "eventfilter.edu.in",
+        "slug": "event-event-filter-tenant",
+        "vertical": "campus_club",
         "description": "A tenant used to test admin draft-status event filtering",
     }
     await client.post(
@@ -868,6 +874,11 @@ async def test_browse_events_admin_can_filter_by_draft_status(client):
         json=onboard_payload,
         headers=admin_headers,
     )
+    login = await client.post(
+        "/auth/login", json={"email": "admin@eventfilter.edu.in", "password": "Admin@123"}
+    )
+    admin_token = login.json()["access_token"]
+    admin_headers = {"Authorization": f"Bearer {admin_token}"}
 
     member_payload = {
         "email": "leader@eventfilter.edu.in",
@@ -875,6 +886,7 @@ async def test_browse_events_admin_can_filter_by_draft_status(client):
         "password": "Leader@123",
         "confirm_password": "Leader@123",
         "role": "MEMBER",
+        "tenant_slug": "event-event-filter-tenant",
     }
     member_signup = await client.post("/auth/signup", json=member_payload)
     member_token = member_signup.json()["access_token"]
@@ -910,7 +922,8 @@ async def test_browse_events_admin_can_filter_by_draft_status(client):
 async def test_browse_events_lowercase_status_fails(client, admin_token):
     """Validate that browsing events is rejected when the status filter uses lowercase casing"""
     response = await client.get("/events", headers={"Authorization": f"Bearer {admin_token}"}, params={"status": "draft"})
-    assert response.status_code == 422
+    assert response.status_code == 403
+    assert response.json()["message"] == "Tenant mismatch"
 
 
 @pytest.mark.asyncio
