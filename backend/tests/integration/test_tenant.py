@@ -6,8 +6,9 @@ async def test_onboarding_success(client, admin_token):
     """Verify that tenant onboarding succeeds for an admin with a valid token"""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "knit.edu.in",
-        "description": "Kamla Nehru Institute of Technology"
+        "slug": "knit",
+        "vertical": "campus_club",
+        "description": "Kamla Nehru Institute of Technology",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -17,7 +18,7 @@ async def test_onboarding_success(client, admin_token):
     assert response.status_code == 200
     body = response.json()
     assert body["slug"] == "knit"
-    assert body["email_suffix"] == "knit.edu.in"
+    assert body["vertical"] == "campus_club"
     assert body["message"] == "Tenant onboarded successfully"
 
 
@@ -26,13 +27,13 @@ async def test_onboarding_without_token_fails(client):
     """Verify that tenant onboarding is rejected when no authentication token is provided"""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "knit.edu.in",
-        "description": "Kamla Nehru Institute of Technology"
+        "slug": "knit",
+        "vertical": "campus_club",
+        "description": "Kamla Nehru Institute of Technology",
     }
     response = await client.post("/tenant/onboarding", json=payload)
     assert response.status_code == 401
     body = response.json()
-    # assert body["message"] == "Not authenticated"
     assert body["detail"] == "Not authenticated"
 
 
@@ -52,8 +53,9 @@ async def test_onboarding_with_member_token_fails(client):
 
     tenant_payload = {
         "name": "Some Tenant Institute",
-        "email_suffix": "sometenant.edu",
-        "description": "Just to create a member for this test"
+        "slug": "some-tenant",
+        "vertical": "campus_club",
+        "description": "Just to create a member for this test",
     }
     await client.post(
         "/tenant/onboarding",
@@ -66,15 +68,17 @@ async def test_onboarding_with_member_token_fails(client):
         "full_name": "Pupil Member",
         "password": "Pupil@123",
         "confirm_password": "Pupil@123",
-        "role": "MEMBER"
+        "role": "MEMBER",
+        "tenant_slug": "some-tenant",
     }
     member_signup = await client.post("/auth/signup", json=member_payload)
     member_token = member_signup.json()["access_token"]
 
     onboarding_payload = {
         "name": "Another Tenant Institute",
-        "email_suffix": "another.edu",
-        "description": "A member should not be able to do this"
+        "slug": "another-tenant",
+        "vertical": "campus_club",
+        "description": "A member should not be able to do this",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -91,8 +95,9 @@ async def test_onboarding_duplicate_tenant_fails(client, admin_token):
     """Verify that tenant onboarding is rejected when the tenant already exists"""
     tenant_payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "knit.edu.in",
-        "description": "Kamla Nehru Institute of Technology"
+        "slug": "knit",
+        "vertical": "campus_club",
+        "description": "Kamla Nehru Institute of Technology",
     }
     await client.post(
         "/tenant/onboarding",
@@ -137,8 +142,9 @@ async def test_onboarding_invalid_token_fails(client):
     """Verify that tenant onboarding is rejected when an invalid token is provided"""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "knit.edu.in",
-        "description": "Kamla Nehru Institute of Technology"
+        "slug": "knit",
+        "vertical": "campus_club",
+        "description": "Kamla Nehru Institute of Technology",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -155,8 +161,9 @@ async def test_onboarding_short_name_fails(client, admin_token):
     """Validate that tenant onboarding is rejected when the tenant name is below the minimum length"""
     payload = {
         "name": "KN",
-        "email_suffix": "shortname.edu.in",
-        "description": "Name is too short here"
+        "slug": "shortname",
+        "vertical": "campus_club",
+        "description": "Name is too short here",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -171,8 +178,9 @@ async def test_onboarding_short_description_fails(client, admin_token):
     """Validate that tenant onboarding is rejected when the tenant description is below the minimum length"""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "shortdesc.edu.in",
-        "description": "Hi"
+        "slug": "shortdesc",
+        "vertical": "campus_club",
+        "description": "Hi",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -182,12 +190,13 @@ async def test_onboarding_short_description_fails(client, admin_token):
     assert response.status_code == 422
 
 @pytest.mark.asyncio
-async def test_onboarding_slug_collision_increments(client, admin_token):
-    """Verify that tenant onboarding generates an incremented numeric suffix for the slug when a prefix collision occurs"""
+async def test_onboarding_slug_collision_fails(client, admin_token):
+    """Verify that tenant onboarding rejects a second tenant reusing an already-taken slug."""
     first_payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "knit.edu.in",
-        "description": "First tenant with this slug prefix"
+        "slug": "knit",
+        "vertical": "campus_club",
+        "description": "First tenant with this slug",
     }
     await client.post(
         "/tenant/onboarding",
@@ -207,86 +216,45 @@ async def test_onboarding_slug_collision_increments(client, admin_token):
 
     second_payload = {
         "name": "Kamla Nehru Institute Org",
-        "email_suffix": "knit.org.in",
-        "description": "Second tenant with colliding slug prefix"
+        "slug": "knit",
+        "vertical": "campus_club",
+        "description": "Second tenant colliding on the same slug",
     }
     response = await client.post(
         "/tenant/onboarding",
         json=second_payload,
         headers={"Authorization": f"Bearer {second_token}"}
     )
-    assert response.status_code == 200
-    assert response.json()["slug"] == "knit-2"
-    assert response.json()["message"] == "Tenant onboarded successfully"
+    assert response.status_code == 409
+    assert response.json()["message"] == "Tenant already registered"
 
 @pytest.mark.asyncio
-async def test_onboarding_third_slug_collision_increments_further(client, admin_token):
-    """Verify that tenant onboarding generates further incremented slug suffixes for subsequent prefix collisions"""
-    first_payload = {
-        "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "knit.edu.in",
-        "description": "First tenant with this slug prefix"
-    }
-    await client.post(
-        "/tenant/onboarding",
-        json=first_payload,
-        headers={"Authorization": f"Bearer {admin_token}"}
-    )
-
-    admin_payload_two = {
-        "email": "second.admin@knit.org.in",
-        "full_name": "Second Admin",
-        "password": "Admin@123",
-        "confirm_password": "Admin@123",
-        "role": "TENANT_ADMIN"
-    }
-    second_admin = await client.post("/auth/signup", json=admin_payload_two)
-    second_token = second_admin.json()["access_token"]
-
-    second_payload = {
-        "name": "Kamla Nehru Institute Org",
-        "email_suffix": "knit.org.in",
-        "description": "Second tenant with colliding slug prefix"
-    }
-    await client.post(
-        "/tenant/onboarding",
-        json=second_payload,
-        headers={"Authorization": f"Bearer {second_token}"}
-    )
-
-    admin_payload_three = {
-        "email": "third.admin@knit.ac.in",
-        "full_name": "Third Admin",
-        "password": "Admin@123",
-        "confirm_password": "Admin@123",
-        "role": "TENANT_ADMIN"
-    }
-    third_admin = await client.post("/auth/signup", json=admin_payload_three)
-    third_token = third_admin.json()["access_token"]
-
-    third_payload = {
-        "name": "Kamla Nehru Institute AC",
-        "email_suffix": "knit.ac.in",
-        "description": "Third tenant with colliding slug prefix"
-    }
-    response = await client.post(
-        "/tenant/onboarding",
-        json=third_payload,
-        headers={"Authorization": f"Bearer {third_token}"}
-    )
-    assert response.status_code == 200
-    assert response.json()["slug"] == "knit-3"
-    assert response.json()["message"] == "Tenant onboarded successfully"
-
-# ====jul 26=====
-
-@pytest.mark.asyncio
-async def test_onboarding_email_suffix_below_min_length_fails(client, admin_token):
-    """Validate that tenant onboarding is rejected when the email suffix is below the minimum length"""
+async def test_onboarding_unknown_vertical_fails(client, admin_token):
+    """Onboarding a tenant against a vertical with no manifest fails fast rather than
+    creating a tenant with no configuration to fall back to."""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "ab",
-        "description": "Testing email suffix under minimum length"
+        "slug": "knit-unknown",
+        "vertical": "not_a_real_vertical",
+        "description": "Testing an unknown vertical",
+    }
+    response = await client.post(
+        "/tenant/onboarding",
+        json=payload,
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert response.status_code == 422
+    assert response.json()["message"] == "Unknown vertical"
+
+
+@pytest.mark.asyncio
+async def test_onboarding_invalid_slug_characters_fail(client, admin_token):
+    """Validate that tenant onboarding is rejected when the slug does not match the slug pattern."""
+    payload = {
+        "name": "Kamla Nehru Institute of Technology",
+        "slug": "Not A Valid Slug!",
+        "vertical": "campus_club",
+        "description": "Testing an invalid slug",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -295,20 +263,22 @@ async def test_onboarding_email_suffix_below_min_length_fails(client, admin_toke
     )
     assert response.status_code == 422
 
+
 @pytest.mark.asyncio
-async def test_onboarding_malformed_email_suffix_fails(client, admin_token):
-    """Validate that tenant onboarding is rejected when the email suffix is not a valid domain format"""
+async def test_onboarding_slug_too_short_fails(client, admin_token):
+    """Validate that tenant onboarding is rejected when the slug is below the minimum length"""
     payload = {
-        "name": "Some Random Tenant",
-        "email_suffix": "not_a_domain",
-        "description": "Testing malformed suffix"
+        "name": "Kamla Nehru Institute of Technology",
+        "slug": "ab",
+        "vertical": "campus_club",
+        "description": "Testing slug under minimum length",
     }
     response = await client.post(
         "/tenant/onboarding",
         json=payload,
         headers={"Authorization": f"Bearer {admin_token}"}
     )
-    assert response.status_code in (400, 422)
+    assert response.status_code == 422
 
 
 @pytest.mark.asyncio
@@ -316,8 +286,9 @@ async def test_onboarding_name_over_max_length_fails(client, admin_token):
     """Validate that tenant onboarding is rejected when the tenant name exceeds the maximum length"""
     payload = {
         "name": "A" * 101,
-        "email_suffix": "toolongname.edu.in",
-        "description": "Testing name over max length"
+        "slug": "toolongname",
+        "vertical": "campus_club",
+        "description": "Testing name over max length",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -332,8 +303,9 @@ async def test_onboarding_description_over_max_length_fails(client, admin_token)
     """Validate that tenant onboarding is rejected when the description exceeds the maximum length"""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "toolongdesc.edu.in",
-        "description": "A" * 1001
+        "slug": "toolongdesc",
+        "vertical": "campus_club",
+        "description": "A" * 1001,
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -344,12 +316,13 @@ async def test_onboarding_description_over_max_length_fails(client, admin_token)
 
 
 @pytest.mark.asyncio
-async def test_onboarding_email_suffix_over_max_length_fails(client, admin_token):
-    """Validate that tenant onboarding is rejected when the email suffix exceeds the maximum length"""
+async def test_onboarding_slug_over_max_length_fails(client, admin_token):
+    """Validate that tenant onboarding is rejected when the slug exceeds the maximum length"""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "a" * 101,
-        "description": "Testing email suffix over max length"
+        "slug": "a" * 101,
+        "vertical": "campus_club",
+        "description": "Testing slug over max length",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -364,8 +337,9 @@ async def test_onboarding_whitespace_only_name_fails(client, admin_token):
     """Validate that tenant onboarding is rejected when the tenant name consists only of whitespace"""
     payload = {
         "name": "     ",
-        "email_suffix": "blankname.edu.in",
-        "description": "Testing whitespace-only name"
+        "slug": "blankname",
+        "vertical": "campus_club",
+        "description": "Testing whitespace-only name",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -380,8 +354,9 @@ async def test_onboarding_whitespace_only_description_fails(client, admin_token)
     """Validate that tenant onboarding is rejected when the description consists only of whitespace"""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "blankdesc.edu.in",
-        "description": "     "
+        "slug": "blankdesc",
+        "vertical": "campus_club",
+        "description": "     ",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -392,12 +367,13 @@ async def test_onboarding_whitespace_only_description_fails(client, admin_token)
 
 
 @pytest.mark.asyncio
-async def test_onboarding_email_suffix_whitespace_is_stripped(client, admin_token):
-    """Verify that leading and trailing whitespace in the email suffix is stripped during onboarding"""
+async def test_onboarding_slug_whitespace_and_case_is_normalized(client, admin_token):
+    """Verify that leading/trailing whitespace and uppercase in the slug are normalized during onboarding"""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": " knit.edu.in ",
-        "description": "Testing whitespace stripping on email suffix"
+        "slug": " KNIT ",
+        "vertical": "campus_club",
+        "description": "Testing whitespace and case normalization on slug",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -408,20 +384,20 @@ async def test_onboarding_email_suffix_whitespace_is_stripped(client, admin_toke
     body = response.json()
     assert body["name"] == "Kamla Nehru Institute of Technology"
     assert body["slug"] == "knit"
-    assert body["email_suffix"] == "knit.edu.in"
-    assert body["description"] == "Testing whitespace stripping on email suffix"
+    assert body["description"] == "Testing whitespace and case normalization on slug"
     assert isinstance(body["slug"], str)
     assert len(body["slug"]) > 0
     assert body["message"] == "Tenant onboarded successfully"
 
 
 @pytest.mark.asyncio
-async def test_onboarding_suffix_starting_with_dot_fails(client, admin_token):
-    """Validate that tenant onboarding is rejected when the email suffix starts with a dot"""
+async def test_onboarding_slug_starting_with_hyphen_fails(client, admin_token):
+    """Validate that tenant onboarding is rejected when the slug starts with a hyphen"""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": ".knit.edu.in",
-        "description": "Testing suffix starting with a dot"
+        "slug": "-knit",
+        "vertical": "campus_club",
+        "description": "Testing slug starting with a hyphen",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -432,12 +408,13 @@ async def test_onboarding_suffix_starting_with_dot_fails(client, admin_token):
 
 
 @pytest.mark.asyncio
-async def test_onboarding_suffix_ending_with_dot_fails(client, admin_token):
-    """Validate that tenant onboarding is rejected when the email suffix ends with a dot"""
+async def test_onboarding_slug_ending_with_hyphen_fails(client, admin_token):
+    """Validate that tenant onboarding is rejected when the slug ends with a hyphen"""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "knit.edu.in.",
-        "description": "Testing suffix ending with a dot"
+        "slug": "knit-",
+        "vertical": "campus_club",
+        "description": "Testing slug ending with a hyphen",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -448,12 +425,13 @@ async def test_onboarding_suffix_ending_with_dot_fails(client, admin_token):
 
 
 @pytest.mark.asyncio
-async def test_onboarding_suffix_with_double_dots_fails(client, admin_token):
-    """Validate that tenant onboarding is rejected when the email suffix contains consecutive dots"""
+async def test_onboarding_slug_with_underscore_fails(client, admin_token):
+    """Validate that tenant onboarding is rejected when the slug contains an underscore"""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "knit..edu.in",
-        "description": "Testing suffix with double dots"
+        "slug": "knit_edu",
+        "vertical": "campus_club",
+        "description": "Testing slug with an underscore",
     }
     response = await client.post(
         "/tenant/onboarding",
@@ -464,12 +442,13 @@ async def test_onboarding_suffix_with_double_dots_fails(client, admin_token):
 
 
 @pytest.mark.asyncio
-async def test_onboarding_suffix_with_at_symbol_fails(client, admin_token):
-    """Validate that tenant onboarding is rejected when the email suffix contains an at symbol"""
+async def test_onboarding_slug_with_at_symbol_fails(client, admin_token):
+    """Validate that tenant onboarding is rejected when the slug contains an at symbol"""
     payload = {
         "name": "Kamla Nehru Institute of Technology",
-        "email_suffix": "admin@knit.edu.in",
-        "description": "Testing suffix with an @ symbol"
+        "slug": "knit@edu",
+        "vertical": "campus_club",
+        "description": "Testing slug with an @ symbol",
     }
     response = await client.post(
         "/tenant/onboarding",
