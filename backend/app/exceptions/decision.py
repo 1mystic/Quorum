@@ -29,3 +29,13 @@ class BallotShapeInvalidError(AppException):
 class BallotOptionInvalidError(AppException):
     status_code = 422
     message = "A ballot referenced an option that does not belong to this decision"
+
+
+class DecisionActionNotAllowedError(AppException):
+    status_code = 403
+    message = "This action is not allowed for this decision"
+
+
+class DecisionNotOpenError(AppException):
+    status_code = 403
+    message = "This decision is not open for voting"

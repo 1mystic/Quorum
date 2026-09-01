@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.models import Decision, DecisionOption, Ballot
+from app.models import Decision, DecisionOption, Ballot, DecisionStatus
 from app.repository.base import TenantScopedRepository
 
 
@@ -20,11 +20,15 @@ class DecisionRepository(TenantScopedRepository):
 
     async def create_decision(
         self, *, title: str, kind, declared_rule: str, ballot_style,
-        opened_at: datetime | None = None, group_id: int | None = None,
+        group_id: int | None = None,
         description: str | None = None, seats: int = 1,
         quorum_rule: str | None = None, budget_minor: int | None = None,
-        eligible_strata: list | None = None,
     ) -> Decision:
+        """
+        Created as DRAFT: `opened_at`/`eligible_strata` stay unset until a
+        TenantAdmin approves a submitted decision (see `approve` below), so
+        the roster snapshot is genuinely frozen at the moment voting opens.
+        """
         decision = Decision(
             tenant_id=self.tenant_id,
             group_id=group_id,
@@ -36,11 +40,30 @@ class DecisionRepository(TenantScopedRepository):
             quorum_rule=quorum_rule,
             budget_minor=budget_minor,
             ballot_style=ballot_style,
-            opened_at=opened_at or datetime.now(timezone.utc),
-            eligible_strata=eligible_strata or [],
+            status=DecisionStatus.DRAFT,
         )
         self.db.add(decision)
         await self.db.flush()
+        return decision
+
+    async def submit_for_review(self, decision: Decision) -> Decision:
+        decision.status = DecisionStatus.SUBMITTED
+        decision.submitted_at = datetime.now(timezone.utc)
+        return decision
+
+    async def approve(self, decision: Decision, approved_by: int, eligible_strata: list) -> Decision:
+        decision.status = DecisionStatus.OPEN
+        decision.approved_by = approved_by
+        decision.approved_at = datetime.now(timezone.utc)
+        decision.opened_at = datetime.now(timezone.utc)
+        decision.eligible_strata = eligible_strata
+        return decision
+
+    async def reject(self, decision: Decision, rejected_by: int, reason: str) -> Decision:
+        decision.status = DecisionStatus.REJECTED
+        decision.rejected_by = rejected_by
+        decision.rejected_at = datetime.now(timezone.utc)
+        decision.rejection_reason = reason
         return decision
 
     async def add_option(
@@ -61,6 +84,7 @@ class DecisionRepository(TenantScopedRepository):
 
     async def close_decision(self, decision: Decision) -> Decision:
         decision.closed_at = datetime.now(timezone.utc)
+        decision.status = DecisionStatus.CLOSED
         return decision
 
     async def cast_ballot(
@@ -115,7 +139,9 @@ class DecisionRepository(TenantScopedRepository):
     async def list_decisions(self, limit: int = 50, offset: int = 0) -> list[Decision]:
         result = await self.db.execute(
             self.scope(select(Decision), Decision)
-            .order_by(Decision.opened_at.desc())
+            # created_at, not opened_at: a DRAFT/SUBMITTED/REJECTED decision
+            # has no opened_at yet and would sort unpredictably by it.
+            .order_by(Decision.created_at.desc())
             .limit(limit)
             .offset(offset)
         )

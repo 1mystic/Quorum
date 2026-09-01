@@ -144,7 +144,10 @@ def get_decision_service(db: AsyncSession = Depends(get_db),
     member_repo = MemberRepository(db)
     user_repo = UserRepository(db)
     tenant_repo = TenantRepository(db)
-    return DecisionService(decision_repo, member_repo, user_repo, tenant_repo)
+    membership_repo = MembershipRepository(db)
+    group_repo = GroupRepository(db)
+    return DecisionService(decision_repo, member_repo, user_repo, tenant_repo,
+                           membership_repo, group_repo)
 
 
 

@@ -1,7 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
 
-from app.models import DecisionKind, BallotStyle
+from app.models import DecisionKind, BallotStyle, DecisionStatus
 
 
 class CreateDecisionOptionRequest(BaseModel):
@@ -40,8 +40,13 @@ class DecisionItem(BaseModel):
     seats: int
     quorum_rule: str | None
     budget_minor: int | None
-    opened_at: datetime
+    status: DecisionStatus
+    opened_at: datetime | None
     closed_at: datetime | None
+    submitted_at: datetime | None = None
+    approved_at: datetime | None = None
+    rejected_at: datetime | None = None
+    rejection_reason: str | None = None
     options: list[DecisionOptionItem]
 
 
@@ -68,4 +73,6 @@ class BallotItem(BaseModel):
 
 class DecisionActionResponse(BaseModel):
     id: int
+    status: DecisionStatus
     message: str
+    rejection_reason: str | None = None

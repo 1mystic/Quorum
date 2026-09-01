@@ -29,7 +29,7 @@ pure, once the adapter turns these rows into `Ballot`/`DecisionOption`/
 import enum
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, Enum, DateTime, Integer, Text, UniqueConstraint, func
+from sqlalchemy import ForeignKey, Enum, DateTime, Integer, Text, UniqueConstraint, func, text
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -49,6 +49,22 @@ class BallotStyle(str, enum.Enum):
     SCORE = "score"
     SINGLE = "single"
     ALLOCATION = "allocation"
+
+
+class DecisionStatus(str, enum.Enum):
+    """
+    Approval-workflow half of card (backend-porter): a poll is drafted, then
+    submitted, then a TenantAdmin either opens it for voting or rejects it
+    with a reason. `opened_at`/`eligible_strata` are only ever populated once
+    a decision reaches OPEN (see DecisionService.approve), so the roster
+    snapshot is genuinely frozen at the moment voting starts, not at draft
+    time.
+    """
+    DRAFT = "DRAFT"
+    SUBMITTED = "SUBMITTED"
+    OPEN = "OPEN"
+    REJECTED = "REJECTED"
+    CLOSED = "CLOSED"
 
 
 # Rule D1's vocabulary: the same six values `DecisionSpec.declared_rule`'s
@@ -74,9 +90,20 @@ class Decision(Base):
     quorum_rule: Mapped[str | None] = mapped_column()
     budget_minor: Mapped[int | None] = mapped_column()
     ballot_style: Mapped[BallotStyle] = mapped_column(Enum(BallotStyle))
-    opened_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                                default=utcnow, server_default=func.now())
+    status: Mapped[DecisionStatus] = mapped_column(
+        Enum(DecisionStatus), default=DecisionStatus.DRAFT, server_default=text("'DRAFT'")
+    )
+    # Nullable now: only set once a TenantAdmin approves the decision and
+    # voting genuinely opens (DecisionService.approve), not at draft time.
+    opened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # References users.id: a TENANT_ADMIN approver never gets a Member row.
+    approved_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    rejected_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    rejected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    rejection_reason: Mapped[str | None] = mapped_column(Text)
     # RosterSnapshot frozen at opened_at (spine section 8): a list of
     # {"strata": {...}, "count": n} rows, never recomputed after the fact, so
     # a later move-in cannot change a past turnout figure.

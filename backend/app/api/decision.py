@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, Security
 
-from app.schemas import CreateDecisionRequest, DecisionItem, CastBallotRequest, BallotItem
+from app.schemas import (
+    CreateDecisionRequest, DecisionItem, CastBallotRequest, BallotItem, DecisionActionResponse,
+    RejectContentRequest,
+)
 from app.services import DecisionService
 from app.core.di import get_decision_service, get_user_info
 
@@ -14,6 +17,34 @@ async def create_decision(
     service: DecisionService = Depends(get_decision_service),
 ):
     return await service.create_decision(payload, data)
+
+
+@decision_router.patch("/{decision_id}/submit-for-review", response_model=DecisionActionResponse)
+async def submit_decision_for_review(
+    decision_id: int,
+    payload: dict = Security(get_user_info, scopes=["MEMBER", "TENANT_ADMIN"]),
+    service: DecisionService = Depends(get_decision_service),
+):
+    return await service.submit_for_review(payload, decision_id)
+
+
+@decision_router.patch("/{decision_id}/approve", response_model=DecisionActionResponse)
+async def approve_decision(
+    decision_id: int,
+    payload: dict = Security(get_user_info, scopes=["TENANT_ADMIN"]),
+    service: DecisionService = Depends(get_decision_service),
+):
+    return await service.approve(payload, decision_id)
+
+
+@decision_router.patch("/{decision_id}/reject", response_model=DecisionActionResponse)
+async def reject_decision(
+    decision_id: int,
+    data: RejectContentRequest,
+    payload: dict = Security(get_user_info, scopes=["TENANT_ADMIN"]),
+    service: DecisionService = Depends(get_decision_service),
+):
+    return await service.reject(payload, decision_id, data.reason)
 
 
 @decision_router.get("", response_model=list[DecisionItem])

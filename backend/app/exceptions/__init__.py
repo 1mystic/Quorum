@@ -40,4 +40,5 @@ from app.exceptions.participation import (
 from app.exceptions.decision import (
     DecisionNotFoundError, DecisionOptionNotFoundError, DecisionAlreadyClosedError,
     DeclaredRuleInvalidError, BallotShapeInvalidError, BallotOptionInvalidError,
+    DecisionActionNotAllowedError, DecisionNotOpenError,
 )
