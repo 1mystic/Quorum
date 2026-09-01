@@ -25,6 +25,23 @@ from app.exceptions import AuthorizationError, TenantSlugMismatchError
 _security = HTTPBearer()
 
 
+async def set_tenant_context(db: AsyncSession, tenant_id: int) -> None:
+    """
+    The GUC half of verify_tenant_scope, for the handful of writes to a
+    tenant-scoped table (RLS-FORCE'd, see the tenancy migration) that happen
+    on a route with no {slug} in the URL to check - MEMBER signup creating
+    its `members` row is the one today. The service already knows the real
+    tenant_id at that point (resolved from the submitted tenant_slug), so
+    this sets the same session-local `app.tenant_id` the route dependency
+    would have set, rather than leaving the FORCE RLS policy to fail the
+    insert closed against an unset setting.
+    """
+    await db.execute(
+        text("SELECT set_config('app.tenant_id', :tenant_id, true)"),
+        {"tenant_id": str(tenant_id)},
+    )
+
+
 async def verify_tenant_scope(
     request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(_security),

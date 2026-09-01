@@ -16,6 +16,7 @@ from app.core.google import verify_google_id_token
 from app.core.mailer import send_password_reset_job
 from app.core.token import create_access_token, create_refresh_token, create_reset_token, decode_token
 from app.core.messages import AuthMessages
+from app.core.tenancy import set_tenant_context
 
 RESET_TOKEN_MINUTES = 15
 
@@ -54,6 +55,11 @@ class UserService:
             "role": new_user.role
         }
         if data.role == UserRole.MEMBER:
+            # `members` is RLS-FORCE'd like every other tenant-scoped table,
+            # but signup runs outside /api/t/{slug} (no verify_tenant_scope
+            # to set app.tenant_id for us) - set it here now that the tenant
+            # is resolved, or this insert fails closed against an unset GUC.
+            await set_tenant_context(self.user_repo.db, tenant.id)
             new_member = await self.user_repo.create_member(user_id=new_user.id, tenant_id=tenant.id)
             payload["tenant_id"] = tenant.id
             payload["tenant_slug"] = tenant.slug
@@ -121,6 +127,7 @@ class UserService:
                 profile_image_url=picture,
             )
             if role == UserRole.MEMBER:
+                await set_tenant_context(self.user_repo.db, tenant.id)
                 await self.user_repo.create_member(user_id=user.id, tenant_id=tenant.id)
             else:
                 await self.user_repo.create_tenant_admin(user_id=user.id)
