@@ -14,31 +14,28 @@ export function coreNav(slug) {
   ]
 }
 
+// One Insights section for every enabled pack, not one micro-section per
+// pack: four enabled packs used to mean four headers each holding a single
+// link. The pack number stays on the item itself (not a repeated header) so
+// a Method Card can still be traced back to its pack at a glance.
 export function insightNav(slug, tenant) {
-  const groups = []
   const has = (id) => tenant.enabled_packs.includes(id) || tenant.optional_packs.includes(id)
 
+  const items = []
   if (has('reliability_ops')) {
-    groups.push({ label: 'Pack 01 · Operations', items: [
-      { name: 'insights-operations', to: `/t/${slug}/insights/operations`, label: 'Resolution' }
-    ] })
+    items.push({ name: 'insights-operations', to: `/t/${slug}/insights/operations`, label: 'Resolution', pack: '01' })
   }
   if (has('bayes_ranking')) {
-    groups.push({ label: 'Pack 02 · Comparison', items: [
-      { name: 'insights-comparison', to: `/t/${slug}/insights/comparison`, label: 'Leaderboard' }
-    ] })
+    items.push({ name: 'insights-comparison', to: `/t/${slug}/insights/comparison`, label: 'Leaderboard', pack: '02' })
   }
   if (has('forecast_risk')) {
-    groups.push({ label: 'Pack 03 · Foresight', items: [
-      { name: 'insights-forecast', to: `/t/${slug}/insights/forecast`, label: 'Forecast' }
-    ] })
+    items.push({ name: 'insights-forecast', to: `/t/${slug}/insights/forecast`, label: 'Forecast', pack: '03' })
   }
   if (has('governance_insight')) {
-    groups.push({ label: 'Pack 04 · Voice', items: [
-      { name: 'insights-governance', to: `/t/${slug}/insights/governance`, label: 'Segmentation' }
-    ] })
+    items.push({ name: 'insights-governance', to: `/t/${slug}/insights/governance`, label: 'Segmentation', pack: '04' })
   }
-  return groups
+  if (items.length === 0) return []
+  return [{ label: 'Insights', items }]
 }
 
 export function adminNav(slug) {

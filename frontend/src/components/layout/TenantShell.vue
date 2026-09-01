@@ -79,7 +79,7 @@ useOverlayScrollbar(sideRef)
           v-for="item in group.items" :key="item.name"
           class="ni" :class="{ on: isActive(item) }"
           :to="item.to"
-        >{{ item.label }}</router-link>
+        >{{ item.label }}<span v-if="item.pack" class="c">{{ item.pack }}</span></router-link>
       </div>
 
       <div class="side-foot navgrp">
