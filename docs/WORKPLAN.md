@@ -83,7 +83,7 @@ whose only definition is inside a media query.
 | C.2 | Rename pass per `docs/GLOSSARY.md` (College→Tenant, Student→Member, Club→Group, Issue→Request) | backend-porter | C.1 | DONE |
 | C.3 | Tenant model: `slug`, `vertical`, `enabled_packs`, `settings` + vertical manifest loader | backend-porter | C.2 | DONE, 2 provisional manifests only, see parking lot |
 | C.4 | `TenantScopedRepository` + Postgres RLS + `/api/t/{slug}` routing + slug/claim match | backend-porter | C.3 | DONE, fully wired for RequestRepository only, RLS is the backstop elsewhere |
-| C.5 | **Tenant isolation test suite** | reviewer | C.4 | DONE, written and gate-checked offline, not yet run against a live Postgres |
+| C.5 | **Tenant isolation test suite** | reviewer | C.4 | DONE, run for real against a live Postgres 2026-09-01: 403 at the API and zero rows under RLS with the API bypassed, both proven with a non-superuser role; see CONTEXT.md |
 | C.6 | `app/stats/contracts.py` + `registry.py` + purity lint | statistician | C.4, A.8 | DONE, 81 services registered with method cards, purity lint verified against a planted violation |
 | C.7 | `app/stats/streams/` — canonical dataclasses + RWA and campus adapters | statistician | C.6 | DONE, ledger/decision declared empty pending their models, see CONTEXT constraints |
 | C.8 | `request_flow` domain end to end (Request model, service, API, UI) | backend-porter | C.7 | DONE. Backend half done; UI wired to the real API 2026-09-01 (`RequestsView`/`RequestNewView`/`RequestDetailView`), see CONTEXT.md |
