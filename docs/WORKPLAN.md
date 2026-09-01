@@ -95,7 +95,7 @@ whose only definition is inside a media query.
 | C.14 | Conformal ETA surfaced on the request detail page | frontend | C.13 | DONE against fixtures (`RequestDetailView`, `display="range"` StatTile), pending the real per-request ETA endpoint |
 | C.15 | `participation` + `decision` domains + **Pack 4** | statistician | C.13 | DONE, all 28 Pack-4 services real, 154 known-answer tests. Condorcet cycle disclosed as a named sequence with no winner (a beats b beats c beats a, Smith set all three, non-blocking FAIL, envelope qualified); Schulze's published 45-voter path matrix and E > A > C > B > D reproduced exactly; STV food election reproduced round by round. Karate club: betweenness 0.43764 at node 0 and 0.30407 at node 33 matching the published values, Louvain Q = 0.4156 over 4 communities recovering 32 of 34 recorded faction memberships, z = 8.32 against a degree-preserving null which an Erdos-Renyi graph fails at z = -0.75. Brant test blocks per covariate. Seven catalog known-answer corrections; see CONTEXT.md |
 | C.16 | Decision console UI — pairwise matrix, cycle disclosure, budgeting fairness report | frontend | C.15 | DONE against fixtures (`DecisionDetailView`, pairwise matrix + mandatory cycle disclosure, tested); budgeting fairness report not yet a page, no fixture shape drafted for it |
-| C.17 | **Pack 2** (`bayes.py`, `experiments.py`, `bandits.py`) + shrunk leaderboard | statistician | C.15 | IN PROGRESS. `experiments.*` (3) and `bandits.*` (2) are implemented, 79 tests: the always-valid stopping rule holds 0.0% false positives under monitoring after every observation where the naive stop-when-significant rule reaches 23.8%, and Thompson regret tracks the Lai-Robbins line. `bayes.*` and `pairwise.*` are the other half. |
+| C.17 | **Pack 2** (`bayes.py`, `experiments.py`, `bandits.py`, `pairwise.py`) + shrunk leaderboard | statistician | C.15 | DONE. All 12 Pack 2 services implemented, so **all 81 registered services are implemented** and nothing under `app/stats/` raises `NotImplementedError`. The always-valid stopping rule holds 0.0% false positives under monitoring after every observation where the naive rule reaches 23.8%, and Thompson regret tracks the Lai-Robbins line. The 3-of-3 versus 47-of-52 gate passes: raw rates rank 3-of-3 first, the posterior lower bound ranks it **fourth** at 0.573 behind 47-of-52 at 0.796. `hierarchical_pool`'s DP sensitivity gate passes exactly (a held-out tenant moves each released statistic by at most the clamp under a shared seed) and empirically (worst log density ratio under epsilon + Monte Carlo slack over 6000 seeds per side). The shrunk leaderboard UI is not built; the mathematics behind it is. |
 | C.18 | Agent stats tools returning `Evidence` + grounding tests | backend-porter | C.9 | TODO |
 | C.19 | Seed script: one demo tenant per vertical with enough history for the packs to be non-trivial | backend-porter | C.15 | TODO |
 | C.20 | Deploy: `web` + `worker` Dockerfiles, Vercel config, Neon migration, `.env.example` | supervisor | C.19 | TODO |
@@ -144,6 +144,8 @@ section for what remains.
 - WhatsApp broadcast — the RWA research found ~99% resident usage, which is the single strongest
   adoption signal in the file. Revisit once Phase C is walking.
 - Cross-tenant hierarchical priors (Pack 2): privacy mechanism settled (DP-noised sufficient
-  statistics, batched weekly refresh, per-tenant epsilon budget). See `docs/STATS_CATALOG.md`
-  `bayes.hierarchical_pool`. Implementation still lands in card C.17, gated by the sensitivity
-  test in addition to the known-answer test.
+  statistics, batched weekly refresh, per-tenant epsilon budget) and **implemented in card C.17**,
+  through both gates: the eight schools known answer and the sensitivity test. Off the parking lot
+  as a design question. What remains is product, not mathematics: the tenant-admin opt-out switch
+  in the vertical manifest, and the per-quarter epsilon budget ledger, which `hierarchical_pool`
+  reads as an argument and does not keep.
