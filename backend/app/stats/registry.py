@@ -964,12 +964,18 @@ _s(
         "Robinson, Introduction to Empirical Bayes (2017), ch. 3",
     ),
     known=(
-        "Robinson's baseball batting-average example fits Beta(alpha about 78.7, beta about "
-        "224.9), a published pair reproduced across the empirical Bayes literature; our fit must "
-        "match within 1%. Plus recovery: data simulated from a known Beta at a fixed seed must "
-        "return alpha and beta within a tolerance derived from the Fisher information."
+        "CORRECTED. Robinson's published Beta(78.7, 224.9) is fitted to career batting averages "
+        "from the Lahman database, which is not vendored here and cannot be downloaded in this "
+        "environment, so asserting against it would be a known answer nothing checks. What is "
+        "asserted instead: recovery of a known Beta from seeded simulation, within a tolerance "
+        "derived from the design's own standard error rather than tuned; agreement between the "
+        "moment and maximum-likelihood fits on plentiful data; and the blocking refusal when "
+        "every group sits at the same rate. The prior-fit check is a posterior predictive "
+        "chi-square on the probability integral transform, asserted in BOTH directions, on a "
+        "bimodal population that must fail it and an exchangeable one that must not."
     ),
     min_n_expr="5 groups and at least 50 total trials",
+    implemented=True,
 )
 
 _s(
@@ -995,13 +1001,17 @@ _s(
     refs=("Gelman et al., Bayesian Data Analysis, 3rd ed., ch. 5", "Efron and Morris (1975) JASA 70:311"),
     known=(
         "Exact and closed form: the posterior of Beta(a,b) with x successes in n trials is "
-        "Beta(a+x, b+n-x), asserted against scipy.stats.beta to 1e-12. Then Efron and Morris's "
-        "eighteen baseball players, where the empirical Bayes estimates reduce total squared "
-        "error by a published factor of about 3.5. Then the pathology test, which is a hard "
-        "shipping requirement: a fixture with a 3-of-3 group and a 47-of-52 group must rank "
-        "47-of-52 first by posterior lower bound."
+        "Beta(a+x, b+n-x). Asserted on the parameters to 1e-12 and on both interval endpoints by "
+        "inverting our own regularized incomplete beta to 1e-9; scipy is deliberately not a "
+        "dependency of the light tier, so it is not the oracle. Then Efron and Morris's eighteen "
+        "batters, whose published totals (.0755 raw, .0214 James-Stein, a factor of about 3.5) "
+        "the fixture reproduces to three decimals before any service touches it; that table is "
+        "reconstructed from published values rather than vendored as a CSV, and the test file "
+        "says so. Then the pathology test, which is a hard shipping requirement: a 3-of-3 group "
+        "and a 47-of-52 group must rank 47-of-52 first by posterior lower bound."
     ),
     min_n_expr="1 trial per group for a row, 5 groups for the prior",
+    implemented=True,
 )
 
 _s(
@@ -1022,11 +1032,14 @@ _s(
     interval="A 95% credible interval on the group's rate per unit exposure.",
     refs=("Gelman et al., Bayesian Data Analysis, 3rd ed., ch. 5", "Robbins (1956)"),
     known=(
-        "Exact conjugate identity: the posterior is Gamma(alpha + sum(y), beta + sum(exposure)), "
-        "asserted against scipy.stats.gamma to 1e-12, plus recovery of a known Gamma from seeded "
-        "simulation."
+        "Exact conjugate identity: the posterior is Gamma(alpha + y, beta + exposure), asserted "
+        "on the parameters to 1e-12 and on both interval endpoints by inverting our own "
+        "regularized incomplete gamma to 1e-9 (scipy is not a dependency of the light tier), "
+        "plus recovery of a known Gamma from seeded simulation, plus the exposure test: two "
+        "groups at the same rate on very different exposure must not get the same interval."
     ),
     min_n_expr="5 groups",
+    implemented=True,
 )
 
 _s(
@@ -1050,12 +1063,18 @@ _s(
     interval="Per-row credible intervals, plus the seeded probability that each group holds its rank.",
     refs=("Efron and Morris (1975) JASA 70:311", "Gelman et al., Bayesian Data Analysis, 3rd ed."),
     known=(
-        "Deterministic given the posteriors, asserted exactly. The behavioural tests are the "
-        "point and are required for shipping: 3-of-3 must not outrank 47-of-52, and in the "
-        "inverse fixture a 0-of-1 group must not outrank a measured 2-of-10. Rank stability is "
-        "asserted by seeded Monte Carlo against the analytic two-group integral."
+        "Deterministic given the posteriors, asserted exactly. The behavioural test is the point "
+        "and is required for shipping: 3-of-3 must not outrank 47-of-52, and it does not, "
+        "dropping from first on raw rate to fourth on the lower bound. CORRECTED on the inverse "
+        "fixture: the catalog asked that a 0-of-1 group must not outrank a measured 2-of-10, and "
+        "that expectation is wrong. 2 of 10 is not an absence of evidence, it is evidence of "
+        "being poor, so its posterior sits BELOW the population while the unmeasured group sits "
+        "at the prior. What the rule guarantees, and what is asserted, is that an unmeasured "
+        "group never outranks a group measured to be GOOD. Rank stability is asserted by seeded "
+        "Monte Carlo against the two-group integral computed independently by quadrature."
     ),
     min_n_expr="inherits the prior's 5 groups",
+    implemented=True,
 )
 
 _s(
@@ -1090,12 +1109,27 @@ _s(
         "Dwork and Roth (2014), The Algorithmic Foundations of Differential Privacy",
     ),
     known=(
-        "The eight schools dataset: published posterior estimates for the group effects and for "
-        "tau in Rubin (1981) and BDA ch. 5, matched within Monte Carlo error at a fixed seed. "
-        "Plus a privacy gate: perturbing one held-out tenant's contribution by a bounded amount "
-        "must change the published pooled statistic by no more than the declared epsilon allows."
+        "The eight schools dataset, from Rubin (1981) and BDA ch. 5. The data (28, 8, -3, 7, -1, "
+        "1, 18, 12) with standard errors (15, 10, 16, 11, 9, 11, 10, 18) is quoted from the "
+        "published table; the posterior figures are quoted from the same source rather than "
+        "vendored, so what is asserted is the set of features every published account agrees on "
+        "and a wrong implementation fails: school A shrinks from 28 to about 11, every effect "
+        "lands between its own value and the pooled mean, the order is preserved among schools "
+        "with equal standard errors and deliberately NOT preserved across unequal ones (C at -3 "
+        "is pooled above E at -1, because C's standard error is 16 against E's 9), and tau's "
+        "credible interval reaches down to zero. Two exact identities carry no tolerance at all: "
+        "the pooling factor equals sigma^2/(sigma^2+tau^2) per unit, and the fitted values "
+        "reproduce the precision-weighted mean as tau goes to zero. Plus the privacy gate: "
+        "perturbing one held-out tenant's contribution changes the released sufficient statistic "
+        "by at most the clamp under a shared seed, and over 6000 seeds the ratio of the release "
+        "densities on two neighbouring datasets stays under exp(epsilon). CORRECTED on "
+        "convergence: the posterior is computed by deterministic quadrature over tau, not by "
+        "MCMC, so R-hat does not apply; the equivalent criterion, grid refinement plus a second "
+        "seeded draw stream against the Monte Carlo error the draw count implies, is run and "
+        "reported under the same check id."
     ),
     min_n_expr="5 units per level; for cross-tenant pooling, 10 tenants with none above 25% of observations",
+    implemented=True,
 )
 
 _s(
@@ -1296,13 +1330,22 @@ _s(
         "Turner and Firth (2012) JSS 48:9",
     ),
     known=(
-        "The BradleyTerry2 package's published worked examples with printed abilities and "
-        "standard errors. Exact second ground truth: in a balanced round-robin the fitted "
-        "abilities must be a monotone function of win counts, and for a perfectly transitive "
-        "result set the ordering must match exactly. Third: the separation fixture must trigger "
-        "the blocking check rather than return a large finite number."
+        "CORRECTED twice. First, the BradleyTerry2 package is not vendored here and there is no "
+        "network access, so its printed examples are not the oracle. What replaces them is "
+        "stronger because it is a theorem rather than another library that could be wrong the "
+        "same way: the exact stationarity condition of the MLE, that for every item the wins the "
+        "fitted abilities predict equal the wins observed, asserted to 1e-6. Second, the claim "
+        "that a perfectly transitive result set must reproduce the ordering exactly is right "
+        "about the ordering and wrong about the abilities: when the stronger item wins every "
+        "game, Ford's condition fails and NO finite set of abilities maximises the likelihood, "
+        "so the service publishes the tier order the data determines and withholds the numbers "
+        "it does not. Also asserted: recovery of known abilities from a seeded ladder with "
+        "profile intervals covering all five; monotonicity in wins on a balanced round robin; "
+        "the disconnected-graph refusal; and the order effect caught in one fixture and not in "
+        "its control."
     ),
     min_n_expr="5 items, 30 comparisons, and a connected comparison graph",
+    implemented=True,
 )
 
 _s(
@@ -1326,11 +1369,15 @@ _s(
     ),
     refs=("Elo (1978), The Rating of Chessplayers", "Glickman (1999) Applied Statistics 48:377"),
     known=(
-        "Exact arithmetic: each update is a closed-form expression asserted by hand; total "
-        "rating is conserved across an update; and the fixed point of repeated updates against a "
-        "constant opponent equals the Bradley-Terry ability difference implied by the observed "
-        "win rate, which links the two services and is a real analytic identity."
+        "Exact arithmetic: two items at 1500 with K=32 move by exactly 16, asserted to 1e-12; "
+        "total rating is conserved to 1e-9 over 400 seeded results; and the fixed point of "
+        "repeated updates against an opponent held constant is 400*log10(w/(1-w)), which equals "
+        "the Bradley-Terry ability difference log(w/(1-w)) after the ln(10)/400 change of scale. "
+        "That last recursion is written in the test rather than run through the service, because "
+        "the service is zero sum and moves the opponent too: a constant opponent is a property "
+        "of the update rule, not of a real ladder, and the test says so."
     ),
+    implemented=True,
 )
 
 
@@ -2983,9 +3030,11 @@ def missing_streams(service_id: str, streams: frozenset[str]) -> frozenset[str]:
 
 def implemented_ids() -> tuple[str, ...]:
     """
-    Services whose mathematics actually exists. The rest are registered, carry a
-    complete Method Card, and raise NotImplementedError when called: specified
-    and honest about not being built, rather than absent and invisible.
+    Services whose mathematics actually exists. As of Pack 2 that is all of them,
+    but the flag stays: anything registered ahead of its mathematics raises
+    NotImplementedError when called and is not offered by the read surface,
+    which is specified and honest about not being built rather than absent and
+    invisible.
     """
     return tuple(sorted(s.id for s in REGISTRY.values() if s.implemented))
 

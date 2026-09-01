@@ -208,18 +208,23 @@ def test_the_flagship_services_are_present():
         assert service_id in R.REGISTRY
 
 
-def test_stub_services_raise_rather_than_return_a_number():
+def test_nothing_is_a_stub_any_more():
     """
-    Everything is registered; almost nothing is implemented yet. An unimplemented
-    service must raise loudly, never return a plausible-looking zero.
+    The successor to `test_stub_services_raise_rather_than_return_a_number`,
+    which held while the four packs were landing and required that anything not
+    yet implemented raise loudly rather than return a plausible-looking zero.
+    Pack 2's `bayes.*` and `pairwise.*` were the last stubs it named, so the test
+    it was written to enforce has been discharged and is replaced by its own
+    stopping condition: every registered service now has a body.
+
+    If a service is ever added ahead of its mathematics, this fails on the same
+    commit and the read surface stops advertising it.
     """
-    unimplemented = [spec for spec in R.REGISTRY.values() if not spec.implemented]
-    assert unimplemented, "if everything is implemented, delete this test"
-    # Named rather than picked at random so the failure message is readable. It
-    # is swapped for another stub each time a pack lands; it was a forecast
-    # service before Pack 3 and a voting service before Pack 4.
-    with pytest.raises(NotImplementedError):
-        R.get("bayes.hierarchical_pool").fn(None, levels=(), seed=0)
+    unimplemented = sorted(
+        spec.id for spec in R.REGISTRY.values() if not spec.implemented
+    )
+    assert unimplemented == []
+    assert len(R.implemented_ids()) == len(R.REGISTRY) == 81
 
 
 def test_pack_one_is_marked_implemented():

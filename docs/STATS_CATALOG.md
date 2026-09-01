@@ -1862,11 +1862,24 @@ Bernoulli with that group's rate.
 - *interval_meaning:* a profile-likelihood interval on the prior mean. It is uncertainty about the *population*, not about any group.
 - *references:* Robbins (1956) on empirical Bayes. Efron and Morris (1975) JASA 70:311. Robinson, *Introduction to Empirical Bayes* (2017), ch. 3.
 
-**known answer** Two published grounds. Robinson's baseball batting-average example fits
-Beta(alpha ~ 78.7, beta ~ 224.9) to the career batting averages, a published pair reproduced across
-the empirical Bayes literature; our fit must match to within 1%. Second, recovery: data simulated
-from a known Beta at a fixed seed must return alpha and beta within Monte Carlo tolerance, and the
-tolerance is derived from the known Fisher information rather than picked.
+**known answer** *Corrected in implementation.* Robinson's published Beta(78.7, 224.9) is fitted to
+career batting averages from the Lahman database, which is not vendored here and cannot be
+downloaded in this environment, so asserting against it would be a known answer nothing checks. What
+is asserted instead: recovery of a known Beta from seeded simulation, at a tolerance derived from
+the design's own standard error rather than picked; agreement between the moment and
+maximum-likelihood fits on plentiful data; and the blocking refusal when every group sits at the
+same rate. The `prior-fit` check is asserted in **both** directions, on a bimodal population that
+must fail it and an exchangeable one that must not.
+
+*Also corrected:* `prior-fit` cannot be a comparison of observed against expected **spread**. Both
+fitting methods match the observed variance by construction, so a variance ratio computed against
+them can essentially never fire, and a check that cannot fail is not a check. It is a posterior
+predictive chi-square on the probability integral transform instead, which does catch the case the
+check exists for: two trades pooled as one look bimodal, not Beta. A new non-blocking
+`strength-identified` check was added alongside it, because on the eighteen batters the marginal
+likelihood moves by under half a log unit between a prior strength of 167 and one of infinity: the
+prior **mean** is well determined there and the shrinkage weight is not, and saying so is the
+difference between a defensible choice and a measurement.
 
 ---
 
@@ -1894,13 +1907,17 @@ row is labelled "not enough evidence yet" rather than given a number that looks 
 - *references:* Gelman et al., *Bayesian Data Analysis*, 3rd ed., ch. 5. Efron and Morris (1975).
 
 **known answer** Exact and closed form. The posterior of `Beta(a,b)` with `x` successes in `n` trials
-is `Beta(a+x, b+n-x)`, so the posterior mean, variance and every quantile are asserted against
-`scipy.stats.beta` to 1e-12. Second published ground truth: **Efron and Morris's 1975 eighteen
-baseball players**, where the James-Stein/empirical Bayes estimates reduce total squared error
-against the true season averages by a published factor of about 3.5 compared to the raw rates. Our
-implementation must reproduce that reduction. Third, the pathology test, which is a hard shipping
-requirement: a fixture containing a 3-of-3 group and a 47-of-52 group must rank 47-of-52 first by
-posterior lower bound.
+is `Beta(a+x, b+n-x)`; the parameters are asserted to 1e-12 and both interval endpoints by inverting
+our own regularized incomplete beta to 1e-9. *Corrected:* `scipy` is deliberately not a dependency
+of the light tier, so it is not the oracle. Second ground truth: **Efron and Morris's 1975 eighteen
+batters**. The fixture is reconstructed from published values rather than vendored as a CSV, and
+`tests/unit/stats/data/baseball.py` says so in its own header; it is checked against three published
+aggregates before any service touches it, and reproduces them: raw total squared error **.0753**
+against the published .0755, James-Stein **.0213** against the published .0214, and the famous
+ratio **3.53** against the published 3.5. Empirical Bayes shrinkage on the same table cuts the error
+by **3.30**. Third, the pathology test, which is a hard shipping requirement and passes: on a
+fixture containing a 3-of-3 group and a 47-of-52 group, 47-of-52 ranks **first** by posterior lower
+bound (0.796) and 3-of-3 falls to **fourth** (0.573), from first on raw rate.
 
 ---
 
@@ -1909,8 +1926,11 @@ posterior lower bound.
 The count-rate analogue, for "requests per resolver per month" or "escalations per category per
 week". Posterior `Gamma(alpha + sum(y), beta + sum(exposure))`, closed form, with the same table
 shape and the same per-row rule. Exposure is explicit, so a resolver active for two weeks is not
-compared against one active for a year. **known answer** exact conjugate identity against
-`scipy.stats.gamma` to 1e-12, plus recovery of a known Gamma from seeded simulation.
+compared against one active for a year. **known answer** exact conjugate identity, asserted on the
+parameters to 1e-12 and on both interval endpoints by inverting our own regularized incomplete gamma
+to 1e-9 (*corrected:* `scipy` is not a dependency of the light tier), plus recovery of a known Gamma
+from seeded simulation, plus the exposure test: two groups at the same rate on very different
+exposure must not come out with the same interval.
 
 ---
 
@@ -1933,10 +1953,22 @@ the table cannot be rendered without the per-row n, enforced here rather than le
 frontend).
 
 **known answer** Deterministic given the posteriors, asserted exactly. The interesting test is
-behavioural and required for shipping: the 3-of-3 versus 47-of-52 fixture, plus its inverse, a
-2-of-10 versus 0-of-1 fixture, where the lower-bound rule must not put the unmeasured group above
-the measured one. Rank stability is asserted by seeded Monte Carlo against the analytic probability
-in a two-group case, which is a computable integral.
+behavioural and required for shipping: the 3-of-3 versus 47-of-52 fixture, which passes.
+
+*Corrected on the inverse fixture.* This entry asked that a 0-of-1 group must not outrank a measured
+2-of-10, and that expectation is **wrong**. 2 of 10 is not an absence of evidence, it is evidence of
+being poor: that group's posterior sits well below the population while the unmeasured group's sits
+at the prior, so the unknown group ranking above the known-poor one is shrinkage working, not
+failing. What the lower-bound rule guarantees, and what the test asserts, is that an unmeasured
+group never outranks a group measured to be **good**, which is the direction the leaderboard
+pathology actually runs in.
+
+A second behavioural test carries the weight the 47-of-52 fixture cannot: on that fixture the
+posterior mean happens to agree with the lower bound, so it does not on its own show the rule is
+needed. With a deliberately weak Beta(1,1) prior and a well evidenced vendor at 39 of 52, the two
+rules disagree, the mean puts 3-of-3 first, and only the lower bound charges it for the evidence it
+does not have. Rank stability is asserted by seeded Monte Carlo against the two-group integral
+computed independently by quadrature.
 
 ---
 
@@ -1998,10 +2030,29 @@ perturbing one held-out tenant's contribution by a bounded amount changes the pu
 statistic by no more than the DP guarantee allows, at the declared epsilon. This is the gate,
 alongside the statistical test, that must pass before a card implementing this service can close.
 
-**known answer** The **eight schools** dataset, the canonical hierarchical-model fixture: published
-posterior estimates for the group effects and for tau appear in Rubin (1981) and in *Bayesian Data
-Analysis* ch. 5, and our posterior means must match within Monte Carlo error at a fixed seed. This
-is a genuinely published, widely replicated ground truth for exactly this model.
+**known answer** The **eight schools** dataset, the canonical hierarchical-model fixture, from Rubin
+(1981) and *Bayesian Data Analysis* ch. 5. The data (28, 8, -3, 7, -1, 1, 18, 12) with standard
+errors (15, 10, 16, 11, 9, 11, 10, 18) is quoted from the published table; the posterior figures are
+quoted from the same source rather than vendored, so what is asserted is the set of features every
+published account agrees on and a wrong implementation fails: school A shrinks from 28 to about 11,
+every effect lands between its own value and the pooled mean, the order is preserved among schools
+with equal standard errors and deliberately **not** preserved across unequal ones (C at -3 is pooled
+above E at -1, because C's standard error is 16 against E's 9), and tau's credible interval reaches
+down to zero. Two exact identities carry no tolerance at all: the pooling factor equals
+`sigma^2 / (sigma^2 + tau^2)` per unit, and the fitted values reproduce the precision-weighted mean
+as tau goes to zero.
+
+*Corrected on `convergence`.* The posterior is computed by deterministic quadrature over tau (BDA
+ch. 5.4) rather than by MCMC, because the model has one scalar hyperparameter and the integral is
+cheap and exact to grid resolution. R-hat does not apply to a quadrature. The equivalent criterion
+is run and reported under the same check id: grid refinement, plus a second seeded draw stream
+compared against the Monte Carlo error the draw count itself implies rather than against a fixed
+number that would pass at 8000 draws and fail at 400 for no reason but the sample size.
+
+*Corrected on `dp-budget-exhausted`.* A tenant over budget is **excluded**, which is the remedy this
+entry itself specifies, so the check cannot block whenever it fires or the remedy would never run.
+It is a non-blocking WARN naming the exclusions, and blocks only when the exclusions leave too few
+tenants to pool at all, at which point `min-tenants` fails with it.
 
 ---
 
@@ -2215,12 +2266,28 @@ actually fail if someone added module-level state to `stats/`, so it doubles as 
 - *interval_meaning:* profile-likelihood intervals on abilities relative to the reference item. Only differences are identified, so the scale's origin is arbitrary and the card says so.
 - *references:* Bradley and Terry (1952) Biometrika 39:324. Hunter (2004) Annals of Statistics 32:384 for the MM algorithm. Turner and Firth (2012) JSS 48:9, the `BradleyTerry2` package.
 
-**known answer** The `BradleyTerry2` package's published worked examples, which ship with printed
-ability estimates and standard errors. Second ground truth, exact and analytic: in a balanced
-round-robin where every pair plays the same number of games, the fitted abilities must be a
-monotone function of win counts, and for a perfectly transitive result set the ordering must match
-exactly. Third: the separation fixture must trigger the blocking check rather than return a large
-finite number.
+**known answer** *Corrected twice.* First, the `BradleyTerry2` package is not vendored here and
+there is no network access, so its printed examples are not the oracle. What replaces them is
+stronger, because it is a theorem rather than another library that could be wrong in the same way:
+the exact stationarity condition of the maximum likelihood estimate, that for every item the number
+of wins the fitted abilities predict equals the number observed,
+`sum_j n_ij * p_i / (p_i + p_j) = w_i`, asserted to 1e-6. Asserting each pair's observed win rate
+instead would be wrong and it is worth writing down why: Bradley-Terry is a constrained model with
+one parameter per item and deliberately does not reproduce a pair's rate, so such a test would be
+testing a saturated model this is not.
+
+Second, "for a perfectly transitive result set the ordering must match exactly" is right about the
+ordering and wrong about the abilities. When the stronger item wins every single game, **Ford's
+condition fails and no finite set of abilities maximises the likelihood**; any number printed for
+them is the optimiser's stopping rule. The `separation` check is therefore Ford's condition itself
+rather than a scan for undefeated items (an undefeated item is only the most obvious way to fail
+it), and the service publishes the **tier** order the data determines while withholding the numbers
+it does not. On a perfectly transitive six-item ladder that is six tiers, every ability `None`, and
+the ordering exactly right.
+
+Also asserted: recovery of known abilities from a seeded ladder, with the profile intervals covering
+all five; monotonicity in wins on a balanced round robin; the disconnected-graph refusal; and the
+order effect caught in one fixture and not in its control.
 
 ---
 
@@ -2228,10 +2295,13 @@ finite number.
 
 Sequential rating updates with a declared K-factor, for time-ordered comparisons where ability
 changes. Returns the rating trajectory with a `structure` per item. **known answer** exact
-arithmetic: the Elo update is a closed-form expression and each step is asserted by hand; the
-zero-sum property (total rating is conserved across an update) holds exactly; and the fixed point of
-repeated updates against a constant opponent equals the Bradley-Terry ability difference implied by
-the observed win rate, which links the two services and is a real analytic identity.
+arithmetic: two items at 1500 with K = 32 move by exactly 16, asserted to 1e-12; total rating is
+conserved to 1e-9 over 400 seeded results; and the fixed point of repeated updates against an
+opponent held constant is `400 * log10(w / (1-w))`, which equals the Bradley-Terry ability
+difference `log(w / (1-w))` after the `ln(10)/400` change of scale, linking the two services by a
+real analytic identity. *One nuance recorded:* that recursion is run in the test rather than through
+the service, because the service is zero sum and moves the opponent too. A constant opponent is a
+property of the update rule, not of a real ladder.
 
 ---
 
