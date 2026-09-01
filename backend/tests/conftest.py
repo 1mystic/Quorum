@@ -102,13 +102,75 @@ async def db_session(setup_db) -> AsyncGenerator[AsyncSession, None]:
             await connection.close()
 
 
+
+# Route prefixes mounted straight on the app (main.py) vs. under the
+# /api/t/{slug} tenant-scoped sub-router. Several integration test files
+# predate the tenancy routing pass and call bare paths ("/auth/signup",
+# "/groups", ...) that 404 against the real app; rather than hand-edit every
+# call site, InterceptAsyncClient rewrites them onto the real route below,
+# the same way a browser's router would after the tenancy migration landed.
+_GLOBAL_PREFIXES = {"auth", "tenant", "public", "methods"}
+_TENANT_PREFIXES = {
+    "members", "groups", "events", "announcements", "requests", "notifications",
+    "certificates", "ai", "ledger", "insights", "participation", "decisions",
+}
+_DEFAULT_TENANT_SLUG = "test-university"  # matches conftest's seed_tenant fixture
+
+
+def _tenant_slug_from_bearer(headers) -> str:
+    """
+    Best-effort tenant slug for a bare tenant-scoped test path: decoded from
+    the request's own bearer token (every real client would know its tenant
+    from the JWT it holds, not from a hardcoded default), falling back to the
+    shared seed_tenant slug when there is no token or it does not decode
+    (e.g. a test deliberately using a malformed/expired one - such a request
+    is headed for a 401/403 regardless of which tenant slug lands in the URL).
+    """
+    from app.core.token import decode_token
+
+    auth = None
+    if headers:
+        for key, value in (headers.items() if hasattr(headers, "items") else headers):
+            if key.lower() == "authorization":
+                auth = value
+                break
+    if not auth or not auth.lower().startswith("bearer "):
+        return _DEFAULT_TENANT_SLUG
+    token = auth.split(" ", 1)[1]
+    try:
+        payload = decode_token(token, exp_type="access")
+    except Exception:
+        return _DEFAULT_TENANT_SLUG
+    return payload.get("tenant_slug") or _DEFAULT_TENANT_SLUG
+
+
 class InterceptAsyncClient(AsyncClient):
     async def request(self, method: str, url, *args, **kwargs):
         method_upper = method.upper()
         url_str = str(url)
-        from urllib.parse import urlparse
-        path = urlparse(url_str).path
-        
+        from urllib.parse import urlparse, urlunparse
+        parsed = urlparse(url_str)
+        path = parsed.path
+
+        if not path.startswith("/api/") and path != "/api":
+            segments = path.lstrip("/").split("/", 1)
+            head = segments[0]
+            rest = f"/{segments[1]}" if len(segments) > 1 else ""
+            if head == "certificates" and (rest.startswith("/verify/") or rest.endswith("/file")):
+                # public_certificate_router: certificate verification is
+                # deliberately cross-tenant and unauthenticated (a serial is
+                # its own proof), mounted at /api/public/certificates rather
+                # than under a tenant slug.
+                path = f"/api/public/certificates{rest}"
+            elif head in _GLOBAL_PREFIXES:
+                path = f"/api/{head}{rest}"
+            elif head in _TENANT_PREFIXES:
+                slug = _tenant_slug_from_bearer(kwargs.get("headers"))
+                path = f"/api/t/{slug}/{head}{rest}"
+            if path != parsed.path:
+                url_str = urlunparse(parsed._replace(path=path))
+                url = url_str
+
         parts = path.strip("/").split("/")
         # Tenant-scoped routes are /api/t/{slug}/..., so strip that prefix
         # before checking the domain-relative shape below.
@@ -141,6 +203,19 @@ class InterceptAsyncClient(AsyncClient):
 async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     async def override_get_db():
         yield db_session
+        # The real get_db (app.core.database) commits after every request,
+        # so a repository that adds a row without an immediate flush (see
+        # RequestRepository.create_request's RequestEventLog, for one) still
+        # lands inside that same request's own app.tenant_id GUC scope. Tests
+        # share one session/transaction across many requests instead (so a
+        # test can roll everything back at once), so without this a pending
+        # unflushed row can get swept up by some *later* request's autoflush
+        # under a *different* caller's tenant context and fail RLS's WITH
+        # CHECK spuriously - a false positive from the harness, not a real
+        # cross-tenant write. Flush (never commit: that would end the
+        # savepoint the rollback-based isolation depends on) closes the same
+        # gap real traffic never has.
+        await db_session.flush()
 
     app.dependency_overrides[get_db] = override_get_db
 
