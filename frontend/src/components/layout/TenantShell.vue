@@ -39,8 +39,20 @@ const nav = computed(() => [
   ...adminNav(slug.value)
 ])
 
+// Sibling routes can share a path prefix (`/admin` and `/admin/approvals`
+// are two distinct pages, not parent/child), so a naive per-item prefix
+// match highlights both at once. Picking the single longest matching `to`
+// across the whole nav resolves it to exactly one active item.
+const activeTo = computed(() => {
+  const candidates = nav.value
+    .flatMap((group) => group.items)
+    .filter((item) => route.path === item.to || route.path.startsWith(item.to + '/'))
+  if (candidates.length === 0) return null
+  return candidates.reduce((best, item) => (item.to.length > best.to.length ? item : best)).to
+})
+
 function isActive(item) {
-  return route.path === item.to || route.path.startsWith(item.to + '/')
+  return item.to === activeTo.value
 }
 
 // Collapsible, directory-tree-style groups: each labelled section (Community,
