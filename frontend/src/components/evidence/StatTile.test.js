@@ -23,15 +23,32 @@ describe('StatTile', () => {
     expect(wrapper.find('.pill').classes()).toContain('p-qual')
   })
 
-  test('the why disclosure is closed by default', () => {
+  test('the why modal is closed by default, opens on trigger, closes on the X', async () => {
     const wrapper = mount(StatTile, {
       props: { title: 'Median time to resolution', evidence: medianResolution },
-      slots: { why: '<p>because</p>' }
+      slots: { why: '<p>because</p>' },
+      attachTo: document.body
     })
 
-    const details = wrapper.find('details.why')
-    expect(details.exists()).toBe(true)
-    expect(details.attributes('open')).toBeUndefined()
+    expect(document.querySelector('.why-modal-backdrop')).toBeNull()
+
+    await wrapper.find('.why-trigger').trigger('click')
+    const backdrop = document.querySelector('.why-modal-backdrop')
+    expect(backdrop).not.toBeNull()
+    // the qualifying-check explanation (moved out of EvidenceValue.vue) is
+    // included ahead of the custom #why slot content, not lost
+    expect(document.querySelector('.why-modal-body').textContent).toContain(
+      medianResolution.checks[0].detail
+    )
+    expect(document.querySelector('.why-modal-body').textContent).toContain('because')
+    expect(document.activeElement).toBe(document.querySelector('.why-modal-close'))
+
+    document.querySelector('.why-modal-close').click()
+    await wrapper.vm.$nextTick()
+    expect(document.querySelector('.why-modal-backdrop')).toBeNull()
+    expect(document.activeElement).toBe(wrapper.find('.why-trigger').element)
+
+    wrapper.unmount()
   })
 
   test('insufficient data reads calm: waiting pill, muted card, no error styling', () => {

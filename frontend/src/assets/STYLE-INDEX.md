@@ -19,7 +19,7 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 10 | Pills: the four Evidence render states (`.p-est`, `.p-qual`, `.p-hold`, `.p-wait`) |
 | 11 | The Evidence value (`.big`, `.big.range`) |
 | 12 | Meta strip (`.meta`): `n`, interval, censored count |
-| 13 | Progressive disclosure (`details.why`): the long explanation, closed by default |
+| 13 | Tile footer (`.tile-foot`, `.why-row`, `.why-trigger`): pinned to the bottom of a stretched card, opens the why modal |
 | 14 | Audit line (`.audit`): method id + `params_hash` |
 | 15 | Charts (`.chart`, `.legend`, `.draw`/`.fade` reveal keyframes) |
 | 16 | Waiting state (`.wait-bar`, `.wait-num`): calm, never an error colour |
@@ -50,12 +50,13 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 41 | Landing: sweep-fill buttons and icon arrows (`.landing-body .btn`, `.arw`, `.tl`) |
 | 42 | Select field (`SelectField.vue`), replaces every native `<select>` (`.select-field`, `.select-trigger`, `.select-list`) |
 | 43 | Mobile nav drawer (`.nav-toggle`, `.side-close`, `.side-backdrop`); pairs with `.side`/`.side.open` in section 4 |
+| 44 | Evidence "why" modal (`.why-modal-backdrop`, `.why-modal`, `.why-modal-close`), teleported to `<body>` by `StatTile.vue` |
 
 ## Quick reference by concern
 
 | Concern | Sections |
 | --- | --- |
-| Evidence render states | 10, 11, 12, 13, 16, 17 |
+| Evidence render states | 10, 11, 12, 13, 16, 17, 44 |
 | Dashboard shell | 3, 4, 5, 6, 7, 43 |
 | Cards and tables | 8, 18, 19 |
 | Buttons and toggles | 9 |

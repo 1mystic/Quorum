@@ -626,24 +626,34 @@ a{
   font-weight:500;
 }
 
-/*  13. Progressive disclosure: the prose lives here, closed by default  */
-/* details.why's body is an anchored overlay, not inline flow: a StatTile
-   sits in a CSS grid row of siblings (.row.r-4), and if the body pushed the
-   details element's own height, opening one card would grow only that
-   grid item, leaving its row-mates short and the row ragged. Positioning
-   the body absolutely, anchored to details.why itself (position:relative),
-   means the trigger's own box - and so the card's box - never changes size
-   on toggle, open or closed; the explanation floats over whatever sits
-   below it instead of reflowing the grid. z-index:5 clears ordinary content
-   but stays under the sticky topbar (section 6, z-index:40). */
-details.why{
-  position:relative;
-  border-top:1px solid var(--hair);
-  padding-top:var(--sp4);
+/*  13. Tile footer: the "Why this reading" trigger, pinned to the bottom  */
+/* .tile-foot wraps the why-trigger and AuditLine as one unit and takes
+   margin-top:auto. A StatTile sits in a CSS grid row of siblings
+   (.row.r-4), and grid's default align-items:stretch grows the .card's own
+   height to match its tallest row-mate; .card is a column flexbox
+   (section 8) whose children otherwise take only their natural height, so
+   the extra height used to land as dead space wherever it happened to fall
+   in source order - between the value and the trigger, looking broken
+   rather than deliberate. margin-top:auto on .tile-foot consumes all of
+   that leftover space itself, so the card's main content (title, pill,
+   value) sits naturally at the top and the trigger + audit line always
+   land at the same position at the bottom, in a short row or a tall one,
+   with or without a #why slot at all (AuditLine alone still pins). */
+.tile-foot{
+  display:flex;
+  flex-direction:column;
+  gap:var(--sp4);
   margin-top:auto;
 }
-details.why summary{
-  list-style:none;
+.why-row{
+  border-top:1px solid var(--hair);
+  padding-top:var(--sp4);
+}
+.why-trigger{
+  width:100%;
+  background:transparent;
+  border:0;
+  padding:0;
   cursor:pointer;
   display:flex;
   align-items:center;
@@ -654,45 +664,14 @@ details.why summary{
   color:var(--ink-3);
   transition:color var(--t-hover) var(--ease-snap);
 }
-details.why summary::-webkit-details-marker{
-  display:none;
-}
-details.why summary:hover{
+.why-trigger:hover,.why-trigger:focus-visible{
   color:var(--accent);
 }
-details.why summary::after{
+.why-trigger::after{
   content:'+';
   margin-left:auto;
   font-size:14px;
   line-height:1;
-  transition:transform var(--t-hover) var(--ease);
-}
-details.why[open] summary::after{
-  transform:rotate(45deg);
-}
-details.why .body{
-  position:absolute;
-  left:0;
-  right:0;
-  top:calc(100% + var(--sp2));
-  z-index:5;
-  background:var(--panel);
-  border:1px solid var(--hair);
-  border-radius:var(--r);
-  box-shadow:var(--shadow-pop);
-  font-size:14.5px;
-  line-height:1.65;
-  color:var(--ink-2);
-  padding:var(--sp4);
-  max-height:260px;
-  overflow-y:auto;
-}
-details.why .body p + p{
-  margin-top:var(--sp3);
-}
-details.why .body b{
-  color:var(--ink);
-  font-weight:600;
 }
 
 /*  14. Audit line: method id + params_hash  */
@@ -2556,6 +2535,102 @@ html.qs-active::-webkit-scrollbar{
 }
 @media (prefers-reduced-motion: reduce){
   .side-backdrop{
+    transition:none;
+  }
+}
+
+/*  44. Evidence "why" modal  */
+/* Real modal, not a same-column disclosure: a backdrop, a centred dialog,
+   an explicit visible close button. Teleported to <body> (StatTile.vue)
+   the same way SelectField.vue teleports its own popover, so it is never
+   clipped by a scrolling/positioned ancestor and always paints above
+   everything else in the app, including the toast stack (section 21,
+   z-index 300). Escape and a backdrop click both dismiss it; focus moves
+   onto the close button on open and returns to the trigger on close
+   (StatTile.vue), the same pattern TenantShell.vue's mobile drawer uses. */
+.why-modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:400;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:var(--sp5);
+  background:color-mix(in srgb,var(--ink) 46%,transparent);
+}
+.why-modal{
+  width:min(480px,100%);
+  max-height:min(520px,80vh);
+  display:flex;
+  flex-direction:column;
+  background:var(--panel);
+  border:1px solid var(--hair);
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow-pop);
+}
+.why-modal-head{
+  display:flex;
+  align-items:center;
+  gap:var(--sp4);
+  padding:var(--sp5) var(--sp5) var(--sp4);
+  border-bottom:1px solid var(--hair);
+}
+.why-modal-head h4{
+  font-size:1rem;
+  letter-spacing:-.02em;
+  color:var(--ink);
+}
+.why-modal-close{
+  margin-left:auto;
+  flex-shrink:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:32px;
+  height:32px;
+  border-radius:var(--r-sm);
+  border:1px solid var(--hair-2);
+  background:transparent;
+  color:var(--ink-2);
+  cursor:pointer;
+  transition:border-color var(--t-hover) var(--ease-snap), color var(--t-hover) var(--ease-snap);
+}
+.why-modal-close:hover,.why-modal-close:focus-visible{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+.why-modal-body{
+  padding:var(--sp5);
+  overflow-y:auto;
+  font-size:14.5px;
+  line-height:1.65;
+  color:var(--ink-2);
+}
+.why-modal-body p + p{
+  margin-top:var(--sp3);
+}
+.why-modal-body b{
+  color:var(--ink);
+  font-weight:600;
+}
+
+/* Fade + slight rise on the dialog, plain fade on the backdrop. */
+.why-modal-enter-active,.why-modal-leave-active{
+  transition:opacity var(--t-hover) var(--ease-snap);
+}
+.why-modal-enter-active .why-modal,.why-modal-leave-active .why-modal{
+  transition:opacity var(--t-hover) var(--ease-snap), transform var(--t-hover) var(--ease-snap);
+}
+.why-modal-enter-from,.why-modal-leave-to{
+  opacity:0;
+}
+.why-modal-enter-from .why-modal,.why-modal-leave-to .why-modal{
+  opacity:0;
+  transform:translateY(8px) scale(.98);
+}
+@media (prefers-reduced-motion: reduce){
+  .why-modal-enter-active,.why-modal-leave-active,
+  .why-modal-enter-active .why-modal,.why-modal-leave-active .why-modal{
     transition:none;
   }
 }

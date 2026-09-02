@@ -17,13 +17,16 @@ describe('EvidenceValue', () => {
     expect(wrapper.text()).toContain('5.6')
   })
 
-  test('qualified: value still shown alongside the failing check', () => {
+  test('qualified: value still shown, the check explanation is not inline', () => {
     const wrapper = mount(EvidenceValue, { props: { evidence: medianResolution } })
 
-    // medianResolution carries a non-blocking WARN check
+    // medianResolution carries a non-blocking WARN check. The explanation
+    // itself now lives in StatTile.vue's why modal, not rendered inline
+    // here, so a qualified card is structurally identical to an estimate
+    // or waiting card in the same grid row until its modal is opened.
     expect(wrapper.classes()).toContain('ev-qualified')
     expect(wrapper.find('.big').exists()).toBe(true)
-    expect(wrapper.text()).toContain('systematically the hard ones')
+    expect(wrapper.text()).not.toContain('systematically the hard ones')
   })
 
   test('insufficient_data: no number is rendered', () => {

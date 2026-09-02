@@ -99,12 +99,6 @@ const need = computed(() => {
         <span v-if="evidence?.n_censored"><b>censored</b> {{ evidence.n_censored }}</span>
         <span v-if="evidence?.n_excluded"><b>excluded</b> {{ evidence.n_excluded }} ({{ evidence.exclusion_reason }})</span>
       </div>
-
-      <p v-if="isQualified" class="check-detail">
-        <template v-for="check in qualifiers" :key="check.id">
-          {{ check.label }}<template v-if="check.detail">. {{ check.detail }}</template>
-        </template>
-      </p>
     </template>
   </div>
 </template>
