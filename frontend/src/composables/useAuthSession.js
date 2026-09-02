@@ -19,6 +19,9 @@ export function useAuthSession() {
 
     const payload = jwtDecode(result.access_token)
     const role = (payload.role || '').toLowerCase()
+    // Backend role enum is MEMBER / TENANT_ADMIN (app/models/user.py), not
+    // "admin" - a real admin login was silently landing here as 'member'
+    // and losing access to every /admin route.
 
     auth.setUser({
       name: payload.full_name,
@@ -32,7 +35,7 @@ export function useAuthSession() {
         .toUpperCase()
     })
 
-    auth.setRole(role === 'admin' ? 'admin' : 'member')
+    auth.setRole(role === 'tenant_admin' ? 'admin' : 'member')
 
     router.push(auth.homeRoute)
   }

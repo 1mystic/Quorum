@@ -77,9 +77,10 @@ const router = createRouter({
 
 const TIER_RANK = { public: 0, member: 1, admin: 2 }
 
-// Demo-only RBAC per docs/RULES.md and CONTEXT.md: there is no real backend to
-// authorize against yet, so a mismatch never blocks navigation. It logs and
-// surfaces a dismissible banner, which is the point, not an afterthought.
+// This is a soft, UI-side gate: it never blocks navigation itself, since the
+// backend is the real enforcement point (every route 403s a mismatched
+// scope, per docs/RULES.md). A tier mismatch here just logs and surfaces a
+// dismissible banner, ahead of the API call that would otherwise 403.
 router.beforeEach(function checkDemoRole(to) {
   dismissRoleMismatch()
 

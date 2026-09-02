@@ -1,15 +1,15 @@
 import { defineStore } from 'pinia'
-import { tierForRole } from '../fixtures/roles'
 
 // Quorum is multi-tenant: a session belongs to a role inside a tenant
-// (identified by its slug), not to a college. Mirrors campus-connect's
-// auth store shape but renamed per docs/GLOSSARY.md (College -> Tenant).
+// (identified by its slug), not to a college.
 //
 // `role` is the coarse tier ('member' | 'admin') that route.meta.role is
-// checked against. `demoRole` is the actual vertical role (e.g. 'treasurer',
-// 'core_team') shown in the role switcher; `role` is derived from it. This
-// is a demo-only mechanism (see docs/VERTICALS.md role lists): nothing here
-// is enforced by a real backend yet, see router.beforeEach.
+// checked against, set for real from the JWT's MEMBER/TENANT_ADMIN claim on
+// login (useAuthSession.completeSignIn). `demoRole` is the finer vertical
+// role (e.g. 'treasurer', 'core_team', see docs/VERTICALS.md) shown in the
+// role switcher, for label/copy purposes only - it can narrow which label
+// is shown within a tier but does not grant access the JWT-derived tier
+// does not already have; router.beforeEach's real gate is the backend.
 
 const defaultUser = {
   name: '',
@@ -62,10 +62,14 @@ export const useAuthStore = defineStore('auth', {
       localStorage.setItem('qm_role', role)
     },
 
-    setDemoRole(roleId, vertical) {
+    // Label preference only - never touches `role`. `role` comes from the
+    // JWT and is the real access tier; letting a vertical role label like
+    // "President" or "Resident" overwrite it would desync the UI from what
+    // the backend actually grants, so this only picks which role name
+    // within that tier is displayed.
+    setDemoRole(roleId) {
       this.demoRole = roleId
       localStorage.setItem('qm_demo_role', roleId)
-      this.setRole(tierForRole(vertical, roleId))
     },
 
     setToken(token) {
