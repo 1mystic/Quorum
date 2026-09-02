@@ -2717,3 +2717,29 @@ html.qs-active::-webkit-scrollbar{
     transition:none;
   }
 }
+
+/*  45. Static page header (StaticHeader.vue)  */
+/* The minimal top bar for pages outside every shell (Method Cards): brand
+   mark plus an explicit way back, styled close to .topbar (sticky, same
+   blur) since it is standing in for one on a page with no sidebar. */
+.static-header{
+  position:sticky;
+  top:0;
+  z-index:40;
+  background:color-mix(in srgb,var(--canvas) 90%,transparent);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--hair);
+  padding:var(--sp5) var(--sp7);
+  display:flex;
+  align-items:center;
+  gap:var(--sp5);
+}
+@media(max-width:768px){
+  .static-header{
+    padding:var(--sp5);
+  }
+}
+.static-header-back{
+  margin-left:auto;
+  margin-bottom:0;
+}

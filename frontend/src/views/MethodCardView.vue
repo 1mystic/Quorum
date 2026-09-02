@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import StaticHeader from '../components/layout/StaticHeader.vue'
 import { methodCard } from '../fixtures/methodCards'
 
 // GET /api/methods/{method_id} per docs/STATS_API.md §4: not tenant-scoped,
@@ -13,9 +14,8 @@ const card = computed(() => methodCard(route.params.id))
 </script>
 
 <template>
+  <StaticHeader />
   <div class="wrap" style="padding-block:var(--sp8)">
-    <router-link to="/" class="brand" style="margin-bottom:var(--sp6);display:inline-flex">Quorum</router-link>
-
     <div v-if="card" class="card">
       <div class="chead"><div><h1 style="font-size:1.6rem">{{ card.name }}</h1><div class="sub">{{ card.id }}</div></div></div>
       <p style="font-size:15.5px;line-height:1.7;color:var(--ink-2)">{{ card.one_liner }}</p>

@@ -1,12 +1,13 @@
 <script setup>
+import StaticHeader from '../components/layout/StaticHeader.vue'
 import { methodCards } from '../fixtures/methodCards'
 
 const cards = Object.values(methodCards)
 </script>
 
 <template>
+  <StaticHeader />
   <div class="wrap" style="padding-block:var(--sp8)">
-    <router-link to="/" class="brand" style="margin-bottom:var(--sp6);display:inline-flex">Quorum</router-link>
     <h1 style="margin-bottom:var(--sp2)">Method cards</h1>
     <p class="sub" style="margin-bottom:var(--sp6)">Every statistic on the platform links here. Public, unauthenticated, per docs/STATS_API.md §4.</p>
 

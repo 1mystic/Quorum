@@ -51,6 +51,7 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 42 | Select field (`SelectField.vue`), replaces every native `<select>` (`.select-field`, `.select-trigger`, `.select-list`) |
 | 43 | Mobile nav drawer (`.nav-toggle`, `.side-close`, `.side-backdrop`); pairs with `.side`/`.side.open` in section 4 |
 | 44 | Evidence "why" modal (`.why-modal-backdrop`, `.why-modal`, `.why-modal-close`), teleported to `<body>` by `StatTile.vue` |
+| 45 | Static page header (`.static-header`, `.static-header-back`), `StaticHeader.vue` - the minimal brand-plus-back bar for pages outside every shell (Method Cards) |
 
 ## Quick reference by concern
 
