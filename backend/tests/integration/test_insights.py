@@ -181,3 +181,101 @@ async def test_the_materializer_produces_a_real_cached_run(client, db_session, r
     assert body["insufficient_data"] is False
     assert body["n"] == 40
     assert body["value"] == survival_run.payload["value"]
+
+
+# ==== PUT /api/t/{slug}/insights/packs/{pack_id} ====
+
+@pytest.mark.asyncio
+async def test_enable_pack_with_unsupported_streams_is_rejected(client, seed_tenant, tenant_admin):
+    """governance_insight needs decision/participation/signal, none of which the
+    materializer fetches yet, so enabling it must 409 rather than silently
+    turning on a pack that will only ever show insufficient_data."""
+    response = await client.put(
+        "/insights/packs/governance_insight", headers=tenant_admin, json={"enabled": True},
+    )
+    assert response.status_code == 409
+    body = response.json()
+    assert body["reason"] == "stream_unavailable"
+    assert "decision" in body["stream"]
+
+
+@pytest.mark.asyncio
+async def test_enable_unknown_pack_id_404s(client, tenant_admin):
+    response = await client.put(
+        "/insights/packs/not_a_real_pack", headers=tenant_admin, json={"enabled": True},
+    )
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_enable_supported_pack_updates_enabled_packs_and_materializes(
+    client, seed_tenant, tenant_admin
+):
+    """reliability_ops only needs request_flow and member_lifecycle, both of
+    which the materializer actually fetches, so enabling it must write
+    Tenant.enabled_packs and produce a real materialized run inline."""
+    before = await client.get("/insights/packs", headers=tenant_admin)
+    entry = next(p for p in before.json()["packs"] if p["id"] == "reliability_ops")
+    assert entry["enabled"] is False
+
+    response = await client.put(
+        "/insights/packs/reliability_ops", headers=tenant_admin, json={"enabled": True},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["id"] == "reliability_ops"
+    assert body["enabled"] is True
+    assert body["estimated_first_result_at"] is not None
+    assert body["last_computed_at"] is not None
+
+    after = await client.get("/insights/packs", headers=tenant_admin)
+    entry = next(p for p in after.json()["packs"] if p["id"] == "reliability_ops")
+    assert entry["enabled"] is True
+    assert entry["last_computed_at"] is not None
+
+    envelope = await client.get(
+        "/insights/reliability_ops/survival.median_resolution_days", headers=tenant_admin,
+    )
+    assert envelope.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_disable_pack_removes_from_list_without_deleting_history(
+    client, seed_tenant, tenant_admin
+):
+    enable = await client.put(
+        "/insights/packs/reliability_ops", headers=tenant_admin, json={"enabled": True},
+    )
+    assert enable.status_code == 200
+
+    disable = await client.put(
+        "/insights/packs/reliability_ops", headers=tenant_admin, json={"enabled": False},
+    )
+    assert disable.status_code == 200
+    assert disable.json()["enabled"] is False
+    assert disable.json()["estimated_first_result_at"] is None
+
+    packs = await client.get("/insights/packs", headers=tenant_admin)
+    entry = next(p for p in packs.json()["packs"] if p["id"] == "reliability_ops")
+    assert entry["enabled"] is False
+
+    # disabled now 409s on the live read surface...
+    live = await client.get(
+        "/insights/reliability_ops/survival.median_resolution_days", headers=tenant_admin,
+    )
+    assert live.status_code == 409
+    # ...but the run this test's own enable step just materialized is still there.
+    history = await client.get(
+        "/insights/reliability_ops/survival.median_resolution_days/history", headers=tenant_admin,
+    )
+    assert history.status_code == 200
+    assert len(history.json()) >= 1
+
+
+@pytest.mark.asyncio
+async def test_set_pack_enabled_by_member_fails(client, seed_tenant, member_token):
+    headers = {"Authorization": f"Bearer {member_token}"}
+    response = await client.put(
+        "/insights/packs/reliability_ops", headers=headers, json={"enabled": True},
+    )
+    assert response.status_code == 403

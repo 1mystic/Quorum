@@ -52,6 +52,7 @@ from app.schemas.ledger import (
 )
 from app.schemas.insights import (
     PackSummary, PacksResponse, InsightEnvelopeResponse, InsightHealthResponse,
+    PackToggleRequest, PackToggleResponse,
 )
 from app.schemas.participation import (
     RecordParticipationEventRequest, ParticipationEventItem,

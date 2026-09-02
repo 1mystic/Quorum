@@ -9,7 +9,10 @@ it without an account (section 4's `GET /api/methods/{method_id}`).
 """
 from fastapi import APIRouter, Depends, Query, Security
 
-from app.schemas import PacksResponse, InsightEnvelopeResponse, InsightHealthResponse
+from app.schemas import (
+    PacksResponse, InsightEnvelopeResponse, InsightHealthResponse,
+    PackToggleRequest, PackToggleResponse,
+)
 from app.services import InsightsService
 from app.core.di import get_insights_service, get_user_info
 from app.core.tenancy import get_current_tenant_id
@@ -27,6 +30,17 @@ async def list_packs(
     service: InsightsService = Depends(get_insights_service),
 ):
     return await service.packs(tenant_id)
+
+
+@insights_router.put("/packs/{pack_id}", response_model=PackToggleResponse)
+async def set_pack_enabled(
+    pack_id: str,
+    body: PackToggleRequest,
+    tenant_id: int = Depends(get_current_tenant_id),
+    _: dict = Security(get_user_info, scopes=["TENANT_ADMIN"]),
+    service: InsightsService = Depends(get_insights_service),
+):
+    return await service.set_pack_enabled(tenant_id, pack_id, body.enabled)
 
 
 @insights_router.get("/health", response_model=InsightHealthResponse)

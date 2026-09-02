@@ -95,16 +95,37 @@ class InsightMaterializer:
 
     async def materialize_all(self, window: StreamWindow | None = None) -> list:
         window = window or default_window(tenant_timezone=self.tenant.timezone)
-        atoms_by_stream = {
-            "request_flow": await self._request_flow_atoms(window),
-            "ledger": await self._ledger_atoms(window),
-            "member_lifecycle": await self._member_lifecycle_atoms(window),
-        }
+        atoms_by_stream = await self._atoms(window)
         runs = []
         for service_id in registry.implemented_ids():
             spec = registry.get(service_id)
             runs.append(await self.materialize_one(spec, window, atoms_by_stream))
         return runs
+
+    async def materialize_pack(self, pack_id: str, window: StreamWindow | None = None) -> list:
+        """
+        Same call chain as `materialize_all`, restricted to one pack's
+        implemented services. What `InsightsService.set_pack_enabled` runs
+        inline as the "enqueue a backfill" step (`docs/STATS_API.md` section
+        4's `PUT .../insights/packs/{pack_id}`) so a newly enabled pack does
+        not sit empty until the next scheduled worker pass.
+        """
+        window = window or default_window(tenant_timezone=self.tenant.timezone)
+        atoms_by_stream = await self._atoms(window)
+        implemented = set(registry.implemented_ids())
+        runs = []
+        for spec in registry.for_pack(pack_id):
+            if spec.id not in implemented:
+                continue
+            runs.append(await self.materialize_one(spec, window, atoms_by_stream))
+        return runs
+
+    async def _atoms(self, window: StreamWindow) -> dict:
+        return {
+            "request_flow": await self._request_flow_atoms(window),
+            "ledger": await self._ledger_atoms(window),
+            "member_lifecycle": await self._member_lifecycle_atoms(window),
+        }
 
     async def materialize_one(self, spec, window: StreamWindow, atoms_by_stream: dict):
         started = time.monotonic()

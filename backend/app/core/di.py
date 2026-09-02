@@ -128,7 +128,7 @@ def get_insights_service(db: AsyncSession = Depends(get_db),
                          tenant_id: int = Depends(get_current_tenant_id)):
     run_repo = InsightRunRepository(db, tenant_id)
     tenant_repo = TenantRepository(db)
-    return InsightsService(run_repo, tenant_repo)
+    return InsightsService(run_repo, tenant_repo, db)
 
 def get_participation_service(db: AsyncSession = Depends(get_db),
                               tenant_id: int = Depends(get_current_tenant_id)):

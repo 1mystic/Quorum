@@ -22,6 +22,14 @@ class PacksResponse(BaseModel):
     packs: list[PackSummary]
 
 
+class PackToggleRequest(BaseModel):
+    enabled: bool
+
+
+class PackToggleResponse(PackSummary):
+    estimated_first_result_at: datetime | None = None
+
+
 class InsightEnvelopeResponse(BaseModel):
     service: str
     pack: str

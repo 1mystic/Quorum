@@ -7,6 +7,12 @@ class InsightNotFoundError(AppException):
     message = "Unknown insight service"
 
 
+class PackNotFoundError(AppException):
+    """Unknown pack id: not one of the four registered in app.stats.registry.PACKS."""
+    status_code = 404
+    message = "Unknown insight pack"
+
+
 class PackDisabledError(AppException):
     """docs/STATS_API.md section 5: 409 with {"reason": "pack_disabled", "pack": "..."}."""
     status_code = 409
