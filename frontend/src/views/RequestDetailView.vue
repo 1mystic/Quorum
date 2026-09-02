@@ -63,7 +63,10 @@ async function escalate() {
     <div class="callout callout-warn"><span>{{ error }}</span></div>
   </TenantShell>
 
-  <TenantShell v-else-if="request" :title="request.title" :subtitle="`#${request.id} · ${tenant.labels.request}`">
+  <TenantShell
+    v-else-if="request" :title="request.title" :subtitle="`#${request.id} · ${tenant.labels.request}`"
+    :back-to="`/t/${slug}/requests`" :back-label="tenant.labels.request + 's'"
+  >
     <template #actions>
       <button class="btn btn-ghost" @click="escalate">Escalate</button>
       <button class="btn btn-primary" @click="resolve"><span>Mark resolved</span></button>

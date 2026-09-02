@@ -22,7 +22,10 @@ const noShowRate = computed(() => {
 </script>
 
 <template>
-  <TenantShell v-if="event" :title="event.title" :subtitle="`${fmt(event.starts_at)} · ${event.location}`">
+  <TenantShell
+    v-if="event" :title="event.title" :subtitle="`${fmt(event.starts_at)} · ${event.location}`"
+    :back-to="`/t/${slug}/events`" back-label="Events"
+  >
     <div class="row r-4">
       <div class="card"><div class="chead"><div><h3>RSVP</h3></div></div><div class="big">{{ event.rsvp }}<span class="u">of {{ event.capacity }}</span></div></div>
       <div class="card">

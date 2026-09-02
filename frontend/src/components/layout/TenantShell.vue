@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Menu, X, ChevronRight } from 'lucide-vue-next'
+import { Menu, X, ChevronRight, ChevronLeft } from 'lucide-vue-next'
 import { tenantBySlug, demoTenantList } from '../../fixtures/tenants'
 import { coreNav, insightNav, adminNav } from '../../fixtures/nav'
 import { useAuthStore } from '../../stores/auth'
@@ -16,7 +16,14 @@ import ThemeToggle from '../ui/ThemeToggle.vue'
 const props = defineProps({
   title: { type: String, required: true },
   subtitle: { type: String, default: '' },
-  asOf: { type: String, default: '' }
+  asOf: { type: String, default: '' },
+  // A detail page (a single request, event, decision...) passes this to get
+  // a real "back to the list" link in the topbar, not just the browser's
+  // own back button, which does not exist as a visible affordance and does
+  // the wrong thing if the page was opened directly (a shared link, a new
+  // tab) rather than navigated to from the list.
+  backTo: { type: String, default: '' },
+  backLabel: { type: String, default: 'Back' }
 })
 
 const route = useRoute()
@@ -223,6 +230,9 @@ onBeforeUnmount(() => {
           <Menu :size="18" />
         </button>
         <div>
+          <router-link v-if="backTo" :to="backTo" class="topbar-back">
+            <ChevronLeft :size="14" />{{ backLabel }}
+          </router-link>
           <h1>{{ title }}</h1>
           <div v-if="subtitle" class="sub">{{ subtitle }}</div>
         </div>

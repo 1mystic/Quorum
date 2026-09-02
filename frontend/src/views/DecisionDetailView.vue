@@ -31,7 +31,10 @@ function cell(a, b) {
 </script>
 
 <template>
-  <TenantShell v-if="decision" :title="decision.title" :subtitle="`${tenant.labels.decision} · ${decision.status}`">
+  <TenantShell
+    v-if="decision" :title="decision.title" :subtitle="`${tenant.labels.decision} · ${decision.status}`"
+    :back-to="`/t/${slug}/decisions`" back-label="Decisions"
+  >
     <div v-if="!decision.evidence" class="card">
       <div class="chead"><div><h3>Ballot still open</h3><div class="sub">turnout {{ decision.turnout }} of {{ decision.eligible }} eligible</div></div></div>
       <p style="font-size:14.5px;color:var(--ink-2)">Results are tabulated once this {{ tenant.labels.decision.toLowerCase() }} closes. Per docs/STATS_API.md, a governance tabulation runs on decision close and is frozen: it is never recomputed once published.</p>

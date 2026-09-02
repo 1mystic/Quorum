@@ -345,6 +345,20 @@ a{
     padding:var(--sp5);
   }
 }
+.topbar-back{
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+  margin-bottom:var(--sp2);
+  font:500 12px/1 var(--font-mono);
+  letter-spacing:.02em;
+  text-decoration:none;
+  color:var(--ink-3);
+  transition:color var(--t-hover) var(--ease-snap);
+}
+.topbar-back:hover{
+  color:var(--accent);
+}
 .topbar h1{
   font-size:clamp(1.45rem,2.4vw,1.95rem);
   letter-spacing:-.035em;
