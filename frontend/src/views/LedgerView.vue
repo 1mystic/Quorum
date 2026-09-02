@@ -69,14 +69,18 @@ function statusBadge(status) {
 <template>
   <TenantShell :title="tenant.labels.ledger" :subtitle="`ledger · ${ledger.summary.cycleLabel}`">
     <div class="row r-4">
-      <div class="card">
-        <div class="chead"><div><h3>Dues owed</h3><div class="sub">{{ ledger.summary.duesOwedCount }} outstanding</div></div></div>
-        <div class="big">{{ formatMinor(ledger.summary.duesOwed * 100, ledger.summary.currency) }}</div>
-      </div>
-      <div class="card">
-        <div class="chead"><div><h3>Collected this cycle</h3><div class="sub">{{ ledger.summary.collectedThisCycleCount }} entries</div></div></div>
-        <div class="big">{{ formatMinor(ledger.summary.collectedThisCycle * 100, ledger.summary.currency) }}</div>
-      </div>
+      <StatTile
+        title="Dues owed" :subtitle="`${ledger.summary.duesOwed.n} outstanding`"
+        :evidence="ledger.summary.duesOwed" :formatter="(v) => formatMinor(v, ledger.summary.currency)"
+      >
+        <template #why><p>An exact total, not an estimate: every outstanding due summed as of this cycle. No interval because there is nothing to estimate around.</p></template>
+      </StatTile>
+      <StatTile
+        title="Collected this cycle" :subtitle="`${ledger.summary.collectedThisCycle.n} entries`"
+        :evidence="ledger.summary.collectedThisCycle" :formatter="(v) => formatMinor(v, ledger.summary.currency)"
+      >
+        <template #why><p>An exact total, not an estimate: every settled entry for this cycle summed as recorded. No interval because there is nothing to estimate around.</p></template>
+      </StatTile>
       <StatTile title="Verification lag" subtitle="payment made to treasurer confirmed" :evidence="ledger.summary.verificationLag">
         <template #why>
           <p>Cash and screenshots handed off outside the app mean confirmation is a manual step, not an automatic one. This is a survival curve over a censored duration, not an average, because a handful of payments are still awaiting confirmation.</p>

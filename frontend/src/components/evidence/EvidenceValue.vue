@@ -33,6 +33,14 @@ const props = defineProps({
   precision: {
     type: Number,
     default: null
+  },
+  // Currency and other non-decimal formatting EvidenceValue itself has no
+  // business knowing about (₹ symbol, grouping) - a page passes its own
+  // formatter (e.g. formatMinor) instead of pre-stringifying evidence.value,
+  // which would break the exact | interval contract on the value itself.
+  formatter: {
+    type: Function,
+    default: null
   }
 })
 
@@ -47,6 +55,7 @@ const qualifiers = computed(() => qualifyingChecks(props.evidence))
 
 function fmt(v) {
   if (v === null || v === undefined) return ''
+  if (props.formatter) return props.formatter(v)
   if (props.precision !== null && typeof v === 'number') return v.toFixed(props.precision)
   return v
 }

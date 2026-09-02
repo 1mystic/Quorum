@@ -4,10 +4,18 @@
 
 export const ledgerSummary = {
   'vaikunth-heights': {
-    duesOwed: 184000,
-    duesOwedCount: 12,
-    collectedThisCycle: 512000,
-    collectedThisCycleCount: 202,
+    duesOwed: {
+      value: 18400000, n: 12, method: 'ledger.sum_exact', as_of: '2026-08-29T04:15:00Z',
+      interval: null, interval_kind: 'none', assumptions: [], checks: [], caveats: [],
+      insufficient_data: false, n_censored: 0, n_excluded: 0, exclusion_reason: '',
+      unit: '', params_hash: '', contract_version: 1
+    },
+    collectedThisCycle: {
+      value: 51200000, n: 202, method: 'ledger.sum_exact', as_of: '2026-08-29T04:15:00Z',
+      interval: null, interval_kind: 'none', assumptions: [], checks: [], caveats: [],
+      insufficient_data: false, n_censored: 0, n_excluded: 0, exclusion_reason: '',
+      unit: '', params_hash: '', contract_version: 1
+    },
     currency: 'INR',
     cycleLabel: 'August 2026 maintenance',
     verificationLag: {
@@ -25,10 +33,18 @@ export const ledgerSummary = {
     }
   },
   'aavartan-robotics': {
-    duesOwed: 4200,
-    duesOwedCount: 7,
-    collectedThisCycle: 38600,
-    collectedThisCycleCount: 84,
+    duesOwed: {
+      value: 420000, n: 7, method: 'ledger.sum_exact', as_of: '2026-08-29T04:15:00Z',
+      interval: null, interval_kind: 'none', assumptions: [], checks: [], caveats: [],
+      insufficient_data: false, n_censored: 0, n_excluded: 0, exclusion_reason: '',
+      unit: '', params_hash: '', contract_version: 1
+    },
+    collectedThisCycle: {
+      value: 3860000, n: 84, method: 'ledger.sum_exact', as_of: '2026-08-29T04:15:00Z',
+      interval: null, interval_kind: 'none', assumptions: [], checks: [], caveats: [],
+      insufficient_data: false, n_censored: 0, n_excluded: 0, exclusion_reason: '',
+      unit: '', params_hash: '', contract_version: 1
+    },
     currency: 'INR',
     cycleLabel: 'Semester membership fee',
     verificationLag: {

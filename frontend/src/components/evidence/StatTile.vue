@@ -40,6 +40,10 @@ const props = defineProps({
   muted: {
     type: Boolean,
     default: false
+  },
+  formatter: {
+    type: Function,
+    default: null
   }
 })
 
@@ -82,7 +86,7 @@ const showFoot = computed(() => showWhy.value || Boolean(props.evidence && props
       <span class="pill" :class="pillClass[state]">{{ pillLabel[state] }}</span>
     </div>
 
-    <EvidenceValue :evidence="evidence" :display="display" />
+    <EvidenceValue :evidence="evidence" :display="display" :formatter="formatter" />
 
     <div v-if="showFoot" class="tile-foot">
       <WhyDisclosure v-if="showWhy" :label="whySummary">
