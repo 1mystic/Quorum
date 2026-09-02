@@ -22,7 +22,7 @@ TEMPLATES = {
     RegistrationResult.PARTICIPANT: "participant.svg",
 }
 
-SERIAL_PREFIX = "CC"
+SERIAL_PREFIX = "QM"
 _NON_ALNUM = re.compile(r"[^A-Z0-9]+")
 
 NAME_SIZES = ((22, 46), (30, 38), (40, 30), (999, 24))

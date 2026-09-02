@@ -9,7 +9,7 @@ import { demoTenantList } from '../fixtures/tenants'
 // selectable on /onboard but show "no demo data yet".
 
 const verticals = [
-  { id: 'rwa_society', name: 'RWA / housing society', demo: true, tagline: 'Complaints, dues verification and vendor reliability for an apartment society.', packs: 'Operations, Foresight default; Voice, Comparison optional' },
+  { id: 'rwa_society', name: 'Housing society', demo: true, tagline: 'Complaints, dues verification and vendor reliability for an apartment society.', packs: 'Operations, Foresight default; Voice, Comparison optional' },
   { id: 'campus_club', name: 'Campus club', demo: true, tagline: 'Issues, elections and engagement segmentation for a student club or chapter.', packs: 'Operations, Voice default; Foresight, Comparison optional' },
   { id: 'ngo_volunteer', name: 'NGO / volunteer programme', demo: false, tagline: 'Case intake with safeguarding priority and volunteer-tier segmentation.', packs: 'Operations, Foresight, Voice default; Comparison optional' },
   { id: 'alumni_chapter', name: 'Alumni chapter', demo: false, tagline: 'Sparse, bursty engagement; the interesting question is always re-engagement.', packs: 'Foresight, Comparison default; Operations, Voice optional' },

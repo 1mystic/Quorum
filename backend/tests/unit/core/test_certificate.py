@@ -38,15 +38,15 @@ def test_abbreviate_special_characters_are_stripped():
 
 
 def test_make_serial_format():
-    """Verify that a generated serial matches the expected CC-XXX-YYYY-NNNNN pattern"""
+    """Verify that a generated serial matches the expected QM-XXX-YYYY-NNNNN pattern"""
     serial = make_serial("Robotics Workshop", datetime(2026, 8, 9))
-    assert re.match(r"^CC-RW-2026-\d{5}$", serial)
+    assert re.match(r"^QM-RW-2026-\d{5}$", serial)
 
 
 def test_make_serial_symbol_title_uses_evt_prefix():
     """Confirm that a purely symbol event title falls back to EVT prefix"""
     serial = make_serial("---", datetime(2026, 8, 9))
-    assert re.match(r"^CC-EVT-2026-\d{5}$", serial)
+    assert re.match(r"^QM-EVT-2026-\d{5}$", serial)
 
 
 def test_clip_truncates_long_text():

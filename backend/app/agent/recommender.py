@@ -1,5 +1,5 @@
 """
-Campus Connect - AI Group & Event Recommender (deterministic core).
+Quorum - AI Group & Event Recommender (deterministic core).
 
 Design rule (Episteme pattern): every function here is PURE and deterministic.
 The LLM only writes free-text reasons on top of this ranking; it is NEVER

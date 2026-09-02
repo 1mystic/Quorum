@@ -1,5 +1,5 @@
 """
-The Campus Connect mini-harness.
+The Quorum agent mini-harness.
 
 A deliberately small agentic loop: seven read-only tools, at most four
 iterations, five grounding gates, and a deterministic memory tier the model

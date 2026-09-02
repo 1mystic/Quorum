@@ -38,7 +38,7 @@ const creating = ref(false)
 const createError = ref('')
 
 const verticals = [
-  { id: 'rwa_society', label: 'RWA / housing society', demo: true },
+  { id: 'rwa_society', label: 'Housing society', demo: true },
   { id: 'campus_club', label: 'Campus club', demo: true },
   { id: 'ngo_volunteer', label: 'NGO / volunteer programme', demo: false },
   { id: 'alumni_chapter', label: 'Alumni chapter', demo: false },
