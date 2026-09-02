@@ -107,7 +107,7 @@ async def outsider(client, seed_tenant):
 
 
 @pytest.fixture
-async def two_checked_in(client, db_session, leader, member, second_member):
+async def two_checked_in(client, db_session, leader, member, second_member, tenant_admin):
     """Two members registered and checked in, event already started."""
     leader_headers, group_id = leader
     payload = {
@@ -120,7 +120,8 @@ async def two_checked_in(client, db_session, leader, member, second_member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     first = await client.post(f"/events/{event_id}/register", headers=member)
     first_registration_id = first.json()["registration_id"]
@@ -300,7 +301,7 @@ async def test_my_certificates_lists_multiple_earned_certificates(client, db_ses
 
 
 @pytest.mark.asyncio
-async def test_my_certificates_lists_multiple_events_same_member(client, db_session, leader, member, seed_tenant):
+async def test_my_certificates_lists_multiple_events_same_member(client, db_session, leader, member, seed_tenant, tenant_admin):
     """Verify that a member's certificates from two different events both appear in their list"""
     leader_headers, group_id = leader
 
@@ -316,7 +317,8 @@ async def test_my_certificates_lists_multiple_events_same_member(client, db_sess
         }
         create = await client.post("/events", headers=leader_headers, json=payload)
         event_id = create.json()["id"]
-        await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+        await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+        await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
         registration = await client.post(f"/events/{event_id}/register", headers=member)
         events.append((event_id, registration.json()["registration_id"]))
 
