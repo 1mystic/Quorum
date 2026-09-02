@@ -20,7 +20,11 @@ const routes = [
   { path: '/reset-password', name: 'reset-password', component: () => import('../views/ResetPasswordView.vue'), meta: { role: 'public', bodyClass: 'auth-body' } },
   { path: '/verify-email', name: 'verify-email', component: () => import('../views/VerifyEmailView.vue'), meta: { role: 'public', bodyClass: 'auth-body' } },
   { path: '/onboard', name: 'onboard', component: () => import('../views/OnboardView.vue'), meta: { role: 'public', bodyClass: 'auth-body' } },
-  { path: '/workspace', name: 'workspace', component: () => import('../views/WorkspaceView.vue'), meta: { role: 'member', bodyClass: 'auth-body' } },
+  // WorkspaceView.vue ("choose a workspace") is retired: app/models/user.py's
+  // User.tenant_id is a single nullable FK, so a real account belongs to at
+  // most one tenant and this screen's premise ("you belong to more than
+  // one") is never true against the real backend - see TenantShell.vue's
+  // sidebar for the same fix on the always-on switcher this route fed.
 
   // ── method cards: public, unauthenticated per docs/STATS_API.md §4 ──
   { path: '/methods', name: 'methods-index', component: () => import('../views/MethodsIndexView.vue'), meta: { role: 'public', bodyClass: 'landing-body' } },
@@ -78,30 +82,54 @@ const router = createRouter({
 
 const TIER_RANK = { public: 0, member: 1, admin: 2 }
 
-// This is a soft, UI-side gate: it never blocks navigation itself, since the
-// backend is the real enforcement point (every route 403s a mismatched
-// scope, per docs/RULES.md). A tier mismatch here just logs and surfaces a
-// dismissible banner, ahead of the API call that would otherwise 403.
-router.beforeEach(function checkDemoRole(to) {
-  dismissRoleMismatch()
+// A real gate now, not just a banner: `auth.role` is JWT-derived (a real
+// MEMBER-vs-TENANT_ADMIN distinction), so a soft warn-only pass-through let
+// every member session browse straight into the admin shell and see it
+// render, only individual API calls inside it 403ing - that reads as "no
+// RBAC" even though the backend itself was always safe. This is the
+// product-facing access-control decision now, not a cosmetic one.
+//
+// The redirect itself is a second navigation, which runs this same guard
+// again for the destination - a bare dismissRoleMismatch() on every entry
+// would wipe the banner the mismatch branch just set before the browser
+// ever painted it. suppressNextDismiss carries the banner across exactly
+// that one follow-on navigation, and nowhere else.
+let suppressNextDismiss = false
+
+router.beforeEach(function checkAccess(to) {
+  if (suppressNextDismiss) {
+    suppressNextDismiss = false
+  } else {
+    dismissRoleMismatch()
+  }
 
   const required = to.meta.role || 'public'
   if (required === 'public') return true
 
   const auth = useAuthStore()
-  const currentTier = auth.role === 'admin' ? 'admin' : 'member'
 
+  // No session at all: nothing to rank against, and the tenant dashboard
+  // this would otherwise redirect to is exactly as unreachable as the page
+  // that was actually requested.
+  if (!auth.isLoggedIn) {
+    // eslint-disable-next-line no-console
+    console.warn(`[rbac] ${to.fullPath} requires "${required}", no session - redirecting to /login`)
+    return '/login'
+  }
+
+  const currentTier = auth.role === 'admin' ? 'admin' : 'member'
   if (TIER_RANK[currentTier] >= TIER_RANK[required]) return true
 
   const tenant = tenantBySlug(to.params.slug)
   const roleLabel = labelForRole(tenant ? tenant.vertical : 'rwa_society', auth.demoRole || 'resident')
-  const message = `Viewing as ${roleLabel}. This page is normally ${required === 'admin' ? 'Admin' : 'Member'}-only.`
+  const message = `Viewing as ${roleLabel}. This page is ${required === 'admin' ? 'Admin' : 'Member'}-only, so you were sent back to the dashboard.`
 
   // eslint-disable-next-line no-console
-  console.warn(`[demo-rbac] ${to.fullPath} requires "${required}", current demo role is "${roleLabel}" (${currentTier})`)
+  console.warn(`[rbac] ${to.fullPath} requires "${required}", current role is "${roleLabel}" (${currentTier}) - redirecting`)
   showRoleMismatch(message)
+  suppressNextDismiss = true
 
-  return true
+  return `/t/${to.params.slug}/dashboard`
 })
 
 router.beforeEach(function beginNavigation() {

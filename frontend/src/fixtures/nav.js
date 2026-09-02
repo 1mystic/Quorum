@@ -58,12 +58,3 @@ export function adminNav(slug) {
     ] }
   ]
 }
-
-export function footNav(slug) {
-  return [
-    { label: '', items: [
-      { name: 'method-cards', to: '/methods', label: 'Method cards' },
-      { name: 'workspace', to: '/workspace', label: 'Switch tenant' }
-    ] }
-  ]
-}
