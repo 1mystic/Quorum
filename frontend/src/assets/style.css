@@ -839,6 +839,25 @@ a{
 .tbl-scroll{
   width:100%;
   overflow-x:auto;
+  /* Same thin themed scrollbar as .select-list (section 42), not the OS
+     default: a table's horizontal overflow is occasional and contained to
+     its own box, not worth mounting useOverlayScrollbar's drag/fade thumb
+     (built for the two page-level vertical scrollers, window and sidebar). */
+  scrollbar-width:thin;
+  scrollbar-color:var(--hair-2) transparent;
+}
+.tbl-scroll::-webkit-scrollbar{
+  height:7px;
+}
+.tbl-scroll::-webkit-scrollbar-track{
+  background:transparent;
+}
+.tbl-scroll::-webkit-scrollbar-thumb{
+  background:var(--hair-2);
+  border-radius:var(--r-pill);
+}
+.tbl-scroll::-webkit-scrollbar-thumb:hover{
+  background:var(--accent);
 }
 .tbl th{
   text-align:left;
@@ -2652,6 +2671,23 @@ html.qs-active::-webkit-scrollbar{
   font-size:14.5px;
   line-height:1.65;
   color:var(--ink-2);
+  /* Same thin themed scrollbar as .select-list/.tbl-scroll: a modal is
+     open too briefly to be worth useOverlayScrollbar's drag/fade thumb. */
+  scrollbar-width:thin;
+  scrollbar-color:var(--hair-2) transparent;
+}
+.why-modal-body::-webkit-scrollbar{
+  width:7px;
+}
+.why-modal-body::-webkit-scrollbar-track{
+  background:transparent;
+}
+.why-modal-body::-webkit-scrollbar-thumb{
+  background:var(--hair-2);
+  border-radius:var(--r-pill);
+}
+.why-modal-body::-webkit-scrollbar-thumb:hover{
+  background:var(--accent);
 }
 .why-modal-body p + p{
   margin-top:var(--sp3);
