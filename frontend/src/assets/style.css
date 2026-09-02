@@ -228,6 +228,15 @@ a{
   font:400 11px/1.4 var(--font-mono);
   color:var(--ink-3);
 }
+/* The one tenant a real session actually belongs to (User.tenant_id is a
+   single FK, not a membership table): a label, not a button - no cursor,
+   no hover, nothing to click through to a 403. */
+.tn-static{
+  cursor:default;
+}
+.tn-static:hover{
+  background:var(--brand-soft);
+}
 .navgrp{
   display:flex;
   flex-direction:column;
@@ -277,6 +286,15 @@ a{
   .navgrp-chevron{
     transition:none;
   }
+}
+/* button.ni (the sign-out control) resets the native button chrome so it
+   reads identically to every router-link.ni beside it. */
+button.ni{
+  background:transparent;
+  border:0;
+  width:100%;
+  cursor:pointer;
+  font:inherit;
 }
 .ni{
   display:flex;

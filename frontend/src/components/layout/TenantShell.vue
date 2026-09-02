@@ -1,8 +1,8 @@
 <script setup>
 import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Menu, X, ChevronRight, ChevronLeft } from 'lucide-vue-next'
-import { tenantBySlug, demoTenantList } from '../../fixtures/tenants'
+import { Menu, X, ChevronRight, ChevronLeft, LogOut } from 'lucide-vue-next'
+import { tenantBySlug } from '../../fixtures/tenants'
 import { assistantNav, coreNav, insightNav, adminNav } from '../../fixtures/nav'
 import { useAuthStore } from '../../stores/auth'
 import { useOverlayScrollbar } from '../../composables/useOverlayScrollbar'
@@ -90,10 +90,18 @@ function toggleGroup(group) {
   }
 }
 
-function switchTenant(nextSlug) {
-  if (nextSlug === slug.value) return
-  const target = route.name ? { name: route.name, params: { ...route.params, slug: nextSlug } } : `/t/${nextSlug}/dashboard`
-  router.push(target).catch(() => router.push(`/t/${nextSlug}/dashboard`))
+// A real user belongs to at most one tenant (app/models/user.py's
+// User.tenant_id is a single nullable FK, not a membership table), so the
+// sidebar no longer offers to switch to a different one - a click here used
+// to overwrite auth.user.tenantSlug locally while the JWT in auth.token
+// still carried the original tenant_slug claim, so every API call after
+// "switching" sent a mismatched token and the backend correctly 403'd with
+// "Tenant mismatch". The tenant panel is a static label now, sourced from
+// the same slug the URL and JWT already agree on.
+
+function logout() {
+  auth.logout()
+  router.push('/login')
 }
 
 // design/samples/quorum/dashboard.html's overlayScroll(target) pair: one
@@ -198,14 +206,10 @@ onBeforeUnmount(() => {
 
       <div class="tenant">
         <span class="lbl" style="padding:0 var(--sp4) 4px">Tenant</span>
-        <button
-          v-for="t in demoTenantList" :key="t.slug"
-          class="tn" :class="{ on: t.slug === slug }"
-          @click="switchTenant(t.slug)"
-        >
-          <span class="dot" :style="{ background: t.dotColor }">{{ t.dot }}</span>
-          <span><span class="nm">{{ t.name }}</span><br /><span class="sub">{{ t.tagline }}</span></span>
-        </button>
+        <div class="tn on tn-static">
+          <span class="dot" :style="{ background: tenant.dotColor }">{{ tenant.dot }}</span>
+          <span><span class="nm">{{ tenant.name }}</span><br /><span class="sub">{{ tenant.tagline }}</span></span>
+        </div>
       </div>
 
       <div class="navgrp" v-for="(group, gi) in nav" :key="gi" :class="{ collapsed: isCollapsed(group) }">
@@ -228,8 +232,11 @@ onBeforeUnmount(() => {
 
       <div class="side-foot navgrp">
         <router-link class="ni" to="/methods">Method cards</router-link>
-        <router-link class="ni" to="/workspace">Switch tenant</router-link>
         <router-link class="ni" :to="`/t/${slug}/profile`">{{ auth.user.name || 'Profile' }}</router-link>
+        <button type="button" class="ni" @click="logout">
+          <LogOut :size="15" />
+          Sign out
+        </button>
       </div>
     </aside>
 
