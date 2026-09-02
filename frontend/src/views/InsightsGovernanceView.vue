@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
 import AuditLine from '../components/evidence/AuditLine.vue'
+import WhyDisclosure from '../components/evidence/WhyDisclosure.vue'
 import { tenantBySlug } from '../fixtures/tenants'
 import { governancePack } from '../fixtures/insights'
 
@@ -66,10 +67,9 @@ const rows = computed(() => pack.value.isolation.evidence.value.rows)
           </tbody>
         </table>
       </div>
-      <details class="why">
-        <summary>Why this can never list individuals</summary>
-        <div class="body"><p>{{ pack.isolation.privacyNote }}</p></div>
-      </details>
+      <WhyDisclosure label="Why this can never list individuals">
+        <p>{{ pack.isolation.privacyNote }}</p>
+      </WhyDisclosure>
       <AuditLine :evidence="pack.isolation.evidence" />
     </div>
   </TenantShell>

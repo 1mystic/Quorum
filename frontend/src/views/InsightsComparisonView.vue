@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
 import AuditLine from '../components/evidence/AuditLine.vue'
+import WhyDisclosure from '../components/evidence/WhyDisclosure.vue'
 import { tenantBySlug } from '../fixtures/tenants'
 import { comparisonPack } from '../fixtures/insights'
 
@@ -50,10 +51,9 @@ function pct(x) {
             </tbody>
           </table>
         </div>
-        <details class="why">
-          <summary>Why the top raw rate is not first</summary>
-          <div class="body"><p>{{ board.why }}</p></div>
-        </details>
+        <WhyDisclosure label="Why the top raw rate is not first">
+          <p>{{ board.why }}</p>
+        </WhyDisclosure>
         <AuditLine :evidence="board.evidence" />
       </div>
     </div>
