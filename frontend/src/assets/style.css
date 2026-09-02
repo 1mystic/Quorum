@@ -742,6 +742,34 @@ a{
 }
 
 /*  16. Waiting state: calm, deliberate, never an error  */
+/* .ev-insufficient-data grows to fill whatever leftover height a stretched
+   grid row (StatTile.vue's .tile-foot pins the footer to the bottom, see
+   section 13) leaves inside the card, and .wait-progress then takes
+   margin-top:auto within that grown box, so the n/min_n bar always settles
+   just above the footer rather than leaving a blank gap between the
+   message and it - the same number the text above already states, given a
+   second, scannable form rather than decorative filler. */
+.evidence-value.ev-insufficient-data{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+}
+.stat-tile-empty{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+}
+.wait-progress{
+  margin-top:auto;
+  padding-top:var(--sp4);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.wait-progress-label{
+  font:400 11px/1 var(--font-mono);
+  color:var(--ink-4);
+}
 .wait-bar{
   height:6px;
   border-radius:var(--r-pill);
@@ -771,6 +799,17 @@ a{
 }
 
 /*  17. Withheld state: value suppressed, blocking check failed  */
+.evidence-value.ev-not-interpretable{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+}
+.ev-suppressed{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  gap:var(--sp4);
+}
 .withheld{
   border:1px dashed var(--hair-2);
   border-radius:var(--r);
@@ -781,6 +820,14 @@ a{
   letter-spacing:.1em;
   text-transform:uppercase;
   background:repeating-linear-gradient(45deg,transparent,transparent 7px,var(--panel-2) 7px,var(--panel-2) 14px);
+  /* Grows with .ev-suppressed so the stripe pattern, already this state's
+     "deliberately nothing here" texture, fills a stretched row's leftover
+     height instead of a fixed-size box leaving that height blank below it. */
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:64px;
 }
 
 /*  18. Table  */

@@ -61,6 +61,18 @@ const need = computed(() => {
   // when the envelope itself does not carry one.
   return props.evidence?.min_n || null
 })
+
+// A card in a stretched grid row (a Waiting tile beside a tall chart) has
+// real leftover height once the message stops. The progress bar toward
+// min_n is not decoration - it is the same "n of need" figure the text
+// already states, given a second, scannable form, and its wrapper below
+// takes margin-top:auto so it settles just above the tile's footer instead
+// of leaving that height blank. See style.css section 16.
+const progressPct = computed(() => {
+  if (!need.value) return null
+  const n = props.evidence?.n ?? 0
+  return Math.max(0, Math.min(100, Math.round((n / need.value) * 100)))
+})
 </script>
 
 <template>
@@ -74,13 +86,21 @@ const need = computed(() => {
         Not enough data yet. Quorum needs more observations before this reading is
         trustworthy<span v-if="need">, has {{ evidence?.n ?? 0 }} of {{ need }}</span>.
       </p>
+      <div v-if="progressPct !== null" class="wait-progress">
+        <div class="wait-bar"><i :style="{ width: progressPct + '%' }"></i></div>
+        <span class="wait-progress-label">{{ progressPct }}% of the {{ need }} needed</span>
+      </div>
     </div>
 
-    <!-- not interpretable: value suppressed, blocking check explained -->
-    <template v-else-if="isSuppressed">
+    <!-- not interpretable: value suppressed, blocking check explained. The
+         striped .withheld box already reads as "deliberately nothing
+         shown"; it grows to fill a stretched row's leftover height (see
+         style.css section 17) rather than leaving that height blank below
+         a fixed-size box. -->
+    <div v-else-if="isSuppressed" class="ev-suppressed">
       <div class="withheld">value suppressed</div>
       <p v-if="blocking" class="check-detail">{{ blocking.detail || blocking.label }}</p>
-    </template>
+    </div>
 
     <!-- qualified or estimate: value always shown, qualifiers shown inline -->
     <template v-else>

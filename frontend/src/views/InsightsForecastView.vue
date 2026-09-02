@@ -56,6 +56,10 @@ const maxBucket = computed(() => Math.max(1, ...buckets.value.map((b) => b.n)))
         <div v-else class="stat-tile-empty">
           <div class="wait-num">{{ forecastEvidence.n }}<span> / {{ forecastEvidence.min_n }} needed</span></div>
           <p>Not enough seasonal cycles yet to forecast.</p>
+          <div v-if="forecastEvidence.min_n" class="wait-progress">
+            <div class="wait-bar"><i :style="{ width: Math.min(100, Math.round((forecastEvidence.n / forecastEvidence.min_n) * 100)) + '%' }"></i></div>
+            <span class="wait-progress-label">{{ Math.min(100, Math.round((forecastEvidence.n / forecastEvidence.min_n) * 100)) }}% of the {{ forecastEvidence.min_n }} needed</span>
+          </div>
         </div>
       </div>
 

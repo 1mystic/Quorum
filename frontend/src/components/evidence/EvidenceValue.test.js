@@ -38,6 +38,16 @@ describe('EvidenceValue', () => {
     expect(wrapper.text()).toContain('Not enough data')
   })
 
+  test('insufficient_data: a progress bar toward min_n fills the space instead of leaving it blank', () => {
+    const wrapper = mount(EvidenceValue, { props: { evidence: tankerCycleInsufficient } })
+
+    // tankerCycleInsufficient: n 11, min_n 30 -> 37%
+    const bar = wrapper.find('.wait-bar > i')
+    expect(bar.exists()).toBe(true)
+    expect(bar.attributes('style')).toContain('37%')
+    expect(wrapper.find('.wait-progress-label').text()).toContain('37%')
+  })
+
   test('insufficient_data: never renders an error tone class', () => {
     const wrapper = mount(EvidenceValue, { props: { evidence: tankerCycleInsufficient } })
 
