@@ -53,6 +53,7 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 44 | Evidence "why" modal (`.why-modal-backdrop`, `.why-modal`, `.why-modal-close`), teleported to `<body>` by `StatTile.vue` |
 | 45 | Static page header (`.static-header`, `.static-header-back`), `StaticHeader.vue` - the minimal brand-plus-back bar for pages outside every shell (Method Cards) |
 | 46 | Assistant / AI chat (`.assistant-card`, `.assistant-msg`, `.assistant-tag`, `.assistant-items`, `.assistant-composer`), `AssistantView.vue` |
+| 47 | Getting-started card (`.getting-started-grid`, `.getting-started-item`), `GettingStartedCard.vue` - dismissible first-session orientation on the dashboard |
 
 ## Quick reference by concern
 

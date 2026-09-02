@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
+import GettingStartedCard from '../components/layout/GettingStartedCard.vue'
 import StatTile from '../components/evidence/StatTile.vue'
 import SurvivalCurve from '../components/evidence/SurvivalCurve.vue'
 import { tenantBySlug, packMeta } from '../fixtures/tenants'
@@ -50,6 +51,8 @@ function fmtDate(iso) {
 
 <template>
   <TenantShell title="Overview" :subtitle="`${tenant.name} · ${tenant.tagline}`" as-of="insight_run · contract v1">
+    <GettingStartedCard :slug="slug" :request-label="tenant.labels.request" />
+
     <div class="row r-4">
       <StatTile :title="ops.tiles[0].title" :subtitle="ops.tiles[0].subtitle" :evidence="ops.tiles[0].evidence">
         <template v-if="ops.tiles[0].why" #why><p>{{ ops.tiles[0].why }}</p></template>
