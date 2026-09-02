@@ -169,6 +169,8 @@ const median = computed(() => {
       </div>
     </template>
 
-    <AuditLine v-if="evidence && evidence.method" :evidence="evidence" />
+    <div v-if="evidence && evidence.method" class="tile-foot">
+      <AuditLine :evidence="evidence" />
+    </div>
   </div>
 </template>

@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
 import StatTile from '../components/evidence/StatTile.vue'
 import AuditLine from '../components/evidence/AuditLine.vue'
+import WhyDisclosure from '../components/evidence/WhyDisclosure.vue'
 import { renderState } from '../utils/evidence'
 import { tenantBySlug } from '../fixtures/tenants'
 import { forecastPack } from '../fixtures/insights'
@@ -45,8 +46,12 @@ const maxBucket = computed(() => Math.max(1, ...buckets.value.map((b) => b.n)))
           <div class="legend" style="margin-top:var(--sp2)">
             <span v-for="(h, i) in history" :key="i" class="mono" style="min-width:20px;text-align:center">{{ h }}</span>
           </div>
-          <p v-if="forecastEvidence.checks.length" class="check-detail">{{ forecastEvidence.checks[0].label }}. {{ forecastEvidence.checks[0].detail }}</p>
-          <AuditLine :evidence="forecastEvidence" />
+          <div class="tile-foot">
+            <WhyDisclosure v-if="forecastEvidence.checks.length" label="Why qualified">
+              <p>{{ forecastEvidence.checks[0].label }}. {{ forecastEvidence.checks[0].detail }}</p>
+            </WhyDisclosure>
+            <AuditLine :evidence="forecastEvidence" />
+          </div>
         </template>
         <div v-else class="stat-tile-empty">
           <div class="wait-num">{{ forecastEvidence.n }}<span> / {{ forecastEvidence.min_n }} needed</span></div>
@@ -68,7 +73,9 @@ const maxBucket = computed(() => Math.max(1, ...buckets.value.map((b) => b.n)))
           <div class="mono" style="font-size:11px;color:var(--ink-3)">{{ b.label }}</div>
         </div>
       </div>
-      <AuditLine :evidence="pack.etaDistribution.evidence" />
+      <div class="tile-foot">
+        <AuditLine :evidence="pack.etaDistribution.evidence" />
+      </div>
     </div>
   </TenantShell>
 </template>
