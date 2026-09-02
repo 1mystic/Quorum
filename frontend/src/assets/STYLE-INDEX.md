@@ -52,8 +52,9 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 43 | Mobile nav drawer (`.nav-toggle`, `.side-close`, `.side-backdrop`); pairs with `.side`/`.side.open` in section 4 |
 | 44 | Evidence "why" modal (`.why-modal-backdrop`, `.why-modal`, `.why-modal-close`), teleported to `<body>` by `StatTile.vue` |
 | 45 | Static page header (`.static-header`, `.static-header-back`), `StaticHeader.vue` - the minimal brand-plus-back bar for pages outside every shell (Method Cards) |
-| 46 | Assistant / AI chat (`.assistant-card`, `.assistant-msg`, `.assistant-tag`, `.assistant-items`, `.assistant-composer`), `AssistantView.vue` |
+| 46 | Assistant / AI chat (`.assistant-layout`, `.assistant-card`, `.assistant-msg`, `.assistant-tag`, `.assistant-items`, `.assistant-composer`, `.assistant-side`, `.assistant-scope`), `AssistantView.vue` - full-height two-column page, chat left, capability/limits/status panel right |
 | 47 | Getting-started card (`.getting-started-grid`, `.getting-started-item`), `GettingStartedCard.vue` - dismissible first-session orientation on the dashboard |
+| 48 | Quick actions (`.qa-card`, `.qa-icon`), `DashboardView.vue` - role-aware shortcut cards, top of the tenant home |
 
 ## Quick reference by concern
 

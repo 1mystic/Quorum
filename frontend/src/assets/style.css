@@ -487,6 +487,14 @@ button.ni{
   margin-left:auto;
   flex:none;
 }
+/* Any icon-only toggle placed as a chead's second child (a close/dismiss
+   control, not a status pill) needs the same right-alignment rule as
+   .pill above, or it sits stranded next to the title instead of at the
+   card's top-right corner - see GettingStartedCard.vue's dismiss button. */
+.chead .icon-tgl{
+  margin-left:auto;
+  flex-shrink:0;
+}
 
 /*  9. Buttons  */
 .btn{
@@ -2770,16 +2778,57 @@ html.qs-active::-webkit-scrollbar{
    lifecycle status): degraded/offline are properties of one assistant turn,
    not of a statistic or a request, and reusing either vocabulary here would
    blur what a `.pill` or `.badge` means everywhere else in the app. */
+/* .assistant-layout is the page's `.row.r-32` (chat card, then the "what it
+   can/can't do" side panel). At >=1081px (the same breakpoint r-32 itself
+   collapses at, section 7) it and .content stretch to the full height
+   .main actually has - the grid's implicit row is `auto`-sized but
+   `align-content` defaults to `stretch`, so once .content has a definite
+   height via flex:1 the row fills it - and .assistant-card/.assistant-scroll
+   grow to fill that, so the transcript uses all the room below the topbar
+   instead of sizing to its own content and leaving dead space under it.
+   Below 1081px the two-column grid collapses to one column and the page
+   scrolls normally instead, so the card gets a plain min-height there. */
+@media(min-width:1081px){
+  .content:has(.assistant-layout){
+    flex:1;
+    min-height:0;
+  }
+  .assistant-layout{
+    flex:1;
+    min-height:0;
+  }
+}
 .assistant-card{
   padding:0;
   overflow:hidden;
+  min-height:60vh;
 }
+@media(min-width:1081px){
+  .assistant-card{
+    min-height:0;
+    height:100%;
+  }
+}
+/* A short thread hugs the composer rather than sitting at the top of a
+   tall panel with empty canvas below it: the scroll area is itself a
+   column flexbox with the thread pinned to its bottom edge, so unused
+   height collapses above the messages, not under them - the same visual
+   idea as any chat surface, and it is what scrollToBottom() already
+   assumes. The empty (pre-first-message) state centres instead, since
+   there is no "latest message" to anchor near. */
 .assistant-scroll{
   padding:var(--sp5) var(--sp5) 0;
-  max-height:62vh;
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
   overflow-y:auto;
   scrollbar-width:thin;
   scrollbar-color:var(--hair-2) transparent;
+}
+.assistant-scroll.is-empty{
+  justify-content:center;
 }
 .assistant-scroll::-webkit-scrollbar{
   width:7px;
@@ -2947,12 +2996,106 @@ html.qs-active::-webkit-scrollbar{
   flex-shrink:0;
 }
 @media(max-width:620px){
-  .assistant-scroll{
-    max-height:56vh;
-  }
   .assistant-msg,.assistant-items{
     max-width:92%;
   }
+}
+.assistant-more-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:0 var(--sp5) var(--sp4);
+}
+.assistant-dots{
+  display:inline-flex;
+  gap:3px;
+  margin-right:6px;
+  vertical-align:middle;
+}
+.assistant-dots span{
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:var(--ink-3);
+  animation:assistant-dot-pulse 1.2s ease-in-out infinite;
+}
+.assistant-dots span:nth-child(2){
+  animation-delay:.15s;
+}
+.assistant-dots span:nth-child(3){
+  animation-delay:.3s;
+}
+@keyframes assistant-dot-pulse{
+  0%,60%,100%{
+    opacity:.25;
+    transform:translateY(0);
+  }
+  30%{
+    opacity:1;
+    transform:translateY(-2px);
+  }
+}
+@media(prefers-reduced-motion: reduce){
+  .assistant-dots span{
+    animation:none;
+    opacity:.6;
+  }
+}
+.assistant-side{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:var(--sp5);
+}
+.assistant-side .card{
+  flex:none;
+}
+.assistant-scope{
+  display:flex;
+  flex-direction:column;
+  gap:var(--sp3);
+}
+.assistant-scope li{
+  display:flex;
+  align-items:flex-start;
+  gap:var(--sp3);
+  font-size:13px;
+  line-height:1.55;
+  color:var(--ink-2);
+}
+.assistant-scope li svg{
+  flex-shrink:0;
+  margin-top:2px;
+  color:var(--brand);
+}
+.assistant-scope.is-limit li svg{
+  color:var(--ink-3);
+}
+/* .assistant-about: one compact card, not three stacked ones - the sparse
+   transcript beside it should not have to compete with a visually heavier
+   "real content" column. Only the lead line and the toggle show by
+   default; the can/can't/status detail is a disclosure, opened on demand. */
+.assistant-about-lead{
+  font-size:13px;
+  line-height:1.6;
+  color:var(--ink-3);
+}
+.assistant-about-toggle{
+  align-self:flex-start;
+}
+.assistant-about-detail{
+  display:flex;
+  flex-direction:column;
+  gap:var(--sp4);
+  padding-top:var(--sp2);
+  border-top:1px solid var(--hair);
+}
+.assistant-about-label{
+  font:600 10.5px/1 var(--font-mono);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--ink-4);
+  margin-bottom:var(--sp3);
 }
 
 /*  47. Getting-started card (GettingStartedCard.vue)  */
@@ -3010,4 +3153,45 @@ html.qs-active::-webkit-scrollbar{
 }
 .getting-started-done{
   align-self:flex-start;
+}
+
+/*  48. Quick actions (DashboardView.vue)  */
+/* Role-aware shortcut cards, top of the tenant home. Same .card shell and
+   soft-brand-circle icon language as sections 46/47 (one consistent
+   "friendly, not clinical" accent for every non-Evidence affordance), laid
+   out as a flat row rather than the icon-over-title stack .getting-started
+   uses, since these are single-line link cards, not orientation copy. */
+.qa-card{
+  flex-direction:row;
+  align-items:center;
+  gap:var(--sp4);
+  padding:var(--sp4) var(--sp5);
+  text-decoration:none;
+}
+.qa-icon{
+  flex-shrink:0;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--brand-soft);
+  color:var(--brand);
+}
+.qa-body{
+  min-width:0;
+}
+.qa-title{
+  font:600 14px/1.3 var(--font-text);
+  letter-spacing:-.01em;
+  color:var(--ink);
+}
+.qa-meta{
+  margin-top:2px;
+  font:400 11.5px/1.5 var(--font-mono);
+  color:var(--ink-3);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }

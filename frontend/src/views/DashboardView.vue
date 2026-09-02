@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { PlusCircle, Sparkles, Wallet, CalendarCheck, ClipboardCheck, ListChecks, Settings } from 'lucide-vue-next'
 import TenantShell from '../components/layout/TenantShell.vue'
 import GettingStartedCard from '../components/layout/GettingStartedCard.vue'
 import StatTile from '../components/evidence/StatTile.vue'
@@ -9,6 +10,9 @@ import { tenantBySlug, packMeta } from '../fixtures/tenants'
 import { operationsPack, forecastPack } from '../fixtures/insights'
 import { ledgerSummary } from '../fixtures/ledger'
 import { requestsFor } from '../fixtures/requests'
+import { eventsFor } from '../fixtures/events'
+import { membersFor } from '../fixtures/members'
+import { useAuthStore } from '../stores/auth'
 
 // The tenant home: one headline figure per enabled pack (per
 // docs/VERTICALS.md's "headline statistics for the tenant home" lists),
@@ -17,6 +21,7 @@ import { requestsFor } from '../fixtures/requests'
 // control chart) lives at insights/operations.
 
 const route = useRoute()
+const auth = useAuthStore()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))
 
@@ -26,6 +31,42 @@ const ledger = computed(() => ledgerSummary[slug.value])
 
 const fourthOpsTile = computed(() => ops.value.tiles[3])
 const recentRequests = computed(() => requestsFor(slug.value).slice(0, 4))
+
+// Role-aware shortcuts to the handful of things a session actually does day
+// to day, capped at four so the `.row.r-4` grid it shares with the stat
+// tiles below always lays out as one symmetric row, never a lone card
+// stranded on a second row. "Raise a request" and "ask the assistant" are
+// the stable pair (always relevant, never both inapplicable); dues and RSVP
+// only surface when the data says the action is actually live right now.
+// Casting a ballot is common enough to matter but not common enough to earn
+// one of only four slots, so it stays a sidebar/Decisions-page action, not
+// a dashboard shortcut.
+const upcomingEvent = computed(() => eventsFor(slug.value).find((e) => e.status === 'upcoming'))
+const duesOwed = computed(() => ledger.value.duesOwed)
+const pendingApprovals = computed(() => membersFor(slug.value).filter((m) => m.status === 'pending').length)
+const openRequestQueue = computed(() => requestsFor(slug.value).filter((r) => r.status !== 'resolved' && r.status !== 'closed').length)
+
+const memberActions = computed(() => {
+  const list = [
+    { key: 'request', icon: PlusCircle, title: `Raise a ${tenant.value.labels.request.toLowerCase()}`, meta: 'always open', to: `/t/${slug.value}/requests/new` }
+  ]
+  if (duesOwed.value && !duesOwed.value.insufficient_data && duesOwed.value.value > 0) {
+    list.push({ key: 'dues', icon: Wallet, title: `Pay your ${tenant.value.labels.ledger.toLowerCase()} dues`, meta: 'balance outstanding', to: `/t/${slug.value}/ledger` })
+  }
+  if (upcomingEvent.value) {
+    list.push({ key: 'rsvp', icon: CalendarCheck, title: 'RSVP to an upcoming event', meta: upcomingEvent.value.title, to: `/t/${slug.value}/events/${upcomingEvent.value.id}` })
+  }
+  list.push({ key: 'assistant', icon: Sparkles, title: 'Ask the assistant', meta: 'groups, events, what\'s new', to: `/t/${slug.value}/assistant` })
+  return list
+})
+
+const adminActions = computed(() => [
+  { key: 'approvals', icon: ClipboardCheck, title: 'Pending approvals', meta: `${pendingApprovals.value} waiting`, to: `/t/${slug.value}/admin/approvals` },
+  { key: 'queue', icon: ListChecks, title: `Open ${tenant.value.labels.request.toLowerCase()} queue`, meta: `${openRequestQueue.value} in flight`, to: `/t/${slug.value}/admin` },
+  { key: 'settings', icon: Settings, title: 'Tenant settings', meta: 'vertical, packs, labels', to: `/t/${slug.value}/settings` }
+])
+
+const quickActions = computed(() => (auth.role === 'admin' ? adminActions.value : memberActions.value))
 
 function has(packId) {
   return tenant.value.enabled_packs.includes(packId) || tenant.value.optional_packs.includes(packId)
@@ -52,6 +93,16 @@ function fmtDate(iso) {
 <template>
   <TenantShell title="Overview" :subtitle="`${tenant.name} · ${tenant.tagline}`" as-of="insight_run · contract v1">
     <GettingStartedCard :slug="slug" :request-label="tenant.labels.request" />
+
+    <div class="row r-4">
+      <router-link v-for="a in quickActions" :key="a.key" class="card qa-card" :to="a.to">
+        <div class="qa-icon"><component :is="a.icon" :size="17" /></div>
+        <div class="qa-body">
+          <div class="qa-title">{{ a.title }}</div>
+          <div class="qa-meta">{{ a.meta }}</div>
+        </div>
+      </router-link>
+    </div>
 
     <div class="row r-4">
       <StatTile :title="ops.tiles[0].title" :subtitle="ops.tiles[0].subtitle" :evidence="ops.tiles[0].evidence">
