@@ -3,7 +3,7 @@ import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Menu, X, ChevronRight, ChevronLeft } from 'lucide-vue-next'
 import { tenantBySlug, demoTenantList } from '../../fixtures/tenants'
-import { coreNav, insightNav, adminNav } from '../../fixtures/nav'
+import { assistantNav, coreNav, insightNav, adminNav } from '../../fixtures/nav'
 import { useAuthStore } from '../../stores/auth'
 import { useOverlayScrollbar } from '../../composables/useOverlayScrollbar'
 import RoleSwitcher from '../ui/RoleSwitcher.vue'
@@ -34,6 +34,7 @@ const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))
 
 const nav = computed(() => [
+  ...assistantNav(slug.value),
   ...coreNav(slug.value),
   ...insightNav(slug.value, tenant.value),
   ...adminNav(slug.value)

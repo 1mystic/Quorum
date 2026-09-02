@@ -52,6 +52,7 @@ space, radius, shadow and duration; nothing below hard-codes a value.
 | 43 | Mobile nav drawer (`.nav-toggle`, `.side-close`, `.side-backdrop`); pairs with `.side`/`.side.open` in section 4 |
 | 44 | Evidence "why" modal (`.why-modal-backdrop`, `.why-modal`, `.why-modal-close`), teleported to `<body>` by `StatTile.vue` |
 | 45 | Static page header (`.static-header`, `.static-header-back`), `StaticHeader.vue` - the minimal brand-plus-back bar for pages outside every shell (Method Cards) |
+| 46 | Assistant / AI chat (`.assistant-card`, `.assistant-msg`, `.assistant-tag`, `.assistant-items`, `.assistant-composer`), `AssistantView.vue` |
 
 ## Quick reference by concern
 

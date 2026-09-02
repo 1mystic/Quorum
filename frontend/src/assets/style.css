@@ -2743,3 +2743,196 @@ html.qs-active::-webkit-scrollbar{
   margin-left:auto;
   margin-bottom:0;
 }
+
+/*  46. Assistant / AI chat (AssistantView.vue)  */
+/* The bounded tool-calling agent (app/agent/loop.py) narrates real Evidence
+   and group/event recommendations - it never computes a statistic itself
+   (docs/RULES.md rule 5). `.assistant-tag` is deliberately not a `.pill`
+   (section 10, the four Evidence render states) or a `.badge` (section 24,
+   lifecycle status): degraded/offline are properties of one assistant turn,
+   not of a statistic or a request, and reusing either vocabulary here would
+   blur what a `.pill` or `.badge` means everywhere else in the app. */
+.assistant-card{
+  padding:0;
+  overflow:hidden;
+}
+.assistant-scroll{
+  padding:var(--sp5) var(--sp5) 0;
+  max-height:62vh;
+  overflow-y:auto;
+  scrollbar-width:thin;
+  scrollbar-color:var(--hair-2) transparent;
+}
+.assistant-scroll::-webkit-scrollbar{
+  width:7px;
+}
+.assistant-scroll::-webkit-scrollbar-track{
+  background:transparent;
+}
+.assistant-scroll::-webkit-scrollbar-thumb{
+  background:var(--hair-2);
+  border-radius:var(--r-pill);
+}
+.assistant-empty{
+  padding:var(--sp8) var(--sp5);
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:var(--sp3);
+}
+.assistant-empty-icon{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--brand-soft);
+  color:var(--brand);
+}
+.assistant-empty h3{
+  font-size:1.05rem;
+}
+.assistant-empty p{
+  font-size:13.5px;
+  color:var(--ink-3);
+  max-width:34em;
+}
+.assistant-empty .chips{
+  justify-content:center;
+  margin-top:var(--sp2);
+}
+.assistant-thread{
+  display:flex;
+  flex-direction:column;
+  gap:var(--sp5);
+  padding-bottom:var(--sp5);
+}
+.assistant-turn{
+  display:flex;
+  flex-direction:column;
+  gap:var(--sp3);
+}
+.assistant-msg{
+  max-width:80%;
+  padding:var(--sp4);
+  border-radius:var(--r);
+  font-size:14.5px;
+  line-height:1.6;
+  white-space:pre-line;
+}
+.assistant-msg.is-user{
+  align-self:flex-end;
+  background:var(--brand-soft);
+  color:var(--ink);
+  border-bottom-right-radius:4px;
+}
+.assistant-msg.is-assistant{
+  align-self:flex-start;
+  background:var(--panel-2);
+  color:var(--ink-2);
+  border-bottom-left-radius:4px;
+}
+.assistant-msg.is-pending{
+  color:var(--ink-3);
+}
+.assistant-msg.is-failed{
+  border:1px dashed var(--stop);
+  color:var(--stop);
+  background:var(--stop-bg);
+}
+.assistant-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:var(--sp3);
+}
+.assistant-tag{
+  display:inline-flex;
+  align-items:center;
+  font:500 10px/1 var(--font-mono);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  padding:5px 9px;
+  border-radius:var(--r-pill);
+  border:1px solid var(--hair-2);
+  color:var(--ink-3);
+  background:var(--panel);
+}
+.assistant-tag.is-degraded{
+  color:var(--warn);
+  border-color:color-mix(in srgb,var(--warn) 34%,transparent);
+  background:var(--warn-bg);
+}
+.assistant-tag.is-offline{
+  color:var(--ink-3);
+  border-color:var(--hair-2);
+  background:transparent;
+}
+.assistant-items{
+  align-self:flex-start;
+  max-width:100%;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:var(--sp3);
+}
+.assistant-item{
+  padding:var(--sp4);
+  border:1px solid var(--hair);
+  border-radius:var(--r-sm);
+  background:var(--panel);
+  min-width:0;
+}
+.assistant-item.is-clickable{
+  cursor:pointer;
+  transition:border-color var(--t-hover) var(--ease-snap);
+}
+.assistant-item.is-clickable:hover{
+  border-color:var(--accent);
+}
+.assistant-item .lr-title{
+  font-weight:600;
+  font-size:14px;
+  letter-spacing:-.01em;
+  color:var(--ink);
+}
+.assistant-item .lr-sub{
+  font:400 12px/1.5 var(--font-mono);
+  color:var(--ink-3);
+  margin-top:3px;
+  text-transform:capitalize;
+}
+.assistant-item-meta{
+  font:400 11.5px/1.5 var(--font-mono);
+  color:var(--ink-4);
+  margin-top:6px;
+}
+.assistant-composer{
+  display:flex;
+  align-items:flex-end;
+  gap:var(--sp3);
+  padding:var(--sp5);
+  border-top:1px solid var(--hair);
+  background:var(--panel);
+}
+.assistant-field{
+  flex:1;
+  margin-bottom:0;
+}
+.assistant-field textarea.assistant-textarea{
+  min-height:44px;
+  max-height:140px;
+  resize:none;
+}
+.assistant-composer .btn-primary{
+  flex-shrink:0;
+}
+@media(max-width:620px){
+  .assistant-scroll{
+    max-height:56vh;
+  }
+  .assistant-msg,.assistant-items{
+    max-width:92%;
+  }
+}

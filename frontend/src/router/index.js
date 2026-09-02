@@ -49,6 +49,7 @@ const routes = [
 
   { path: '/t/:slug/members', name: 'members', component: () => import('../views/MembersView.vue'), meta: { role: 'member', bodyClass: 'portal-body' } },
   { path: '/t/:slug/profile', name: 'profile', component: () => import('../views/ProfileView.vue'), meta: { role: 'member', bodyClass: 'portal-body' } },
+  { path: '/t/:slug/assistant', name: 'assistant', component: () => import('../views/AssistantView.vue'), meta: { role: 'member', bodyClass: 'portal-body' } },
 
   // ── insight packs ──
   { path: '/t/:slug/insights/operations', name: 'insights-operations', component: () => import('../views/InsightsOperationsView.vue'), meta: { role: 'member', bodyClass: 'portal-body' } },

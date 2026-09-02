@@ -1,6 +1,17 @@
 // Sidebar nav groups, built per tenant so every page is actually reachable
 // (not just routed), matching design/samples/quorum/dashboard.html's groups.
 
+// A flat, unlabelled group: TenantShell.vue only renders a collapsible
+// header when `group.label` is truthy, so an empty label here renders as a
+// single top-level link, not buried inside Community/Insights/Admin - the
+// assistant is core to the product thesis ("the LLM narrates, statistics
+// decide"), not a feature to go hunting for.
+export function assistantNav(slug) {
+  return [{ label: '', items: [
+    { name: 'assistant', to: `/t/${slug}/assistant`, label: 'Assistant' }
+  ] }]
+}
+
 export function coreNav(slug) {
   return [
     { label: 'Community', items: [
