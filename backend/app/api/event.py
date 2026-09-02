@@ -132,12 +132,17 @@ async def unregister_from_event(
 @event_router.get("/{event_id}/registrations", response_model=list[ParticipantItem])
 async def event_participants(
     event_id: int,
-    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    payload: dict = Security(get_user_info, scopes=["MEMBER", "TENANT_ADMIN"]),
     service: EventRegistrationService = Depends(get_event_registration_service),
 ):
     return await service.participants(payload, event_id)
 
 
+# mark_attendance and declare_results stay MEMBER-only: they go through
+# EventRegistrationService._managed_event, which is a leader-only business
+# action (checking someone in, declaring a winner), not a read, and a
+# TENANT_ADMIN reaching in here would bypass the "only the group's own
+# leader runs their event" rule rather than exercise real oversight.
 @event_router.patch("/{event_id}/registrations/{registration_id}/attendance",
                     response_model=AttendanceResponse)
 async def mark_attendance(

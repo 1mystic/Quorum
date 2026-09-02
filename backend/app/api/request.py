@@ -36,10 +36,10 @@ async def my_requests(
 @request_router.get("/group", response_model=list[LeaderRequestItem])
 async def group_request_queue(
     status: RequestStatus | None = Query(None),
-    group_id: int | None = Query(None, description="Limit to a single group you lead"),
+    group_id: int | None = Query(None, description="Limit to a single group you lead; ignored for a TENANT_ADMIN, who sees every group"),
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    payload: dict = Security(get_user_info, scopes=["MEMBER", "TENANT_ADMIN"]),
     service: RequestService = Depends(get_request_service),
 ):
     return await service.group_queue(payload, status=status, group_id=group_id,
@@ -48,12 +48,19 @@ async def group_request_queue(
 
 @request_router.get("/group/open-count", response_model=OpenRequestCountResponse)
 async def open_request_count(
-    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    payload: dict = Security(get_user_info, scopes=["MEMBER", "TENANT_ADMIN"]),
     service: RequestService = Depends(get_request_service),
 ):
     return await service.open_count(payload)
 
 
+# reply/resolve/escalate/withdraw/assign/reassign/pause/resume/merge/reopen
+# below all go through RequestService._managed_request, which requires the
+# caller to be the group's own leader (Membership.is_leader). They stay
+# MEMBER-only: a TENANT_ADMIN has no Member row to be a leader with, and
+# widening the scope here would not grant real access, only a different
+# error. Tenant-wide oversight for an admin is the group_queue/open-count
+# routes above, not these leader actions.
 @request_router.post("/{request_id}/reply", response_model=RequestActionResponse)
 async def reply_to_request(
     request_id: int,

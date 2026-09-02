@@ -9,6 +9,10 @@ from app.core.forms import parse_form_model
 member_router = APIRouter(prefix="/members", tags=["Members"])
 
 
+# my_profile/update_my_profile are self-scoped (the caller's own profile) and
+# stay MEMBER-only; a TENANT_ADMIN has no Member row for "my profile" to mean
+# anything. Viewing someone else's profile is member_profile below, already
+# MEMBER + TENANT_ADMIN.
 @member_router.get("/me", response_model=MemberProfileResponse)
 async def my_profile(
     payload: dict = Security(get_user_info, scopes=["MEMBER"]),

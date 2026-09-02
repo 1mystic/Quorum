@@ -24,6 +24,9 @@ from app.services import AnnouncementService, GroupService, EventService, Member
 ai_router = APIRouter(prefix="/ai", tags=["AI"])
 
 
+# Stays MEMBER-only: the assistant is scoped to a member's own recommendations
+# (app/agent/tools.py resolves everything from the JWT), not a tenant-wide
+# oversight tool, so there is nothing here for TENANT_ADMIN to widen onto.
 @ai_router.post("/chat", response_model=AgentChatResponse)
 async def agent_chat(
     data: AgentChatRequest,

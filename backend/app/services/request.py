@@ -2,7 +2,7 @@ from app.repository import (
     RequestRepository, GroupRepository, EventRepository, MembershipRepository,
     MemberRepository, UserRepository, TenantRepository
 )
-from app.models import Request, RequestStatus, GroupStatus
+from app.models import Request, RequestStatus, GroupStatus, UserRole
 from app.schemas import (
     RaiseRequestRequest, ReplyRequestRequest, RaiseRequestResponse, RequestResponseInfo,
     MyRequestItem, LeaderRequestItem, RequestActionResponse, OpenRequestCountResponse
@@ -69,6 +69,9 @@ class RequestService:
     async def my_requests(self, payload: dict, status: RequestStatus | None = None,
                         group_id: int | None = None, limit: int = 50,
                         offset: int = 0) -> list[MyRequestItem]:
+        # Self-scoped by design (requests raised by the caller): stays
+        # MEMBER-only. A TENANT_ADMIN wanting tenant-wide visibility uses
+        # group_queue below, which is oversight-aware.
         member = await self._get_member(payload)
         rows = await self.request_repo.list_by_member(
             member.id, status=status, group_id=group_id, limit=limit, offset=offset
@@ -99,10 +102,18 @@ class RequestService:
     async def group_queue(self, payload: dict, status: RequestStatus | None = None,
                          group_id: int | None = None, limit: int = 50,
                          offset: int = 0) -> list[LeaderRequestItem]:
-        member = await self._get_member(payload)
-        rows = await self.request_repo.list_for_leader(
-            member.id, status=status, group_id=group_id, limit=limit, offset=offset
-        )
+        if self._is_admin(payload):
+            # Oversight: every request in the tenant, not just groups the
+            # caller leads. A TENANT_ADMIN never has a Member row, so it
+            # cannot go through list_for_leader's Membership join at all.
+            rows = await self.request_repo.list_for_tenant(
+                status=status, group_id=group_id, limit=limit, offset=offset
+            )
+        else:
+            member = await self._get_member(payload)
+            rows = await self.request_repo.list_for_leader(
+                member.id, status=status, group_id=group_id, limit=limit, offset=offset
+            )
         return [
             LeaderRequestItem(
                 id=request.id,
@@ -129,8 +140,11 @@ class RequestService:
         ]
 
     async def open_count(self, payload: dict) -> OpenRequestCountResponse:
-        member = await self._get_member(payload)
-        count = await self.request_repo.count_open_for_leader(member.id)
+        if self._is_admin(payload):
+            count = await self.request_repo.count_open_for_tenant()
+        else:
+            member = await self._get_member(payload)
+            count = await self.request_repo.count_open_for_leader(member.id)
         return OpenRequestCountResponse(count=count)
 
     async def reply(self, payload: dict, request_id: int,
@@ -268,6 +282,10 @@ class RequestService:
         return RequestActionResponse(
             id=request.id, status=request.status, message=RequestMessages.REOPENED,
         )
+
+    @staticmethod
+    def _is_admin(payload: dict) -> bool:
+        return payload.get("role") == UserRole.TENANT_ADMIN
 
     @staticmethod
     def _response_info(request: Request, responder_name: str | None) -> RequestResponseInfo | None:

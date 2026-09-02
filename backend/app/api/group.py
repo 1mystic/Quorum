@@ -48,6 +48,7 @@ async def browse_groups(
     return await service.list(payload, status=status, search=search, category=category, type=type)
 
 
+# Self-scoped ("groups I lead" / "groups I joined"); stays MEMBER-only.
 @group_router.get("/me", response_model=list[MyGroupItem])
 async def my_groups(
     role: MembershipRole | None = Query(None, description="LEADER returns groups you lead, MEMBER the ones you joined"),
@@ -127,6 +128,9 @@ async def leave_group(
     return await service.leave(payload, group_id)
 
 
+# pending_requests/handle_request/remove_member are leader actions
+# (MembershipService asserts is_leader on the caller's own Member row); stay
+# MEMBER-only for the same reason as request.py's leader-only actions.
 @group_router.get("/{group_id}/requests", response_model=list[PendingRequestItem])
 async def pending_requests(
     group_id: int,
@@ -150,7 +154,7 @@ async def handle_request(
 @group_router.get("/{group_id}/members", response_model=list[MemberItem])
 async def group_members(
     group_id: int,
-    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    payload: dict = Security(get_user_info, scopes=["MEMBER", "TENANT_ADMIN"]),
     service: MembershipService = Depends(get_membership_service),
 ):
     return await service.members(group_id)

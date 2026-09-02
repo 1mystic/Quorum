@@ -13,6 +13,9 @@ certificate_router = APIRouter(prefix="/certificates", tags=["Certificates"])
 public_certificate_router = APIRouter(prefix="/public/certificates", tags=["Certificates (public)"])
 
 
+# Self-scoped (the caller's own certificates); stays MEMBER-only. Verification
+# for anyone else already goes through the public /verify and /file routes
+# below, which need no auth at all.
 @certificate_router.get("/me", response_model=list[MyCertificateItem])
 async def my_certificates(
     payload: dict = Security(get_user_info, scopes=["MEMBER"]),
@@ -30,6 +33,8 @@ async def verify_certificate(
     return await service.verify(serial)
 
 
+# Also self-scoped: CertificateService.download 404s unless the certificate
+# belongs to the caller. Stays MEMBER-only for the same reason as /me above.
 @certificate_router.get("/{serial}/download", response_model=CertificateDownloadResponse)
 async def download_certificate(
     serial: str,

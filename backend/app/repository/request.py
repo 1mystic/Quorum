@@ -159,6 +159,50 @@ class RequestRepository(TenantScopedRepository):
         )
         return result.scalar_one()
 
+    async def list_for_tenant(self, status: RequestStatus | None = None,
+                              group_id: int | None = None, limit: int = 50,
+                              offset: int = 0) -> list[tuple[Request, str, str, str | None]]:
+        """
+        TENANT_ADMIN oversight: every request in the tenant, not filtered to
+        groups the caller leads. A TENANT_ADMIN never gets a `Member` row
+        (see app/models/decision.py), so this cannot join through Membership
+        the way `list_for_leader` does; `self.scope` already restricts to the
+        caller's own tenant, which is the only scoping an admin needs here.
+        """
+        conditions = []
+        if status is not None:
+            conditions.append(Request.status == status)
+        if group_id is not None:
+            conditions.append(Request.group_id == group_id)
+
+        raiser = aliased(Member)
+        raiser_user = aliased(User)
+        responder = aliased(Member)
+        responder_user = aliased(User)
+
+        result = await self.db.execute(
+            self.scope(
+                select(Request, Group.name, raiser_user.full_name, responder_user.full_name), Request
+            )
+            .join(Group, Group.id == Request.group_id)
+            .join(raiser, raiser.id == Request.member_id)
+            .join(raiser_user, raiser_user.id == raiser.user_id)
+            .outerjoin(responder, responder.id == Request.responded_by)
+            .outerjoin(responder_user, responder_user.id == responder.user_id)
+            .where(*conditions)
+            .order_by(Request.status, Request.created_at.asc())
+            .limit(limit)
+            .offset(offset)
+        )
+        return result.all()
+
+    async def count_open_for_tenant(self) -> int:
+        result = await self.db.execute(
+            self.scope(select(func.count(Request.id)), Request)
+            .where(Request.status != RequestStatus.RESOLVED)
+        )
+        return result.scalar_one()
+
     async def set_response(self, request: Request, response_body: str, responder_id: int) -> Request:
         now = datetime.now(timezone.utc)
         request.response_body = response_body

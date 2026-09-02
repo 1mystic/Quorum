@@ -11,7 +11,13 @@ from app.models import AnnouncementCategory
 
 announcement_router = APIRouter(prefix="/announcements", tags=["Announcements"])
 
-
+# create/feed/mine/unread-count/read-all/submit-for-review/pin/delete all stay
+# MEMBER-only. feed and mine are scoped to groups the caller has joined or
+# leads (AnnouncementService._get_member is unconditional), and there is no
+# tenant-wide "every announcement" oversight query to widen onto without
+# adding one; a TENANT_ADMIN's real oversight path for announcements is the
+# approve/reject review queue below, which is already TENANT_ADMIN-scoped and
+# needs no Member row (_admin_announcement checks tenant match only).
 @announcement_router.post("", response_model=CreateAnnouncementResponse)
 async def post_announcement(
     data: CreateAnnouncementRequest,

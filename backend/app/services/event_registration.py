@@ -6,7 +6,7 @@ from app.repository import (
     EventRegistrationRepository, EventRepository, GroupRepository,
     MembershipRepository, MemberRepository, UserRepository, NotificationRepository
 )
-from app.models import EventStatus, MembershipStatus, RegistrationResult, NotificationType
+from app.models import EventStatus, MembershipStatus, RegistrationResult, NotificationType, UserRole
 from app.schemas import (
     RegistrationConfirmation, UnregisterResponse, ParticipantItem, MarkAttendanceRequest,
     AttendanceResponse, DeclareResultsRequest, DeclaredResultItem, DeclareResultsResponse,
@@ -100,7 +100,12 @@ class EventRegistrationService:
         return UnregisterResponse(event_id=event_id, message=RegistrationMessages.UNREGISTERED)
 
     async def participants(self, payload: dict, event_id: int) -> list[ParticipantItem]:
-        await self._managed_event(payload, event_id)
+        # Read-only oversight: a TENANT_ADMIN can see any event's roster
+        # without being its group's leader, same admin bypass EventService
+        # already applies to _visible_event/_admin_event. mark_attendance and
+        # declare_results below stay leader-only through _managed_event: they
+        # are business actions, not reads, and are not widened here.
+        await self._readable_event(payload, event_id)
         rows = await self.registration_repo.list_participants(event_id)
         return [
             ParticipantItem(
@@ -250,6 +255,16 @@ class EventRegistrationService:
         if not await self.membership_repo.is_leader(member.id, event.group_id):
             raise NotGroupLeaderError()
         return event
+
+    async def _readable_event(self, payload: dict, event_id: int):
+        """Same tenant/leader gate as _managed_event, except a TENANT_ADMIN
+        (no Member row, no leader check) is let through for read-only access."""
+        if payload.get("role") == UserRole.TENANT_ADMIN:
+            event = await self.event_repo.get_by_id(event_id)
+            if not event or event.group.tenant_id != await self._tenant_id(payload):
+                raise EventNotFoundError()
+            return event
+        return await self._managed_event(payload, event_id)
 
     async def _registration_of_event(self, registration_id: int, event_id: int):
         registration = await self.registration_repo.get_by_id(registration_id)

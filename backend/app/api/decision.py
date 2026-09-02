@@ -49,7 +49,7 @@ async def reject_decision(
 
 @decision_router.get("", response_model=list[DecisionItem])
 async def list_decisions(
-    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    payload: dict = Security(get_user_info, scopes=["MEMBER", "TENANT_ADMIN"]),
     service: DecisionService = Depends(get_decision_service),
 ):
     return await service.list_decisions(payload)
@@ -58,7 +58,7 @@ async def list_decisions(
 @decision_router.get("/{decision_id}", response_model=DecisionItem)
 async def get_decision(
     decision_id: int,
-    payload: dict = Security(get_user_info, scopes=["MEMBER"]),
+    payload: dict = Security(get_user_info, scopes=["MEMBER", "TENANT_ADMIN"]),
     service: DecisionService = Depends(get_decision_service),
 ):
     return await service.get_decision(payload, decision_id)
@@ -73,6 +73,9 @@ async def close_decision(
     return await service.close_decision(payload, decision_id)
 
 
+# Casting a ballot is inherently self-scoped; a TENANT_ADMIN voting through
+# this route on a member's behalf would be the bug, not the fix, so this
+# stays MEMBER-only.
 @decision_router.post("/{decision_id}/ballots", response_model=BallotItem)
 async def cast_ballot(
     decision_id: int,

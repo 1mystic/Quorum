@@ -9,7 +9,11 @@ from app.models import NotificationType
 
 notification_router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
-
+# All four routes below are self-scoped (the caller's own notifications) and
+# stay MEMBER-only. Nothing here is tenant oversight - a TENANT_ADMIN reading
+# "my notifications" is not a meaningful action, and NotificationService's
+# _get_member would raise MemberNotFoundError for a TENANT_ADMIN token anyway
+# since it never has a Member row.
 @notification_router.get("", response_model=list[NotificationItem])
 async def my_notifications(
     is_read: bool | None = Query(None, description="Filter by read state"),

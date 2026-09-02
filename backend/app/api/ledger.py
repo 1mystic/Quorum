@@ -10,7 +10,15 @@ from app.core.di import get_ledger_service, get_user_info
 
 ledger_router = APIRouter(prefix="/ledger", tags=["Ledger"])
 
-
+# Every route below stays MEMBER-only. raise_due/record_payment/add_contribution/
+# add_expense are treasurer-style actions done by a MEMBER with the right
+# standing in this domain, not a TENANT_ADMIN action; verify_payment/settle_due/
+# issue_receipt/collect_receipt call LedgerService._get_member for the actor,
+# and a TENANT_ADMIN never has a Member row (see app/models/decision.py's
+# comment), so widening those would trade a 403 for a MemberNotFoundError
+# rather than granting real access. my_dues is self-scoped (dues owed by the
+# caller) and there is no tenant-wide "all dues"/"all payments" oversight
+# endpoint yet to widen onto; adding one is a feature, not an auth fix.
 @ledger_router.post("/dues", response_model=DueItem)
 async def raise_due(
     data: CreateDueRequest,
