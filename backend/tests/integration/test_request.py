@@ -1240,7 +1240,7 @@ async def test_raise_request_against_draft_event_succeeds(client, leader, member
 
 
 @pytest.mark.asyncio
-async def test_raise_request_against_past_event_succeeds(client, db_session, leader, member):
+async def test_raise_request_against_past_event_succeeds(client, db_session, leader, member, tenant_admin):
     """Confirm that an request can be raised against an event whose window has already ended"""
     from datetime import datetime, timedelta, timezone
     from app.models import Event
@@ -1256,7 +1256,8 @@ async def test_raise_request_against_past_event_succeeds(client, db_session, lea
     }
     event = await client.post("/events", headers=headers, json=event_payload)
     event_id = event.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     stored_event = await db_session.get(Event, event_id)
     stored_event.starts_at = datetime.now(timezone.utc) - timedelta(hours=5)
@@ -1275,7 +1276,7 @@ async def test_raise_request_against_past_event_succeeds(client, db_session, lea
 
 
 @pytest.mark.asyncio
-async def test_raise_request_by_non_registrant_succeeds(client, leader, member):
+async def test_raise_request_by_non_registrant_succeeds(client, leader, member, tenant_admin):
     """Confirm that a member can raise an request against an event they never registered for"""
     headers, group_id = leader
     event_payload = {
@@ -1288,7 +1289,8 @@ async def test_raise_request_by_non_registrant_succeeds(client, leader, member):
     }
     event = await client.post("/events", headers=headers, json=event_payload)
     event_id = event.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     payload = {
         "group_id": group_id,

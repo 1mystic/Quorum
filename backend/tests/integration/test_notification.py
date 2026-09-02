@@ -98,7 +98,7 @@ async def outsider(client, seed_tenant):
 
 
 @pytest.fixture
-async def started_event(client, db_session, leader, member):
+async def started_event(client, db_session, leader, member, tenant_admin):
     """A published event whose window has already started, with the member registered."""
     from app.models import Event
 
@@ -113,7 +113,8 @@ async def started_event(client, db_session, leader, member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     registration = await client.post(f"/events/{event_id}/register", headers=member)
     registration_id = registration.json()["registration_id"]
 
@@ -126,7 +127,7 @@ async def started_event(client, db_session, leader, member):
 
 
 @pytest.fixture
-async def two_checked_in(client, db_session, leader, member, second_member):
+async def two_checked_in(client, db_session, leader, member, second_member, tenant_admin):
     """Two members registered and checked in, event already started."""
     from app.models import Event
 
@@ -141,7 +142,8 @@ async def two_checked_in(client, db_session, leader, member, second_member):
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
 
     first = await client.post(f"/events/{event_id}/register", headers=member)
     first_registration_id = first.json()["registration_id"]
@@ -178,7 +180,7 @@ async def test_list_notifications_empty_for_new_member(client, outsider):
 
 
 @pytest.mark.asyncio
-async def test_list_notifications_filter_by_type(client, leader, member):
+async def test_list_notifications_filter_by_type(client, leader, member, tenant_admin):
     """Verify that filtering by type returns only notifications matching that type, not others"""
     headers, group_id = leader
     payload = {
@@ -191,7 +193,8 @@ async def test_list_notifications_filter_by_type(client, leader, member):
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
 
@@ -212,7 +215,7 @@ async def test_list_notifications_filter_by_type(client, leader, member):
 
 
 @pytest.mark.asyncio
-async def test_list_notifications_filter_by_is_read(client, leader, member):
+async def test_list_notifications_filter_by_is_read(client, leader, member, tenant_admin):
     """Verify that filtering by is_read returns only notifications matching that read state"""
     headers, group_id = leader
     payload = {
@@ -225,7 +228,8 @@ async def test_list_notifications_filter_by_is_read(client, leader, member):
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     response = await client.get(
@@ -268,7 +272,7 @@ async def test_list_notifications_offset_negative_fails(client, member):
 
 
 @pytest.mark.asyncio
-async def test_list_notifications_ordered_newest_first(client, db_session, leader, member):
+async def test_list_notifications_ordered_newest_first(client, db_session, leader, member, tenant_admin):
     """Verify that notifications are returned with the most recently created one first"""
     from datetime import datetime, timedelta
     from app.models import Notification
@@ -284,7 +288,8 @@ async def test_list_notifications_ordered_newest_first(client, db_session, leade
     }
     first_create = await client.post("/events", headers=headers, json=first_payload)
     first_event_id = first_create.json()["id"]
-    await client.patch(f"/events/{first_event_id}/publish", headers=headers)
+    await client.patch(f"/events/{first_event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{first_event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{first_event_id}/register", headers=member)
 
     second_payload = {
@@ -297,7 +302,8 @@ async def test_list_notifications_ordered_newest_first(client, db_session, leade
     }
     second_create = await client.post("/events", headers=headers, json=second_payload)
     second_event_id = second_create.json()["id"]
-    await client.patch(f"/events/{second_event_id}/publish", headers=headers)
+    await client.patch(f"/events/{second_event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{second_event_id}/publish", headers=tenant_admin)
     second_registration = await client.post(f"/events/{second_event_id}/register", headers=member)
 
     result = await db_session.execute(
@@ -333,7 +339,7 @@ async def test_unread_count_zero_for_new_member(client, outsider):
 
 
 @pytest.mark.asyncio
-async def test_unread_count_increases_after_registration(client, leader, member):
+async def test_unread_count_increases_after_registration(client, leader, member, tenant_admin):
     """Verify that unread-count increases after a REGISTRATION_CONFIRMED notification fires"""
     before = await client.get("/notifications/unread-count", headers=member)
     initial_count = before.json()["count"]
@@ -349,7 +355,8 @@ async def test_unread_count_increases_after_registration(client, leader, member)
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     after = await client.get("/notifications/unread-count", headers=member)
@@ -367,7 +374,7 @@ async def test_unread_count_without_token_fails(client):
 # ==== read-all ====
 
 @pytest.mark.asyncio
-async def test_mark_all_notifications_read_success(client, leader, member):
+async def test_mark_all_notifications_read_success(client, leader, member, tenant_admin):
     """Verify that read-all marks all unread notifications as read and reports the count updated"""
     headers, group_id = leader
     payload = {
@@ -380,7 +387,8 @@ async def test_mark_all_notifications_read_success(client, leader, member):
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     response = await client.post("/notifications/read-all", headers=member)
@@ -426,7 +434,7 @@ async def test_mark_all_notifications_read_without_token_fails(client):
 # ==== mark single notification read ====
 
 @pytest.mark.asyncio
-async def test_mark_notification_read_success(client, leader, member):
+async def test_mark_notification_read_success(client, leader, member, tenant_admin):
     """Verify that a member can mark their own notification as read"""
     headers, group_id = leader
     payload = {
@@ -439,7 +447,8 @@ async def test_mark_notification_read_success(client, leader, member):
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     listed = await client.get("/notifications", headers=member)
@@ -462,7 +471,7 @@ async def test_mark_notification_read_unknown_id_fails(client, member):
 
 
 @pytest.mark.asyncio
-async def test_mark_notification_read_belonging_to_another_member_fails(client, leader, member, outsider):
+async def test_mark_notification_read_belonging_to_another_member_fails(client, leader, member, outsider, tenant_admin):
     """Ensure that a member cannot mark another member's notification as read"""
     headers, group_id = leader
     payload = {
@@ -475,7 +484,8 @@ async def test_mark_notification_read_belonging_to_another_member_fails(client, 
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     listed = await client.get("/notifications", headers=member)
@@ -487,7 +497,7 @@ async def test_mark_notification_read_belonging_to_another_member_fails(client, 
 
 
 @pytest.mark.asyncio
-async def test_mark_already_read_notification_succeeds_idempotently(client, leader, member):
+async def test_mark_already_read_notification_succeeds_idempotently(client, leader, member, tenant_admin):
     """Confirm that marking an already-read notification as read again succeeds without error"""
     headers, group_id = leader
     payload = {
@@ -500,7 +510,8 @@ async def test_mark_already_read_notification_succeeds_idempotently(client, lead
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     listed = await client.get("/notifications", headers=member)
@@ -514,7 +525,7 @@ async def test_mark_already_read_notification_succeeds_idempotently(client, lead
 
 
 @pytest.mark.asyncio
-async def test_mark_notification_read_without_token_fails(client, leader, member):
+async def test_mark_notification_read_without_token_fails(client, leader, member, tenant_admin):
     """Ensure that marking a notification read is rejected without an access token"""
     headers, group_id = leader
     payload = {
@@ -527,7 +538,8 @@ async def test_mark_notification_read_without_token_fails(client, leader, member
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     listed = await client.get("/notifications", headers=member)
@@ -597,7 +609,7 @@ async def test_join_approved_notification_not_visible_to_leader(client, leader, 
 # ==== REGISTRATION_CONFIRMED trigger ====
 
 @pytest.mark.asyncio
-async def test_registration_creates_notification(client, leader, member):
+async def test_registration_creates_notification(client, leader, member, tenant_admin):
     """Verify that registering for an event creates a REGISTRATION_CONFIRMED notification"""
     headers, group_id = leader
     payload = {
@@ -610,7 +622,8 @@ async def test_registration_creates_notification(client, leader, member):
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     response = await client.get(
@@ -663,7 +676,7 @@ async def test_result_registrant_value_does_not_create_notification(client, memb
     assert len(response.json()) == 1
 
 @pytest.mark.asyncio
-async def test_list_notifications_pagination_slices_correctly(client, db_session, leader, member):
+async def test_list_notifications_pagination_slices_correctly(client, db_session, leader, member, tenant_admin):
     """Verify that limit and offset correctly slice notifications in created_at order"""
     from datetime import datetime, timedelta
     from app.models import Notification
@@ -682,7 +695,8 @@ async def test_list_notifications_pagination_slices_correctly(client, db_session
         create = await client.post("/events", headers=headers, json=payload)
         event_id = create.json()["id"]
         event_ids.append(event_id)
-        await client.patch(f"/events/{event_id}/publish", headers=headers)
+        await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+        await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
         await client.post(f"/events/{event_id}/register", headers=member)
 
     for i, event_id in enumerate(event_ids):
@@ -722,7 +736,7 @@ async def test_mark_all_notifications_read_does_not_affect_other_members(client,
     assert outsider_count.json()["count"] == 1
 
 @pytest.mark.asyncio
-async def test_unread_count_decrements_by_one_after_single_read(client, leader, member):
+async def test_unread_count_decrements_by_one_after_single_read(client, leader, member, tenant_admin):
     """Verify that marking a single notification as read decrements the unread count by exactly 1"""
     headers, group_id = leader
     payload = {
@@ -735,7 +749,8 @@ async def test_unread_count_decrements_by_one_after_single_read(client, leader, 
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     before = await client.get("/notifications/unread-count", headers=member)
@@ -784,7 +799,7 @@ async def test_declare_results_twice_does_not_create_duplicate_notifications(cli
     assert len(response.json()) == 1
 
 @pytest.mark.asyncio
-async def test_registration_failure_does_not_create_notification(client, leader, member, outsider):
+async def test_registration_failure_does_not_create_notification(client, leader, member, outsider, tenant_admin):
     """Confirm that a failed registration attempt (event full) does not create a notification"""
     leader_headers, group_id = leader
     join = await client.post(f"/groups/{group_id}/join", headers=outsider)
@@ -804,7 +819,8 @@ async def test_registration_failure_does_not_create_notification(client, leader,
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     failed = await client.post(f"/events/{event_id}/register", headers=outsider)
@@ -816,7 +832,7 @@ async def test_registration_failure_does_not_create_notification(client, leader,
     assert response.json() == []
 
 @pytest.mark.asyncio
-async def test_list_notifications_combined_is_read_and_type_filters(client, leader, member):
+async def test_list_notifications_combined_is_read_and_type_filters(client, leader, member, tenant_admin):
     """Verify that is_read and type filters can be combined"""
     headers, group_id = leader
     payload = {
@@ -829,7 +845,8 @@ async def test_list_notifications_combined_is_read_and_type_filters(client, lead
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     response = await client.get(
@@ -861,7 +878,7 @@ async def test_result_posted_message_for_runner_up(client, member, two_checked_i
 
 
 @pytest.mark.asyncio
-async def test_unregister_does_not_remove_earlier_registration_notification(client, leader, member):
+async def test_unregister_does_not_remove_earlier_registration_notification(client, leader, member, tenant_admin):
     """Confirm that cancelling a registration does not delete the earlier REGISTRATION_CONFIRMED notification"""
     headers, group_id = leader
     payload = {
@@ -874,7 +891,8 @@ async def test_unregister_does_not_remove_earlier_registration_notification(clie
     }
     create = await client.post("/events", headers=headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
     await client.delete(f"/events/{event_id}/register", headers=member)
 
@@ -885,7 +903,7 @@ async def test_unregister_does_not_remove_earlier_registration_notification(clie
     assert len(response.json()) == 1
 
 @pytest.mark.asyncio
-async def test_list_notifications_filter_is_read_true(client, leader, member, outsider):
+async def test_list_notifications_filter_is_read_true(client, leader, member, outsider, tenant_admin):
     """Verify that is_read=True returns only notifications that have been marked read"""
     leader_headers, group_id = leader
     join = await client.post(f"/groups/{group_id}/join", headers=outsider)
@@ -904,7 +922,8 @@ async def test_list_notifications_filter_is_read_true(client, leader, member, ou
     }
     create = await client.post("/events", headers=leader_headers, json=payload)
     event_id = create.json()["id"]
-    await client.patch(f"/events/{event_id}/publish", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/submit-for-review", headers=leader_headers)
+    await client.patch(f"/events/{event_id}/publish", headers=tenant_admin)
     await client.post(f"/events/{event_id}/register", headers=member)
 
     listed = await client.get("/notifications", headers=member, params={"type": "JOIN_APPROVED"})
