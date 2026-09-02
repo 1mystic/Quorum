@@ -33,11 +33,14 @@ const auth = useAuthStore()
 const slug = computed(() => route.params.slug)
 const tenant = computed(() => tenantBySlug(slug.value))
 
+// Admin group only for a real TENANT_ADMIN session - a member would only
+// ever be redirected back out by the RBAC guard on click, so showing it at
+// all is needless clutter, not a harmless extra option.
 const nav = computed(() => [
   ...assistantNav(slug.value),
   ...coreNav(slug.value),
   ...insightNav(slug.value, tenant.value),
-  ...adminNav(slug.value)
+  ...(auth.role === 'admin' ? adminNav(slug.value) : [])
 ])
 
 // Sibling routes can share a path prefix (`/admin` and `/admin/approvals`
