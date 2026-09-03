@@ -39,6 +39,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/health", include_in_schema=False)
+async def health():
+    """No DB round trip on purpose: a host's uptime probe should reflect
+    whether the process itself is alive, not whether the database is
+    reachable this instant - a slow DB should not flap the whole service."""
+    return {"status": "ok"}
+
 @app.exception_handler(AppException)
 async def handle_app_exc(request: Request, exc: AppException):
     content = {"message": exc.message}
