@@ -160,6 +160,61 @@ cd frontend && npm run test
 Secrets are never committed. `.env.example` in both `backend/` and `frontend/` is the contract for
 every variable a real deploy needs.
 
+## Deploying on free tiers
+
+`backend/app/stats/` is pure Python (`math`/`statistics`/`dataclasses` only, no numpy/scipy/
+pandas/scikit-learn/lifelines). That keeps the whole backend to one lightweight service - there is
+no separate heavy "worker" box to provision. Four pieces, in this order:
+
+**1. Database - Neon.** Create a free Neon project. Copy its connection string and rewrite it for
+asyncpg: scheme `postgresql://` to `postgresql+asyncpg://`, and `?sslmode=require&channel_binding=require`
+to `?ssl=require` (asyncpg has no `sslmode`/`channel_binding` connect kwarg). Neon's default role
+owns every table and has `BYPASSRLS` - do not run the live app as it. Connect once as that default
+role and create a second, restricted role for the app itself:
+
+```sql
+CREATE ROLE quorum_app LOGIN PASSWORD 'a-real-password' NOBYPASSRLS NOSUPERUSER NOCREATEDB NOCREATEROLE;
+GRANT USAGE ON SCHEMA public TO quorum_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO quorum_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO quorum_app;
+ALTER DEFAULT PRIVILEGES FOR ROLE <your_default_role> IN SCHEMA public
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO quorum_app;
+```
+
+Run `uv run alembic upgrade head` once, locally, pointed at Neon as the default owning role
+(migrations need ownership to `ALTER TABLE`/`CREATE POLICY`) - the app's own runtime connection
+uses `quorum_app`, never the owning role. Create a second Neon project (or branch) for
+`TEST_DATABASE_URL` if you intend to run the test suite against Neon at all; never point it at
+the same database real data lives in, since every table gets dropped on teardown.
+
+**2. Backend - Render free web service** (or any host that runs a `Dockerfile`: Fly.io's free
+allowance and Railway's trial both work the same way). Connect the repo, point it at
+`backend/Dockerfile`, and set these environment variables from `backend/.env.example`:
+`DATABASE_URL` (the `quorum_app` connection string above), `JWT_SECRET_KEY` (a real random value,
+never the placeholder), `FRONTEND_URL` (fill in after step 3, once you have the Vercel URL),
+`BACKEND_BASE_URL` (this service's own public URL, once Render assigns it). Everything else in
+`.env.example` is optional and degrades gracefully when left blank. The service exposes `/health`
+for the host's uptime probe.
+
+**3. Frontend - Vercel.** Import the repo, set the root directory to `frontend/`, framework
+preset Vite. One environment variable: `VITE_API_BASE_URL`, set to the backend's Render URL plus
+`/api` (e.g. `https://your-backend.onrender.com/api`). Once deployed, go back to step 2 and set
+the backend's `FRONTEND_URL` to this Vercel URL - CORS and password-reset links both depend on it.
+
+**4. The materializer - a free scheduled job, not an always-on worker.**
+`scripts/materialize_insights.py --once` runs every enabled pack for every tenant and exits; it
+does not need a long-lived process. A GitHub Actions workflow on a `schedule:` trigger (free for
+public repos, and within the free monthly minutes for private ones at an hourly cadence) checking
+out the repo, running `uv sync`, and calling that command with `DATABASE_URL` set to the
+`quorum_app` connection string as a repository secret is enough - match the cadence to
+`docs/STATS_API.md`'s table (nothing coarser than nightly, several services at hourly). Enabling a
+pack through the UI also runs one real materialization inline, so a tenant's first-enabled pack
+never sits empty waiting for the next scheduled run.
+
+Seed the two demo tenants against the real deploy the same way local dev does
+(`uv run python scripts/seed_demo.py`, pointed at the production `DATABASE_URL`) if you want a
+populated demo on first visit, or walk through real signup/onboarding instead - both work.
+
 ## Statistical correctness, checked against known answers
 
 Every statistical service is tested against something external, not against its own prior output.
