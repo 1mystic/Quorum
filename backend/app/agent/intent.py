@@ -158,6 +158,30 @@ _EVENT_WORDS = (
     "activity"
 )
 
+# Words that describe the SHAPE of a request ("something popular", "what's
+# happening", "any events this week") rather than an actual subject. The
+# LLM path (_SYSTEM_PROMPT above) is told explicitly to strip these before
+# returning keywords; recommender.normalize_tokens only strips grammatical
+# filler (articles, pronouns, question words) because it is also used to
+# tokenise group/event text for scoring, where a word like "popular" or
+# "event" appearing in a group's own description is legitimate content, not
+# noise to be dropped. This fallback path has no LLM to apply that judgement,
+# so without a matching filter here every request-shape word survives as a
+# fake "topic" - e.g. "Anything popular I should know about?" reduces to the
+# single token {"popular"}, which then reads as a stated topic and wrongly
+# suppresses the popularity fallback in tools.py (kind == "popularity" and
+# keywords). Keep this list scoped to genuine request-shape words only - it
+# must never absorb a real subject.
+_REQUEST_SHAPE_WORDS = {
+    "popular", "trending", "new", "recent", "latest",
+    "upcoming", "happening", "planned", "plan", "plans", "scheduled",
+    "schedule", "event", "events", "activity", "activities", "session",
+    "sessions", "workshop", "workshops", "tournament", "tournaments",
+    "meet", "meetup", "meetups", "week", "weeks", "weekend", "today",
+    "tonight", "tomorrow", "yesterday", "month", "months", "day", "days",
+    "time", "times", "now", "soon",
+}
+
 
 def _mock_extract(text: str, categories: list[str]) -> dict:
     """Deterministic fallback with no provider configured. This is the old
@@ -166,7 +190,9 @@ def _mock_extract(text: str, categories: list[str]) -> dict:
     from app.agent import recommender as R
 
     lowered = (text or "").lower()
-    words = [w for w in R.normalize_tokens(text)]
+    words = [
+        w for w in R.normalize_tokens(text) if w not in _REQUEST_SHAPE_WORDS
+    ]
 
     time_scope = "any"
     if any(w in lowered for w in ("last", "past", "previous", "happened", "ago")):
