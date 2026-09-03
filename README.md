@@ -130,6 +130,24 @@ through `member90@...` for Aavartan Robotics. Every account uses the same `Demo1
 Full details, what each tenant contains, and the manual (no Docker) path are in
 [`docs/RUNNING_LOCALLY.md`](docs/RUNNING_LOCALLY.md).
 
+**Try it on the live database.** Two further tenants exist on this project's actual Neon
+database (not the local `docker compose`/`seed_demo.py` pair above), built by driving the real
+signup/onboarding/request/event/ledger/decision API end to end rather than a bulk fixture, so
+every account, group, request, event, due, payment, ballot and announcement in them is real,
+transactional data:
+
+| Tenant | Vertical | Admin login | Sample member login |
+|---|---|---|---|
+| Greenfield RWA (`greenfield-rwa`) | housing society | `meena.krishnan@greenfieldrwa.in` / `GreenfieldRWA@2026` | `arjun.rao@greenfieldrwa.in` / `Resident0@2026` |
+| Riverside Coding Club (`riverside-coding-club`) | campus club | `rohan.verma@riversidecc.edu` / `RiversideCC@2026` | `aditi.sharma@riversidecc.edu` / `Coder0@2026` |
+
+Member logins run `Resident0@2026` through `Resident7@2026` (8 residents) for Greenfield RWA and
+`Coder0@2026` through `Coder7@2026` (8 members) for Riverside Coding Club, each password paired
+with that member's own email. Both tenants have real dues/payments/receipts, a closed election
+or budget-allocation decision with cast ballots, published events with registrations, and
+requests in a mix of open/replied/resolved/escalated states, so every Insight Pack page has real
+numbers to show, not placeholders.
+
 ### Manual setup, no Docker
 
 ```bash
@@ -189,25 +207,29 @@ the same database real data lives in, since every table gets dropped on teardown
 
 **2. Backend - Render free web service** (or any host that runs a `Dockerfile`: Fly.io's free
 allowance and Railway's trial both work the same way). Connect the repo, point it at
-`backend/Dockerfile`, and set these environment variables from `backend/.env.example`:
-`DATABASE_URL` (the `quorum_app` connection string above), `JWT_SECRET_KEY` (a real random value,
-never the placeholder), `FRONTEND_URL` (fill in after step 3, once you have the Vercel URL),
-`BACKEND_BASE_URL` (this service's own public URL, once Render assigns it). Everything else in
-`.env.example` is optional and degrades gracefully when left blank. The service exposes `/health`
-for the host's uptime probe.
+`backend/Dockerfile.web` (the light API tier - `Dockerfile.worker` is the always-running
+materializer loop, a separate service most free tiers only let you run one of; see step 4 for the
+free alternative to running it as a second service), and set these environment variables from
+`backend/.env.example`: `DATABASE_URL` (the `quorum_app` connection string above), `JWT_SECRET_KEY`
+(a real random value, never the placeholder), `FRONTEND_URL` (fill in after step 3, once you have
+the Vercel URL), `BACKEND_BASE_URL` (this service's own public URL, once Render assigns it).
+Everything else in `.env.example` is optional and degrades gracefully when left blank. The service
+exposes `/health` for the host's uptime probe.
 
 **3. Frontend - Vercel.** Import the repo, set the root directory to `frontend/`, framework
 preset Vite. One environment variable: `VITE_API_BASE_URL`, set to the backend's Render URL plus
 `/api` (e.g. `https://your-backend.onrender.com/api`). Once deployed, go back to step 2 and set
 the backend's `FRONTEND_URL` to this Vercel URL - CORS and password-reset links both depend on it.
 
-**4. The materializer - a free scheduled job, not an always-on worker.**
-`scripts/materialize_insights.py --once` runs every enabled pack for every tenant and exits; it
-does not need a long-lived process. A GitHub Actions workflow on a `schedule:` trigger (free for
-public repos, and within the free monthly minutes for private ones at an hourly cadence) checking
-out the repo, running `uv sync`, and calling that command with `DATABASE_URL` set to the
-`quorum_app` connection string as a repository secret is enough - match the cadence to
-`docs/STATS_API.md`'s table (nothing coarser than nightly, several services at hourly). Enabling a
+**4. The materializer.** `backend/Dockerfile.worker` is the proper, already-built option: an
+always-running service looping `scripts/materialize_insights.py` on `MATERIALIZE_INTERVAL_SECONDS`
+(default one hour), the same image `docker-compose.yml` runs locally. Deploy it as a second Render
+service pointed at that Dockerfile if your plan allows a second free service. If it does not,
+`scripts/materialize_insights.py --once` runs every enabled pack for every tenant and exits, so a
+free GitHub Actions workflow on a `schedule:` trigger works just as well without a second
+always-on service: check out the repo, `uv sync`, run that command with `DATABASE_URL` set to the
+`quorum_app` connection string as a repository secret, at whatever cadence `docs/STATS_API.md`'s
+table calls for (nothing coarser than nightly, several services at hourly). Either way, enabling a
 pack through the UI also runs one real materialization inline, so a tenant's first-enabled pack
 never sits empty waiting for the next scheduled run.
 
@@ -233,8 +255,8 @@ tested against synthetic recovery or a theorem instead, in
 
 | File | What it covers |
 |---|---|
-| [`PLAN.md`](PLAN.md) | What this is and why, in full |
-| [`CONTEXT.md`](CONTEXT.md) | Current build state and the decision log |
+| [`docs/PLAN.md`](docs/PLAN.md) | What this is and why, in full |
+| [`docs/CONTEXT.md`](docs/CONTEXT.md) | Current build state and the decision log |
 | [`docs/WORKPLAN.md`](docs/WORKPLAN.md) | The task board |
 | [`docs/RULES.md`](docs/RULES.md) | Engineering policy and test gates |
 | [`docs/GLOSSARY.md`](docs/GLOSSARY.md) | Domain and statistical vocabulary |
