@@ -347,6 +347,29 @@ async def test_cast_ballot_after_close_fails(client, leader, member, tenant_admi
     assert response.status_code == 409
 
 
+# ==== list decisions ====
+
+@pytest.mark.asyncio
+async def test_list_decisions_serializes_options(client, leader):
+    """
+    Regression: GET /decisions used to raise sqlalchemy.exc.MissingGreenlet
+    because DecisionRepository.list_decisions never eager-loaded `options`,
+    unlike get_by_id - DecisionItem._item reads decision.options, which
+    lazy-loaded outside the async session context during response
+    serialization. Only reproduces against a real async driver (asyncpg),
+    which is why this must run against Postgres, not a sync-shimmed DB.
+    """
+    headers, group_id = leader
+    create = await client.post("/decisions", headers=headers, json=_decision_payload(group_id))
+    assert create.status_code == 200
+
+    response = await client.get("/decisions", headers=headers)
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) >= 1
+    assert any(len(d["options"]) == 2 for d in body)
+
+
 # ==== close decision ====
 
 @pytest.mark.asyncio

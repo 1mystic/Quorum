@@ -144,8 +144,13 @@ class DecisionRepository(TenantScopedRepository):
             .order_by(Decision.created_at.desc())
             .limit(limit)
             .offset(offset)
+            # DecisionItem._item reads decision.options; without an eager
+            # load here that lazy-loads outside the async session context
+            # during response serialization (MissingGreenlet), unlike
+            # get_by_id which already selectinload's this relationship.
+            .options(selectinload(Decision.options))
         )
-        return list(result.scalars().all())
+        return list(result.scalars().unique().all())
 
     # ---- stream fetch -------------------------------------------------
 
