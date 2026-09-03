@@ -30,7 +30,8 @@ Everything lives under `/home/mystic1/Projects/RWA`. Never write outside it.
 `reference/campus-connect/` and `reference/vibecurb/` are **read-only source material**. Copy out of
 them; never edit in place. They are the record of what we ported from.
 
-`RWA_Master_Context.md` and `RWA-Focused-Project-Plan.md` are **historical research**. The interview
+`reference/historical/RWA_Master_Context.md` and `reference/historical/RWA-Focused-Project-Plan.md`
+are **historical research**. The interview
 findings (payment flow, STP maintenance, receipt-collection gap, ~99% WhatsApp usage) remain valid
 evidence. The scope decisions, the three-role model, the milestone dates and the feature cuts are
 **void** — they were shaped by a course review we are no longer subject to.

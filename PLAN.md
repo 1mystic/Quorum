@@ -4,7 +4,7 @@
 
 ## Context
 
-`/home/mystic1/Projects/RWA` previously held two planning docs (`RWA_Master_Context.md`, `RWA-Focused-Project-Plan.md`) for a narrow, course-scoped RWA/society app: complaints, dues, events, one GenAI categorization call. That scope was deliberately cut to survive an instructor feasibility review. **Those two files are historical research, not requirements** — the interview findings in them are still gold, the scope decisions are void.
+`/home/mystic1/Projects/RWA` previously held two planning docs (now `reference/historical/RWA_Master_Context.md`, `reference/historical/RWA-Focused-Project-Plan.md`) for a narrow, course-scoped RWA/society app: complaints, dues, events, one GenAI categorization call. That scope was deliberately cut to survive an instructor feasibility review. **Those two files are historical research, not requirements**: the interview findings in them are still gold, the scope decisions are void.
 
 We are now building something different and larger: **a general community operations platform**, multi-tenant by slug, where any kind of community — housing society, campus club, NGO, alumni chapter, co-op, sports club, professional guild — onboards and switches on the services it needs.
 
@@ -17,7 +17,7 @@ The differentiator is **not** CRUD and not agentic AI. Those are table stakes. T
 Three existing assets feed this:
 
 - **[MAY2026-Team-003](https://github.com/Srivastava-Shrestha/MAY2026-Team-003)** ("Campus Connect") — a genuinely well-built FastAPI + Vue 3 platform. Async SQLAlchemy 2, Alembic, JWT, clean `api → services → repository` layering, a 9,338-line design system, a bounded read-only AI agent loop with a *pure deterministic core* (`app/agent/recommender.py`), certificates with QR verification, notifications, `pgvector` already a dependency, and — critically — `College.slug` already exists. **This is our port source.**
-- **`design-sources.zip`** → VibeCurb skill pack (`brandkit-gen`, `awwwards-hero`, `awwwards-sections`, `awwwards-motion`, `visual-redesign`, `pixel-perfect`, `imagegen-frontend`). Strict design protocols we run the branding phase through.
+- **`reference/historical/design-sources.zip`** → VibeCurb skill pack (`brandkit-gen`, `awwwards-hero`, `awwwards-sections`, `awwwards-motion`, `visual-redesign`, `pixel-perfect`, `imagegen-frontend`). Strict design protocols we run the branding phase through.
 - **sangam-club.com** — adjacent reference (IITM club ops, six modules, role-based dashboards, minimalist warm aesthetic). Useful for vertical manifests and IA, not for copying.
 
 **Build order is fixed:** (0) governance → **(A) design the statistical services** → **(B) brand kit + UI system via VibeCurb** → **(C) port and adapt Campus Connect code**.
