@@ -2909,33 +2909,25 @@ html.qs-active::-webkit-scrollbar{
   color:var(--stop);
   background:var(--stop-bg);
 }
+/* Degraded/offline are disclosed, never hidden - but a shouting amber
+   uppercase badge over a terse reply reads as an error, not as the same
+   calm, editorial honesty EvidenceValue.vue's withheld/insufficient states
+   use elsewhere (section 16/17: quiet ink tones, plain sentence case, no
+   alarm colour). Same posture here: a small quiet mono note above the
+   reply, not a status pill - the four Evidence pills (section 10) already
+   own that vocabulary and a turn being degraded is not one of them. */
 .assistant-tags{
   display:flex;
-  flex-wrap:wrap;
-  gap:8px;
+  flex-direction:column;
+  gap:4px;
   margin-bottom:var(--sp3);
 }
 .assistant-tag{
-  display:inline-flex;
-  align-items:center;
-  font:500 10px/1 var(--font-mono);
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  padding:5px 9px;
-  border-radius:var(--r-pill);
-  border:1px solid var(--hair-2);
-  color:var(--ink-3);
-  background:var(--panel);
-}
-.assistant-tag.is-degraded{
-  color:var(--warn);
-  border-color:color-mix(in srgb,var(--warn) 34%,transparent);
-  background:var(--warn-bg);
-}
-.assistant-tag.is-offline{
-  color:var(--ink-3);
-  border-color:var(--hair-2);
-  background:transparent;
+  display:flex;
+  align-items:flex-start;
+  gap:6px;
+  font:400 11px/1.5 var(--font-mono);
+  color:var(--ink-4);
 }
 .assistant-items{
   align-self:flex-start;

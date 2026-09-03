@@ -42,8 +42,8 @@ const cannotDo = [
   'Promise a live model reply when it is running degraded or offline'
 ]
 const statusTags = [
-  { label: 'Degraded', body: 'a deterministic keyword match answered instead of the model' },
-  { label: 'Offline', body: 'sample data stood in, not this tenant\'s live data' }
+  { label: 'Degraded', body: 'a simpler keyword match answered, since the assistant model was not reachable' },
+  { label: 'Offline', body: 'example data stood in, since this tenant\'s live data was not reachable' }
 ]
 const aboutOpen = ref(false)
 
@@ -232,8 +232,8 @@ onMounted(() => {
               <template v-else>
                 <div class="assistant-msg is-assistant">
                   <div class="assistant-tags">
-                    <span v-if="turn.degraded" class="assistant-tag is-degraded">Degraded · deterministic match, not the model</span>
-                    <span v-if="turn.offline" class="assistant-tag is-offline">Offline · sample data, not this tenant's live data</span>
+                    <span v-if="turn.degraded" class="assistant-tag is-degraded">Answered by a simpler keyword match, not the assistant model right now</span>
+                    <span v-if="turn.offline" class="assistant-tag is-offline">Showing example data - this tenant's live data isn't reachable right now</span>
                   </div>
                   {{ turn.message }}
                 </div>
