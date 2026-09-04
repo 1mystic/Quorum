@@ -30,6 +30,9 @@ const routes = [
   { path: '/methods', name: 'methods-index', component: () => import('../views/MethodsIndexView.vue'), meta: { role: 'public', bodyClass: 'landing-body' } },
   { path: '/methods/:id', name: 'method-card', component: () => import('../views/MethodCardView.vue'), meta: { role: 'public', bodyClass: 'landing-body' } },
 
+  // ── getting-started guide: public, reachable with or without a session ──
+  { path: '/guide', name: 'guide', component: () => import('../views/GuideView.vue'), meta: { role: 'public', bodyClass: 'landing-body' } },
+
   // ── marketing content pages, linked from the landing footer ──
   { path: '/about', name: 'about', component: () => import('../views/AboutView.vue'), meta: { role: 'public', bodyClass: 'landing-body' } },
   { path: '/verticals', name: 'verticals', component: () => import('../views/VerticalsView.vue'), meta: { role: 'public', bodyClass: 'landing-body' } },

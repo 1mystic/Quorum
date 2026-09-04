@@ -235,6 +235,7 @@ onBeforeUnmount(() => {
 
       <div class="side-foot navgrp">
         <router-link class="ni" to="/methods">Method cards</router-link>
+        <router-link class="ni" to="/guide">Getting started</router-link>
         <router-link class="ni" :to="`/t/${slug}/profile`">{{ auth.user.name || 'Profile' }}</router-link>
         <button type="button" class="ni" @click="logout">
           <LogOut :size="15" />

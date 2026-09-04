@@ -23,6 +23,7 @@ import { demoTenantList } from '../../fixtures/tenants'
             <li><a href="/#packs">Insight packs</a></li>
             <li><router-link :to="`/t/${demoTenantList[0].slug}/dashboard`">Dashboard</router-link></li>
             <li><router-link to="/methods">Method cards</router-link></li>
+            <li><router-link to="/guide">Getting started</router-link></li>
             <li><router-link to="/about">About</router-link></li>
           </ul>
         </div>
