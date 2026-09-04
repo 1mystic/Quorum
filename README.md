@@ -213,8 +213,13 @@ free alternative to running it as a second service), and set these environment v
 `backend/.env.example`: `DATABASE_URL` (the `quorum_app` connection string above), `JWT_SECRET_KEY`
 (a real random value, never the placeholder), `FRONTEND_URL` (fill in after step 3, once you have
 the Vercel URL), `BACKEND_BASE_URL` (this service's own public URL, once Render assigns it).
-Everything else in `.env.example` is optional and degrades gracefully when left blank. The service
-exposes `/health` for the host's uptime probe.
+That is the whole required set - Neon, Render, Vercel, nothing else. Everything else in
+`.env.example` (S3-compatible storage, outbound mail, the AI assistant's provider key) is optional
+and degrades gracefully when left blank: a failed/absent certificate upload falls back to storing
+the PDF in Postgres itself, a missing mail config just means password-reset emails do not send
+(the flow itself still runs and is logged), and no `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` runs the
+assistant in its deterministic mock mode rather than failing. None of the three block a deploy.
+The service exposes `/health` for the host's uptime probe.
 
 **3. Frontend - Vercel.** Import the repo, set the root directory to `frontend/`, framework
 preset Vite. One environment variable: `VITE_API_BASE_URL`, set to the backend's Render URL plus

@@ -1,12 +1,17 @@
 """
 One place for every setting the backend reads.
 
-The core fields are required - the whole application, not just the AI module,
-needs a real database, real auth and certificate storage to run at all.
+Only DATABASE_URL, JWT_SECRET_KEY and FRONTEND_URL are genuinely required -
+the app cannot run at all without a database, a way to sign tokens, and a
+known frontend origin for CORS/password-reset links. Everything else below
+them has a safe default and degrades gracefully when left unset:
 
-Everything below them is specific to the AI assistant and voice relay, and
-is optional with a safe default:
-
+- Empty AWS_*/S3_BUCKET_NAME: certificate upload falls back to storing the
+  PDF bytes in Postgres itself (app/core/storage.py), never raises.
+- Empty SMTP_HOST/etc: a send failure is caught and logged, never raised
+  (app/core/mailer.py) - password-reset emails just do not arrive.
+- TEST_DATABASE_URL is read only by the test harness (tests/conftest.py),
+  never by the running app - it must not be required to boot in production.
 - An empty ANTHROPIC_API_KEY means the AI module runs in deterministic mock
   mode. That is what the offline test suite relies on, and what keeps the
   assistant demoable with no network at all.
@@ -19,26 +24,28 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # --- Core service configuration (required) --------------------------
     DATABASE_URL: str
-    TEST_DATABASE_URL: str
     JWT_SECRET_KEY: str
-    JWT_ALGORITHM: str
+    JWT_ALGORITHM: str = "HS256"
     FRONTEND_URL: str
 
-    # --- Certificate storage (required) ---------------------------------
-    AWS_REGION: str
-    S3_BUCKET_NAME: str
-    AWS_ACCESS_KEY_ID: str
-    AWS_SECRET_ACCESS_KEY: str
+    # Test-only, never read by the running app - see the module docstring.
+    TEST_DATABASE_URL: str = ""
+
+    # --- Certificate storage (optional) ----------------------------------
+    AWS_REGION: str = ""
+    S3_BUCKET_NAME: str = ""
+    AWS_ACCESS_KEY_ID: str = ""
+    AWS_SECRET_ACCESS_KEY: str = ""
     # Used only to build a download link for certificates that fell back to
     # Postgres storage because S3 upload failed (see Certificate.pdf_data).
     BACKEND_BASE_URL: str = "http://localhost:8000"
 
-    # --- Outbound mail (required) ---------------------------------------
-    SMTP_HOST: str
-    SMTP_PORT: int
-    SMTP_USER: str
-    SMTP_PASSWORD: str
-    MAIL_FROM: str
+    # --- Outbound mail (optional) -----------------------------------------
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    MAIL_FROM: str = ""
 
     # --- Google OAuth ------------------------------------------------------
     GOOGLE_CLIENT_ID: str = ""
