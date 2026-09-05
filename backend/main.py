@@ -5,10 +5,10 @@ from fastapi import APIRouter, Depends, FastAPI, Request
 from app.exceptions import AppException
 from fastapi.responses import JSONResponse
 from app.api import (
-    auth_router, tenant_router, member_router, group_router, public_group_router,
-    event_router, announcement_router, request_router, notification_router,
-    certificate_router, public_certificate_router, ai_router, ledger_router,
-    insights_router, methods_router, participation_router, decision_router
+    auth_router, tenant_router, tenant_info_router, member_router, group_router,
+    public_group_router, event_router, announcement_router, request_router,
+    notification_router, certificate_router, public_certificate_router, ai_router,
+    ledger_router, insights_router, methods_router, participation_router, decision_router
 )
 from app.core.tenancy import verify_tenant_scope
 from fastapi.middleware.cors import CORSMiddleware
@@ -72,6 +72,7 @@ app.include_router(methods_router, prefix="/api")
 # that checks the {slug} in the URL against the tenant_id/tenant_slug claims
 # in the caller's JWT - see app/core/tenancy.py. Never trust the URL alone.
 tenant_api = APIRouter(prefix="/api/t/{slug}", dependencies=[Depends(verify_tenant_scope)])
+tenant_api.include_router(tenant_info_router)
 tenant_api.include_router(member_router)
 tenant_api.include_router(group_router)
 tenant_api.include_router(event_router)

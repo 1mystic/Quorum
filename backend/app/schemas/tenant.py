@@ -24,3 +24,14 @@ class TenantOnboardingResponse(BaseModel):
     vertical: str
     description: str
     message: str
+
+
+class TenantInfoResponse(BaseModel):
+    """What every authenticated tenant member needs to render the shell of
+    the app (name, vertical manifest to load, which Insight Packs are on)."""
+    name: str
+    slug: str
+    vertical: str
+    description: str | None
+    enabled_packs: list[str]
+    timezone: str

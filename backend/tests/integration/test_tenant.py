@@ -1,5 +1,7 @@
 import pytest
 
+from app.core.token import create_access_token
+
 
 @pytest.mark.asyncio
 async def test_onboarding_success(client, admin_token):
@@ -245,6 +247,76 @@ async def test_onboarding_unknown_vertical_fails(client, admin_token):
     )
     assert response.status_code == 422
     assert response.json()["message"] == "Unknown vertical"
+
+
+# ==== GET /api/t/{slug}/tenant (tenant identity for the frontend shell) ====
+
+@pytest.mark.asyncio
+async def test_get_tenant_info_as_member_success(client, member_token, seed_tenant):
+    """A MEMBER of the tenant can fetch its identity/config."""
+    response = await client.get(
+        f"/api/t/{seed_tenant.slug}/tenant",
+        headers={"Authorization": f"Bearer {member_token}"}
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["name"] == seed_tenant.name
+    assert body["slug"] == seed_tenant.slug
+    assert body["vertical"] == seed_tenant.vertical
+    assert body["description"] == seed_tenant.description
+    assert body["enabled_packs"] == seed_tenant.enabled_packs
+    assert body["timezone"] == seed_tenant.timezone
+
+
+@pytest.mark.asyncio
+async def test_get_tenant_info_as_tenant_admin_success(client, tenant_admin, seed_tenant):
+    """A TENANT_ADMIN of the tenant can fetch its identity/config too."""
+    response = await client.get(
+        f"/api/t/{seed_tenant.slug}/tenant",
+        headers=tenant_admin,
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["slug"] == seed_tenant.slug
+    assert body["vertical"] == seed_tenant.vertical
+
+
+@pytest.mark.asyncio
+async def test_get_tenant_info_cross_tenant_slug_mismatch_fails(client, member_token):
+    """A token issued for one tenant must not read another tenant's slug in the URL."""
+    response = await client.get(
+        "/api/t/some-other-tenant/tenant",
+        headers={"Authorization": f"Bearer {member_token}"}
+    )
+    assert response.status_code == 403
+    assert response.json()["message"] == "Tenant mismatch"
+
+
+@pytest.mark.asyncio
+async def test_get_tenant_info_unknown_slug_not_found(client):
+    """A token whose own tenant_slug claim matches the URL but whose tenant
+    no longer exists in the database 404s rather than leaking anything."""
+    ghost_token = create_access_token({
+        "sub": "999999",
+        "full_name": "Ghost Member",
+        "email": "ghost@nowhere.test",
+        "role": "MEMBER",
+        "tenant_id": 999999,
+        "tenant_slug": "ghost-tenant",
+    })
+    response = await client.get(
+        "/api/t/ghost-tenant/tenant",
+        headers={"Authorization": f"Bearer {ghost_token}"}
+    )
+    assert response.status_code == 404
+    assert response.json()["message"] == "Tenant not registered"
+
+
+@pytest.mark.asyncio
+async def test_get_tenant_info_without_token_fails(client, seed_tenant):
+    """Fetching tenant info is rejected when no authentication token is provided."""
+    response = await client.get(f"/api/t/{seed_tenant.slug}/tenant")
+    assert response.status_code == 401
 
 
 @pytest.mark.asyncio

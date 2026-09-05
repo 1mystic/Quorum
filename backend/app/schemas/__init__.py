@@ -3,7 +3,7 @@ from app.schemas.user import (
     ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse,
     GoogleAuthRequest, GoogleAuthResponse
 )
-from app.schemas.tenant import TenantOnboardingRequest, TenantOnboardingResponse
+from app.schemas.tenant import TenantOnboardingRequest, TenantOnboardingResponse, TenantInfoResponse
 from app.schemas.member import (
     MemberGroupItem, PublicMemberResponse, MemberProfileResponse,
     UpdateProfileRequest, UpdateProfileResponse

@@ -1,5 +1,5 @@
 from app.api.auth import auth_router
-from app.api.tenant import tenant_router
+from app.api.tenant import tenant_router, tenant_info_router
 from app.api.member import member_router
 from app.api.group import group_router, public_group_router
 from app.api.event import event_router

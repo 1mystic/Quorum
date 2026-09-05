@@ -1,6 +1,6 @@
 from app.repository import TenantRepository, UserRepository
-from app.exceptions import TenantAlreadyExistError
-from app.schemas import TenantOnboardingRequest, TenantOnboardingResponse
+from app.exceptions import TenantAlreadyExistError, TenantNotFoundError
+from app.schemas import TenantOnboardingRequest, TenantOnboardingResponse, TenantInfoResponse
 from app.core.messages import TenantMessages
 from app.verticals import get_manifest
 
@@ -36,4 +36,24 @@ class TenantService:
             vertical=new_tenant.vertical,
             description=new_tenant.description,
             message=TenantMessages.ONBOARDED,
+        )
+
+    async def get_info(self, tenant_id: int) -> TenantInfoResponse:
+        """Called under /api/t/{slug}/tenant, after verify_tenant_scope has
+        already matched the URL slug to the caller's JWT claim - tenant_id
+        here is trusted, not re-derived from the URL. A 404 here means the
+        tenant behind an otherwise-valid token no longer exists (deleted
+        after the token was issued), not a lookup by an attacker-controlled
+        slug."""
+        tenant = await self.tenant_repo.get_by_id(tenant_id)
+        if not tenant:
+            raise TenantNotFoundError()
+
+        return TenantInfoResponse(
+            name=tenant.name,
+            slug=tenant.slug,
+            vertical=tenant.vertical,
+            description=tenant.description,
+            enabled_packs=tenant.enabled_packs,
+            timezone=tenant.timezone,
         )
