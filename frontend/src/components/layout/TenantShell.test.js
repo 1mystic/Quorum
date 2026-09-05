@@ -1,11 +1,23 @@
-import { describe, test, expect } from 'vitest'
+import { describe, test, expect, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 import TenantShell from './TenantShell.vue'
 import { useAuthStore } from '../../stores/auth'
+import { getTenant } from '../../api/tenant'
+
+vi.mock('../../api/tenant', () => ({ getTenant: vi.fn() }))
 
 async function mountShell() {
+  getTenant.mockResolvedValue({
+    name: 'Vaikunth Heights',
+    slug: 'vaikunth-heights',
+    vertical: 'rwa_society',
+    description: '214 flats',
+    enabled_packs: ['reliability_ops', 'forecast_risk'],
+    timezone: 'Asia/Kolkata'
+  })
+
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -20,14 +32,13 @@ async function mountShell() {
   await router.isReady()
   const pinia = createPinia()
   setActivePinia(pinia)
-  return {
-    router,
-    wrapper: mount(TenantShell, {
-      props: { title: 'Overview' },
-      global: { plugins: [router, pinia] },
-      slots: { default: '<div>page content</div>' }
-    })
-  }
+  const wrapper = mount(TenantShell, {
+    props: { title: 'Overview' },
+    global: { plugins: [router, pinia] },
+    slots: { default: '<div>page content</div>' }
+  })
+  await flushPromises()
+  return { router, wrapper }
 }
 
 describe('TenantShell mobile nav drawer', () => {

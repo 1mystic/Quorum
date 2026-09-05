@@ -2,12 +2,13 @@
 import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Menu, X, ChevronRight, ChevronLeft, LogOut } from 'lucide-vue-next'
-import { tenantBySlug } from '../../fixtures/tenants'
+import { useTenant } from '../../composables/useTenant'
 import { assistantNav, coreNav, insightNav, adminNav } from '../../fixtures/nav'
 import { useAuthStore } from '../../stores/auth'
 import { useOverlayScrollbar } from '../../composables/useOverlayScrollbar'
 import RoleSwitcher from '../ui/RoleSwitcher.vue'
 import ThemeToggle from '../ui/ThemeToggle.vue'
+import TenantPending from './TenantPending.vue'
 
 // The dashboard shell every tenant-scoped page mounts inside: sidebar with
 // tenant switcher and nav groups, topbar with title/subtitle slots, content
@@ -31,7 +32,7 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 
 // Admin group only for a real TENANT_ADMIN session - a member would only
 // ever be redirected back out by the RBAC guard on click, so showing it at
@@ -184,7 +185,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="app">
+  <TenantPending v-if="!tenant" :loading="tenantLoading" :error="tenantError" />
+
+  <div v-else class="app">
     <div
       class="side-backdrop" :class="{ open: sidebarOpen }"
       aria-hidden="true"

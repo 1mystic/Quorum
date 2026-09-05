@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { startLoading, finishLoading } from '../composables/useLoadingBar'
 import { showRoleMismatch, dismissRoleMismatch } from '../composables/useRoleMismatch'
 import { useAuthStore } from '../stores/auth'
-import { tenantBySlug } from '../fixtures/tenants'
+import { useTenantStore } from '../stores/tenant'
 import { labelForRole } from '../fixtures/roles'
 
 const routes = [
@@ -123,8 +123,14 @@ router.beforeEach(function checkAccess(to) {
   const currentTier = auth.role === 'admin' ? 'admin' : 'member'
   if (TIER_RANK[currentTier] >= TIER_RANK[required]) return true
 
-  const tenant = tenantBySlug(to.params.slug)
-  const roleLabel = labelForRole(tenant ? tenant.vertical : 'rwa_society', auth.demoRole || 'resident')
+  // This guard only needs a vertical for the mismatch message's role label,
+  // never for access control - reading whatever TenantShell has already
+  // cached for this slug (it fetches on every tenant-scoped mount) avoids a
+  // second real fetch here; a cache miss falls back to the most common
+  // vertical rather than blocking the redirect on a network call.
+  const tenantStore = useTenantStore()
+  const cachedTenant = tenantStore.bySlug[to.params.slug]
+  const roleLabel = labelForRole(cachedTenant ? cachedTenant.vertical : 'rwa_society', auth.demoRole || 'resident')
   const message = `Viewing as ${roleLabel}. This page is ${required === 'admin' ? 'Admin' : 'Member'}-only, so you were sent back to the dashboard.`
 
   // eslint-disable-next-line no-console

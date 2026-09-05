@@ -73,13 +73,18 @@ export const useTenantStore = defineStore('tenant', {
     // slug currently loading, or '' when idle.
     loadingSlug: '',
     errorSlug: '',
-    errorMessage: ''
+    errorMessage: '',
+    // A view and the TenantShell it renders both call useTenant() with the
+    // same slug on the same mount - this dedupes the two into one real
+    // request rather than firing GET /tenant twice for one page load.
+    _pending: {}
   }),
 
   actions: {
-    async fetchTenant(slug, { force = false } = {}) {
-      if (!slug) return null
-      if (!force && this.bySlug[slug]) return this.bySlug[slug]
+    fetchTenant(slug, { force = false } = {}) {
+      if (!slug) return Promise.resolve(null)
+      if (!force && this.bySlug[slug]) return Promise.resolve(this.bySlug[slug])
+      if (!force && this._pending[slug]) return this._pending[slug]
 
       this.loadingSlug = slug
       if (this.errorSlug === slug) {
@@ -87,18 +92,24 @@ export const useTenantStore = defineStore('tenant', {
         this.errorMessage = ''
       }
 
-      try {
-        const raw = await getTenant(slug)
-        const enriched = enrich(raw)
-        this.bySlug = { ...this.bySlug, [slug]: enriched }
-        return enriched
-      } catch (err) {
-        this.errorSlug = slug
-        this.errorMessage = (err && err.message) || 'Could not load this tenant.'
-        return null
-      } finally {
-        if (this.loadingSlug === slug) this.loadingSlug = ''
-      }
+      const promise = getTenant(slug)
+        .then((raw) => {
+          const enriched = enrich(raw)
+          this.bySlug = { ...this.bySlug, [slug]: enriched }
+          return enriched
+        })
+        .catch((err) => {
+          this.errorSlug = slug
+          this.errorMessage = (err && err.message) || 'Could not load this tenant.'
+          return null
+        })
+        .finally(() => {
+          if (this.loadingSlug === slug) this.loadingSlug = ''
+          delete this._pending[slug]
+        })
+
+      this._pending[slug] = promise
+      return promise
     }
   }
 })
