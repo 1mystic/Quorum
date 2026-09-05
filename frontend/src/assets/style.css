@@ -2280,24 +2280,29 @@ html.qs-active::-webkit-scrollbar{
   max-width:48ch;
   margin:var(--sp4) auto var(--sp7);
 }
-.cta-band .btn-fill{
+/* .landing-body .btn-fill/.btn-line (below) share this same 2-class
+   specificity, so a plain .cta-band prefix loses the cascade tie on source
+   order alone - landing-body's light-page tokens were winning inside this
+   deliberately-always-dark band. Prefixing with .landing-body too keeps the
+   selector no less specific than what it must beat, permanently. */
+.landing-body .cta-band .btn-fill{
   background:var(--ink-inverse);
   color:var(--surface-inverse);
 }
-.cta-band .btn-fill::before{
+.landing-body .cta-band .btn-fill::before{
   background:var(--accent);
 }
-.cta-band .btn-fill:hover{
+.landing-body .cta-band .btn-fill:hover{
   color:var(--surface-inverse);
 }
-.cta-band .btn-line{
+.landing-body .cta-band .btn-line{
   border-color:color-mix(in srgb,var(--ink-inverse) 30%,transparent);
   color:color-mix(in srgb,var(--ink-inverse) 80%,transparent);
 }
-.cta-band .btn-line::before{
+.landing-body .cta-band .btn-line::before{
   background:color-mix(in srgb,var(--ink-inverse) 14%,transparent);
 }
-.cta-band .btn-line:hover{
+.landing-body .cta-band .btn-line:hover{
   color:var(--ink-inverse);
   border-color:var(--ink-inverse);
 }

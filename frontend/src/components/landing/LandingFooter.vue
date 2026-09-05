@@ -21,7 +21,6 @@ import { demoTenantList } from '../../fixtures/tenants'
           <ul>
             <li><a href="/#spine">The spine</a></li>
             <li><a href="/#packs">Insight packs</a></li>
-            <li><router-link :to="`/t/${demoTenantList[0].slug}/dashboard`">Dashboard</router-link></li>
             <li><router-link to="/methods">Method cards</router-link></li>
             <li><router-link to="/guide">Getting started</router-link></li>
             <li><router-link to="/about">About</router-link></li>
@@ -41,7 +40,7 @@ import { demoTenantList } from '../../fixtures/tenants'
           <h4>Rigour</h4>
           <ul>
             <li><a href="/#uncertainty">Censoring</a></li>
-            <li><router-link to="/methods/conformal.eta_calibration">Calibration</router-link></li>
+            <li><router-link to="/methods/calibration.reliability_diagram">Calibration</router-link></li>
             <li><router-link to="/methods/conformal.mondrian_eta">Conformal ETA</router-link></li>
             <li><router-link to="/methods/network.isolation_report">Privacy floor</router-link></li>
           </ul>
