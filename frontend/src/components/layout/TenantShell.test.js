@@ -113,3 +113,81 @@ describe('TenantShell tenant panel and sign-out', () => {
     expect(router.currentRoute.value.path).toBe('/login')
   })
 })
+
+describe('TenantShell loading and error states', () => {
+  async function mountWithoutFlush() {
+    let resolveFetch
+    getTenant.mockReturnValue(new Promise((resolve) => { resolveFetch = resolve }))
+
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/t/:slug/dashboard', component: { template: '<div>dashboard</div>' } },
+        { path: '/t/:slug/:pathMatch(.*)*', component: { template: '<div />' } },
+        { path: '/methods', component: { template: '<div />' } },
+        { path: '/login', component: { template: '<div />' } }
+      ]
+    })
+    router.push('/t/vaikunth-heights/dashboard')
+    await router.isReady()
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const wrapper = mount(TenantShell, {
+      props: { title: 'Overview' },
+      global: { plugins: [router, pinia] },
+      slots: { default: '<div>page content</div>' }
+    })
+    return { wrapper, resolveFetch }
+  }
+
+  test('renders the calm pending state, not the sidebar, while the fetch is in flight', async () => {
+    const { wrapper } = await mountWithoutFlush()
+    expect(wrapper.find('.tenant-pending').exists()).toBe(true)
+    expect(wrapper.find('.side').exists()).toBe(false)
+    expect(wrapper.find('.route-buffer-spinner').exists()).toBe(true)
+    expect(wrapper.text()).not.toContain('Could not load')
+  })
+
+  test('renders the sidebar once the fetch resolves, not before', async () => {
+    const { wrapper, resolveFetch } = await mountWithoutFlush()
+    resolveFetch({
+      name: 'Vaikunth Heights',
+      slug: 'vaikunth-heights',
+      vertical: 'rwa_society',
+      description: '214 flats',
+      enabled_packs: ['reliability_ops'],
+      timezone: 'Asia/Kolkata'
+    })
+    await flushPromises()
+    expect(wrapper.find('.tenant-pending').exists()).toBe(false)
+    expect(wrapper.find('.side').exists()).toBe(true)
+  })
+
+  test('a failed fetch renders the error state, not a crash on an undefined tenant', async () => {
+    getTenant.mockRejectedValue(new Error('Tenant not found'))
+
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/t/:slug/dashboard', component: { template: '<div>dashboard</div>' } },
+        { path: '/t/:slug/:pathMatch(.*)*', component: { template: '<div />' } },
+        { path: '/methods', component: { template: '<div />' } },
+        { path: '/login', component: { template: '<div />' } }
+      ]
+    })
+    router.push('/t/does-not-exist/dashboard')
+    await router.isReady()
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const wrapper = mount(TenantShell, {
+      props: { title: 'Overview' },
+      global: { plugins: [router, pinia] },
+      slots: { default: '<div>page content</div>' }
+    })
+    await flushPromises()
+
+    expect(wrapper.find('.side').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Could not load this tenant')
+    expect(wrapper.text()).toContain('Tenant not found')
+  })
+})
