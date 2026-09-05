@@ -2,8 +2,9 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
+import TenantPending from '../components/layout/TenantPending.vue'
 import AuditLine from '../components/evidence/AuditLine.vue'
-import { tenantBySlug } from '../fixtures/tenants'
+import { useTenant } from '../composables/useTenant'
 import { decisionById } from '../fixtures/decisions'
 
 // The mandatory Condorcet-cycle disclosure per docs/STATS_CATALOG.md's
@@ -18,7 +19,7 @@ import { decisionById } from '../fixtures/decisions'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 const decision = computed(() => decisionById(slug.value, route.params.id))
 const value = computed(() => decision.value?.evidence?.value || null)
 
@@ -31,8 +32,10 @@ function cell(a, b) {
 </script>
 
 <template>
+  <TenantPending v-if="!tenant" :loading="tenantLoading" :error="tenantError" />
+
   <TenantShell
-    v-if="decision" :title="decision.title" :subtitle="`${tenant.labels.decision} · ${decision.status}`"
+    v-else-if="decision" :title="decision.title" :subtitle="`${tenant.labels.decision} · ${decision.status}`"
     :back-to="`/t/${slug}/decisions`" back-label="Decisions"
   >
     <div v-if="!decision.evidence" class="card">

@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
-import { tenantBySlug } from '../fixtures/tenants'
 import { eventsFor } from '../fixtures/events'
 
 // TODO(frontend): still fixture-backed. GET/POST /api/t/{slug}/events is
@@ -12,7 +11,6 @@ import { eventsFor } from '../fixtures/events'
 // needs its own pass rather than a one-line swap.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
 const list = computed(() => eventsFor(slug.value))
 
 function fmt(iso) {

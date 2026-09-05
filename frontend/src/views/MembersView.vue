@@ -2,7 +2,8 @@
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
-import { tenantBySlug } from '../fixtures/tenants'
+import TenantPending from '../components/layout/TenantPending.vue'
+import { useTenant } from '../composables/useTenant'
 import { membersFor } from '../fixtures/members'
 
 // TODO(frontend): still fixture-backed. app/api/member.py has no "list all
@@ -10,7 +11,7 @@ import { membersFor } from '../fixtures/members'
 // single real endpoint this list maps onto; out of this session's scope.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 const list = computed(() => membersFor(slug.value))
 
 const q = ref('')
@@ -22,6 +23,7 @@ const filtered = computed(() => {
 </script>
 
 <template>
+  <template v-if="tenant">
   <TenantShell :title="tenant.labels.member + ' directory'" :subtitle="`${list.length} total`">
     <div class="card">
       <div class="field" style="max-width:320px">
@@ -53,4 +55,6 @@ const filtered = computed(() => {
       </div>
     </div>
   </TenantShell>
+  </template>
+  <TenantPending v-else :loading="tenantLoading" :error="tenantError" />
 </template>

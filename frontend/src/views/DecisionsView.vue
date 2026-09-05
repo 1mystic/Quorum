@@ -2,7 +2,8 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
-import { tenantBySlug } from '../fixtures/tenants'
+import TenantPending from '../components/layout/TenantPending.vue'
+import { useTenant } from '../composables/useTenant'
 import { decisionsFor } from '../fixtures/decisions'
 
 // Still fixture-backed. GET /api/t/{slug}/decisions is real
@@ -15,7 +16,7 @@ import { decisionsFor } from '../fixtures/decisions'
 // stay on fixtures together rather than half-wiring a broken cross-link.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 const list = computed(() => decisionsFor(slug.value))
 
 function fmt(iso) {
@@ -24,6 +25,7 @@ function fmt(iso) {
 </script>
 
 <template>
+  <template v-if="tenant">
   <TenantShell :title="tenant.labels.decision + 's'" :subtitle="`decision · ${list.length} total`">
     <div class="card">
       <div class="list">
@@ -42,4 +44,6 @@ function fmt(iso) {
       </div>
     </div>
   </TenantShell>
+  </template>
+  <TenantPending v-else :loading="tenantLoading" :error="tenantError" />
 </template>

@@ -2,7 +2,8 @@
 import { computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
-import { tenantBySlug } from '../fixtures/tenants'
+import TenantPending from '../components/layout/TenantPending.vue'
+import { useTenant } from '../composables/useTenant'
 import { toast } from '../composables/useToast'
 import { listMyRequests, resolveRequest, escalateRequest } from '../api/requests'
 import { useAsyncData } from '../composables/useAsyncData'
@@ -16,7 +17,7 @@ import { useAsyncData } from '../composables/useAsyncData'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 const requestId = computed(() => Number(route.params.ref))
 
 const { loading, error, data, run } = useAsyncData()
@@ -55,7 +56,9 @@ async function escalate() {
 </script>
 
 <template>
-  <TenantShell v-if="loading" title="Loading…">
+  <TenantPending v-if="!tenant" :loading="tenantLoading" :error="tenantError" />
+
+  <TenantShell v-else-if="loading" title="Loading…">
     <div class="empty-state"><h3>Loading…</h3></div>
   </TenantShell>
 

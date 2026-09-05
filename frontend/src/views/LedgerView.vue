@@ -2,8 +2,9 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
+import TenantPending from '../components/layout/TenantPending.vue'
 import StatTile from '../components/evidence/StatTile.vue'
-import { tenantBySlug } from '../fixtures/tenants'
+import { useTenant } from '../composables/useTenant'
 import { ledgerFor, formatMinor } from '../fixtures/ledger'
 import { toast } from '../composables/useToast'
 import { myDues, recordPayment } from '../api/ledger'
@@ -20,7 +21,7 @@ import { useAsyncData } from '../composables/useAsyncData'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 const ledger = computed(() => ledgerFor(slug.value))
 
 const markedPaid = ref(new Set())
@@ -67,8 +68,9 @@ function statusBadge(status) {
 </script>
 
 <template>
-  <TenantShell :title="tenant.labels.ledger" :subtitle="`ledger · ${ledger.summary.cycleLabel}`">
-    <div class="row r-4">
+  <template v-if="tenant">
+  <TenantShell :title="tenant.labels.ledger" :subtitle="ledger.summary ? `ledger · ${ledger.summary.cycleLabel}` : 'ledger'">
+    <div v-if="ledger.summary" class="row r-4">
       <StatTile
         title="Dues owed" :subtitle="`${ledger.summary.duesOwed.n} outstanding`"
         :evidence="ledger.summary.duesOwed" :formatter="(v) => formatMinor(v, ledger.summary.currency)"
@@ -91,6 +93,10 @@ function statusBadge(status) {
           <p>A receipt sitting uncollected at the treasurer's desk is the single most common reconciliation gap the interview evidence found. This is a Wilson interval on a proportion, not a raw percentage.</p>
         </template>
       </StatTile>
+    </div>
+    <div v-else class="card empty-state">
+      <h3>Not enough data yet</h3>
+      <p>This tenant has no materialized ledger summary to show yet.</p>
     </div>
 
     <div class="card">
@@ -160,4 +166,6 @@ function statusBadge(status) {
       </div>
     </div>
   </TenantShell>
+  </template>
+  <TenantPending v-else :loading="tenantLoading" :error="tenantError" />
 </template>

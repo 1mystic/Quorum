@@ -2,13 +2,14 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
-import { tenantBySlug } from '../fixtures/tenants'
+import TenantPending from '../components/layout/TenantPending.vue'
+import { useTenant } from '../composables/useTenant'
 import { eventById } from '../fixtures/events'
 import { formatMinor } from '../fixtures/ledger'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 const event = computed(() => eventById(slug.value, route.params.id))
 
 function fmt(iso) {
@@ -22,8 +23,10 @@ const noShowRate = computed(() => {
 </script>
 
 <template>
+  <TenantPending v-if="!tenant" :loading="tenantLoading" :error="tenantError" />
+
   <TenantShell
-    v-if="event" :title="event.title" :subtitle="`${fmt(event.starts_at)} · ${event.location}`"
+    v-else-if="event" :title="event.title" :subtitle="`${fmt(event.starts_at)} · ${event.location}`"
     :back-to="`/t/${slug}/events`" back-label="Events"
   >
     <div class="row r-4">

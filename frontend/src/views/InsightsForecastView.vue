@@ -6,29 +6,32 @@ import StatTile from '../components/evidence/StatTile.vue'
 import AuditLine from '../components/evidence/AuditLine.vue'
 import WhyDisclosure from '../components/evidence/WhyDisclosure.vue'
 import { renderState } from '../utils/evidence'
-import { tenantBySlug } from '../fixtures/tenants'
 import { forecastPack } from '../fixtures/insights'
 
 // TODO(frontend): still fixture-backed, same reason as
 // InsightsOperationsView.vue - the real endpoint exists, no seeded tenant
-// data does yet.
+// data does yet. `pack` is null for a real, non-demo tenant.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
-const pack = computed(() => forecastPack[slug.value])
+const pack = computed(() => forecastPack[slug.value] || null)
 
-const forecastEvidence = computed(() => pack.value.forecast.evidence)
-const forecastState = computed(() => renderState(forecastEvidence.value))
-const history = computed(() => forecastEvidence.value.value?.history || [])
-const forecastPoint = computed(() => forecastEvidence.value.value?.forecast?.[0])
+const forecastEvidence = computed(() => (pack.value ? pack.value.forecast.evidence : null))
+const forecastState = computed(() => (forecastEvidence.value ? renderState(forecastEvidence.value) : ''))
+const history = computed(() => forecastEvidence.value?.value?.history || [])
+const forecastPoint = computed(() => forecastEvidence.value?.value?.forecast?.[0])
 
-const buckets = computed(() => pack.value.etaDistribution.evidence.value?.buckets || [])
+const buckets = computed(() => (pack.value ? pack.value.etaDistribution.evidence.value?.buckets || [] : []))
 const maxBucket = computed(() => Math.max(1, ...buckets.value.map((b) => b.n)))
 </script>
 
 <template>
   <TenantShell title="Forecast" subtitle="Pack 03 · Foresight" as-of="insight_run · contract v1">
-    <div class="row r-32">
+    <div v-if="!pack" class="card empty-state">
+      <h3>Not enough data yet</h3>
+      <p>This tenant has no materialized forecast insights to show yet.</p>
+    </div>
+
+    <div v-else class="row r-32">
       <div class="card">
         <div class="chead">
           <div><h3>{{ pack.forecast.title }}</h3><div class="sub">{{ pack.forecast.subtitle }}</div></div>
@@ -68,7 +71,7 @@ const maxBucket = computed(() => Math.max(1, ...buckets.value.map((b) => b.n)))
       </StatTile>
     </div>
 
-    <div class="card">
+    <div v-if="pack" class="card">
       <div class="chead"><div><h3>{{ pack.etaDistribution.title }}</h3><div class="sub">{{ pack.etaDistribution.subtitle }}</div></div></div>
       <div style="display:flex;align-items:flex-end;gap:var(--sp4);height:140px">
         <div v-for="b in buckets" :key="b.label" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;justify-content:flex-end;height:100%">

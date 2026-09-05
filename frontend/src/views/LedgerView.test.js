@@ -1,11 +1,23 @@
-import { describe, test, expect } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { describe, test, expect, vi } from 'vitest'
+import { mount, flushPromises } from '@vue/test-utils'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { createPinia } from 'pinia'
 import LedgerView from './LedgerView.vue'
 import { useToastState } from '../composables/useToast'
+import { getTenant } from '../api/tenant'
+
+vi.mock('../api/tenant', () => ({ getTenant: vi.fn() }))
 
 async function mountAt(path) {
+  getTenant.mockResolvedValue({
+    name: 'Vaikunth Heights',
+    slug: 'vaikunth-heights',
+    vertical: 'rwa_society',
+    description: '214 flats',
+    enabled_packs: ['reliability_ops', 'forecast_risk'],
+    timezone: 'Asia/Kolkata'
+  })
+
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -17,7 +29,9 @@ async function mountAt(path) {
   })
   router.push(path)
   await router.isReady()
-  return mount(LedgerView, { global: { plugins: [router, createPinia()] } })
+  const wrapper = mount(LedgerView, { global: { plugins: [router, createPinia()] } })
+  await flushPromises()
+  return wrapper
 }
 
 describe('LedgerView mark-paid flow', () => {

@@ -1,8 +1,10 @@
 <script setup>
-import { computed, reactive } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
-import { tenantBySlug, packMeta } from '../fixtures/tenants'
+import TenantPending from '../components/layout/TenantPending.vue'
+import { packMeta } from '../fixtures/tenants'
+import { useTenant } from '../composables/useTenant'
 import { toast } from '../composables/useToast'
 
 // PUT /api/t/{slug}/insights/packs/{pack_id} per docs/STATS_API.md §4:
@@ -12,12 +14,18 @@ import { toast } from '../composables/useToast'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 
 const allPacks = ['reliability_ops', 'forecast_risk', 'bayes_ranking', 'governance_insight']
 
 const toggles = reactive({})
-allPacks.forEach((p) => { toggles[p] = tenant.value.enabled_packs.includes(p) })
+// Seeded once the real tenant identity arrives, not at ref/reactive
+// creation time - `tenant` is asynchronous now, unlike the old
+// tenantBySlug(...) fixture lookup this replaced.
+watch(tenant, (t) => {
+  if (!t) return
+  allPacks.forEach((p) => { toggles[p] = t.enabled_packs.includes(p) })
+}, { immediate: true })
 
 function toggle(packId) {
   toggles[packId] = !toggles[packId]
@@ -30,6 +38,7 @@ function isAvailable(packId) {
 </script>
 
 <template>
+  <template v-if="tenant">
   <TenantShell title="Settings" :subtitle="`${tenant.name} · ${tenant.vertical}`">
     <div class="card">
       <div class="chead"><div><h3>Insight packs</h3><div class="sub">a pack is only offered when its required streams are supported</div></div></div>
@@ -61,4 +70,6 @@ function isAvailable(packId) {
       <p style="font-size:13.5px;color:var(--ink-3)">Vocabulary, categories, roles and privacy floors for this vertical are configuration, not code, per docs/VERTICALS.md. Changing the vertical after go-live is not supported from this screen.</p>
     </div>
   </TenantShell>
+  </template>
+  <TenantPending v-else :loading="tenantLoading" :error="tenantError" />
 </template>

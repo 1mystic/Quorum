@@ -3,10 +3,12 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { PlusCircle, Sparkles, Wallet, CalendarCheck, ClipboardCheck, ListChecks, Settings } from 'lucide-vue-next'
 import TenantShell from '../components/layout/TenantShell.vue'
+import TenantPending from '../components/layout/TenantPending.vue'
 import GettingStartedCard from '../components/layout/GettingStartedCard.vue'
 import StatTile from '../components/evidence/StatTile.vue'
 import SurvivalCurve from '../components/evidence/SurvivalCurve.vue'
-import { tenantBySlug, packMeta } from '../fixtures/tenants'
+import { useTenant } from '../composables/useTenant'
+import { packMeta } from '../fixtures/tenants'
 import { operationsPack, forecastPack } from '../fixtures/insights'
 import { ledgerSummary } from '../fixtures/ledger'
 import { requestsFor } from '../fixtures/requests'
@@ -23,13 +25,18 @@ import { useAuthStore } from '../stores/auth'
 const route = useRoute()
 const auth = useAuthStore()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 
-const ops = computed(() => operationsPack[slug.value])
-const forecast = computed(() => forecastPack[slug.value])
-const ledger = computed(() => ledgerSummary[slug.value])
+// These three packs are still hand-written fixtures keyed by the two demo
+// slugs only (docs/CONTEXT.md's "depth pass" TODO), so a real tenant this
+// session onboarded or signed into has no entry here - `|| null` plus the
+// template's own v-if is what keeps that a calm "not ready yet" panel
+// instead of the exact `ops.value.tiles[3]` crash this bug report named.
+const ops = computed(() => operationsPack[slug.value] || null)
+const forecast = computed(() => forecastPack[slug.value] || null)
+const ledger = computed(() => ledgerSummary[slug.value] || null)
 
-const fourthOpsTile = computed(() => ops.value.tiles[3])
+const fourthOpsTile = computed(() => (ops.value ? ops.value.tiles[3] : null))
 const recentRequests = computed(() => requestsFor(slug.value).slice(0, 4))
 
 // Role-aware shortcuts to the handful of things a session actually does day
@@ -42,7 +49,7 @@ const recentRequests = computed(() => requestsFor(slug.value).slice(0, 4))
 // one of only four slots, so it stays a sidebar/Decisions-page action, not
 // a dashboard shortcut.
 const upcomingEvent = computed(() => eventsFor(slug.value).find((e) => e.status === 'upcoming'))
-const duesOwed = computed(() => ledger.value.duesOwed)
+const duesOwed = computed(() => (ledger.value ? ledger.value.duesOwed : null))
 const pendingApprovals = computed(() => membersFor(slug.value).filter((m) => m.status === 'pending').length)
 const openRequestQueue = computed(() => requestsFor(slug.value).filter((r) => r.status !== 'resolved' && r.status !== 'closed').length)
 
@@ -91,6 +98,7 @@ function fmtDate(iso) {
 </script>
 
 <template>
+  <template v-if="tenant">
   <TenantShell title="Overview" :subtitle="`${tenant.name} · ${tenant.tagline}`" as-of="insight_run · contract v1">
     <GettingStartedCard :slug="slug" :request-label="tenant.labels.request" />
 
@@ -104,41 +112,48 @@ function fmtDate(iso) {
       </router-link>
     </div>
 
-    <div class="row r-4">
-      <StatTile :title="ops.tiles[0].title" :subtitle="ops.tiles[0].subtitle" :evidence="ops.tiles[0].evidence">
-        <template v-if="ops.tiles[0].why" #why><p>{{ ops.tiles[0].why }}</p></template>
-      </StatTile>
-      <StatTile :title="`${tenant.labels.ledger} receipt gap`" subtitle="share of receipts never collected" :evidence="ledger.receiptGap">
-        <template #why><p>Payment is bank transfer, WhatsApp screenshot and manual treasurer verification, so a receipt issued is not always a receipt collected. This is the honest share that goes uncollected, with a Wilson interval, not an average.</p></template>
-      </StatTile>
-      <StatTile :title="fourthOpsTile.title" :subtitle="fourthOpsTile.subtitle" :evidence="fourthOpsTile.evidence">
-        <template v-if="fourthOpsTile.why" #why><p>{{ fourthOpsTile.why }}</p></template>
-      </StatTile>
-      <StatTile :title="forecast.calibration.title" :subtitle="forecast.calibration.subtitle" :evidence="forecast.calibration.evidence">
-        <template #why><p>{{ forecast.calibration.why }}</p></template>
-      </StatTile>
-    </div>
-
-    <div class="row r-32">
-      <SurvivalCurve :title="ops.survival.title" :subtitle="ops.survival.subtitle" :evidence="ops.survival.evidence" />
-
-      <div class="card">
-        <div class="chead">
-          <div><h3>Recent {{ tenant.labels.request.toLowerCase() }}s</h3><div class="sub">latest activity, request_flow</div></div>
-        </div>
-        <div class="list">
-          <router-link v-for="r in recentRequests" :key="r.ref" class="list-row" :to="`/t/${slug}/requests/${r.ref}`">
-            <div class="lr-main">
-              <div class="lr-title">{{ r.title }}</div>
-              <div class="lr-sub">{{ r.ref }} · {{ r.category.replace(/_/g, ' ') }} · opened {{ fmtDate(r.opened_at) }}</div>
-            </div>
-            <div class="lr-meta">
-              <span :class="badgeClass(r.status)">{{ r.status.replace('_', ' ') }}</span>
-            </div>
-          </router-link>
-        </div>
-        <router-link class="tl" :to="`/t/${slug}/requests`">All {{ tenant.labels.request.toLowerCase() }}s</router-link>
+    <template v-if="ops && forecast && ledger">
+      <div class="row r-4">
+        <StatTile :title="ops.tiles[0].title" :subtitle="ops.tiles[0].subtitle" :evidence="ops.tiles[0].evidence">
+          <template v-if="ops.tiles[0].why" #why><p>{{ ops.tiles[0].why }}</p></template>
+        </StatTile>
+        <StatTile :title="`${tenant.labels.ledger} receipt gap`" subtitle="share of receipts never collected" :evidence="ledger.receiptGap">
+          <template #why><p>Payment is bank transfer, WhatsApp screenshot and manual treasurer verification, so a receipt issued is not always a receipt collected. This is the honest share that goes uncollected, with a Wilson interval, not an average.</p></template>
+        </StatTile>
+        <StatTile :title="fourthOpsTile.title" :subtitle="fourthOpsTile.subtitle" :evidence="fourthOpsTile.evidence">
+          <template v-if="fourthOpsTile.why" #why><p>{{ fourthOpsTile.why }}</p></template>
+        </StatTile>
+        <StatTile :title="forecast.calibration.title" :subtitle="forecast.calibration.subtitle" :evidence="forecast.calibration.evidence">
+          <template #why><p>{{ forecast.calibration.why }}</p></template>
+        </StatTile>
       </div>
+
+      <div class="row r-32">
+        <SurvivalCurve :title="ops.survival.title" :subtitle="ops.survival.subtitle" :evidence="ops.survival.evidence" />
+
+        <div class="card">
+          <div class="chead">
+            <div><h3>Recent {{ tenant.labels.request.toLowerCase() }}s</h3><div class="sub">latest activity, request_flow</div></div>
+          </div>
+          <div class="list">
+            <router-link v-for="r in recentRequests" :key="r.ref" class="list-row" :to="`/t/${slug}/requests/${r.ref}`">
+              <div class="lr-main">
+                <div class="lr-title">{{ r.title }}</div>
+                <div class="lr-sub">{{ r.ref }} · {{ r.category.replace(/_/g, ' ') }} · opened {{ fmtDate(r.opened_at) }}</div>
+              </div>
+              <div class="lr-meta">
+                <span :class="badgeClass(r.status)">{{ r.status.replace('_', ' ') }}</span>
+              </div>
+            </router-link>
+          </div>
+          <router-link class="tl" :to="`/t/${slug}/requests`">All {{ tenant.labels.request.toLowerCase() }}s</router-link>
+        </div>
+      </div>
+    </template>
+
+    <div v-else class="card empty-state">
+      <h3>Not enough data yet</h3>
+      <p>This tenant has no materialized insights to show on the overview yet. Headline figures appear here once enough activity has been recorded.</p>
     </div>
 
     <div class="row r-4">
@@ -151,4 +166,7 @@ function fmtDate(iso) {
       </router-link>
     </div>
   </TenantShell>
+  </template>
+  <TenantPending v-else :loading="tenantLoading" :error="tenantError" />
 </template>
+

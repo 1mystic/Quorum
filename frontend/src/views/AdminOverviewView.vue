@@ -2,7 +2,8 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
-import { tenantBySlug } from '../fixtures/tenants'
+import TenantPending from '../components/layout/TenantPending.vue'
+import { useTenant } from '../composables/useTenant'
 import { requestsFor, requestStatuses } from '../fixtures/requests'
 
 // TODO(frontend): still fixture-backed. This tenant-wide breakdown needs
@@ -12,7 +13,7 @@ import { requestsFor, requestStatuses } from '../fixtures/requests'
 // of this session's scope.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 const all = computed(() => requestsFor(slug.value))
 
 const byStatus = computed(() => {
@@ -30,6 +31,7 @@ const byCategory = computed(() => {
 </script>
 
 <template>
+  <template v-if="tenant">
   <TenantShell title="Oversight" :subtitle="`all ${tenant.labels.request.toLowerCase()}s across categories`">
     <div class="row r-4">
       <div v-for="s in requestStatuses" :key="s" class="card">
@@ -68,4 +70,6 @@ const byCategory = computed(() => {
       </div>
     </div>
   </TenantShell>
+  </template>
+  <TenantPending v-else :loading="tenantLoading" :error="tenantError" />
 </template>

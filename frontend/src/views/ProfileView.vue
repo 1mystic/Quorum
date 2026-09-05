@@ -2,8 +2,9 @@
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
+import TenantPending from '../components/layout/TenantPending.vue'
 import SelectField from '../components/ui/SelectField.vue'
-import { tenantBySlug } from '../fixtures/tenants'
+import { useTenant } from '../composables/useTenant'
 import { useAuthStore } from '../stores/auth'
 import { toast } from '../composables/useToast'
 
@@ -16,7 +17,7 @@ import { toast } from '../composables/useToast'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 const auth = useAuthStore()
 
 const channel = ref('app')
@@ -33,6 +34,7 @@ function save() {
 </script>
 
 <template>
+  <template v-if="tenant">
   <TenantShell title="Profile" :subtitle="tenant.name">
     <div class="row r-32">
       <div class="card">
@@ -60,4 +62,6 @@ function save() {
       </div>
     </div>
   </TenantShell>
+  </template>
+  <TenantPending v-else :loading="tenantLoading" :error="tenantError" />
 </template>

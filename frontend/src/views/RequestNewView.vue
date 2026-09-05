@@ -1,9 +1,10 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
+import TenantPending from '../components/layout/TenantPending.vue'
 import SelectField from '../components/ui/SelectField.vue'
-import { tenantBySlug } from '../fixtures/tenants'
+import { useTenant } from '../composables/useTenant'
 import { toast } from '../composables/useToast'
 import { raiseRequest } from '../api/requests'
 import { myApprovedGroups } from '../api/groups'
@@ -18,14 +19,14 @@ import { ApiError, NetworkError } from '../api/client'
 const route = useRoute()
 const router = useRouter()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 
-const categoryOptions = computed(() => tenant.value.requestCategories.map((c) => ({ value: c, label: c.replace(/_/g, ' ') })))
-const priorityOptions = computed(() => tenant.value.requestPriorities.map((p) => ({ value: p, label: p.replace(/_/g, ' ') })))
+const categoryOptions = computed(() => (tenant.value ? tenant.value.requestCategories.map((c) => ({ value: c, label: c.replace(/_/g, ' ') })) : []))
+const priorityOptions = computed(() => (tenant.value ? tenant.value.requestPriorities.map((p) => ({ value: p, label: p.replace(/_/g, ' ') })) : []))
 
 const title = ref('')
-const category = ref(tenant.value.requestCategories[0])
-const priority = ref(tenant.value.requestPriorities[0])
+const category = ref('')
+const priority = ref('')
 const location = ref('')
 const description = ref('')
 const submitting = ref(false)
@@ -35,6 +36,16 @@ const groups = ref([])
 const groupsLoading = ref(true)
 const groupId = ref(null)
 const groupOptions = computed(() => groups.value.map((g) => ({ value: g.id, label: g.name })))
+
+// Category/priority default to the vertical's first option once the real
+// tenant identity arrives - it is not known synchronously any more, so
+// these can no longer be seeded at ref() creation time the way the old
+// tenantBySlug(...) fixture lookup allowed.
+watch(tenant, (t) => {
+  if (!t) return
+  if (!category.value) category.value = t.requestCategories[0]
+  if (!priority.value) priority.value = t.requestPriorities[0]
+}, { immediate: true })
 
 onMounted(async () => {
   try {
@@ -78,6 +89,7 @@ async function submit() {
 </script>
 
 <template>
+  <template v-if="tenant">
   <TenantShell :title="`Raise a ${tenant.labels.request.toLowerCase()}`" subtitle="request_flow">
     <div class="card" style="max-width:640px">
       <p v-if="errorMessage" class="form-error">{{ errorMessage }}</p>
@@ -125,4 +137,6 @@ async function submit() {
       </form>
     </div>
   </TenantShell>
+  </template>
+  <TenantPending v-else :loading="tenantLoading" :error="tenantError" />
 </template>

@@ -4,17 +4,16 @@ import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
 import AuditLine from '../components/evidence/AuditLine.vue'
 import WhyDisclosure from '../components/evidence/WhyDisclosure.vue'
-import { tenantBySlug } from '../fixtures/tenants'
 import { comparisonPack } from '../fixtures/insights'
 
 // TODO(frontend): still fixture-backed. Pack 2 (bayes_ranking) has no
 // implemented statistician services yet at all (CONTEXT.md), so this pack
-// specifically has nothing real to call.
+// specifically has nothing real to call. `comparisonPack` is keyed by the
+// two demo slugs only, so a real tenant has no entry and `board` is null.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
-const board = computed(() => comparisonPack[slug.value].leaderboard)
-const rows = computed(() => board.value.evidence.value.rows)
+const board = computed(() => comparisonPack[slug.value]?.leaderboard || null)
+const rows = computed(() => (board.value ? board.value.evidence.value.rows : []))
 
 function pct(x) {
   return (x * 100).toFixed(1) + '%'
@@ -23,7 +22,12 @@ function pct(x) {
 
 <template>
   <TenantShell title="Leaderboard" subtitle="Pack 02 · Comparison" as-of="insight_run · contract v1">
-    <div class="row" style="grid-template-columns:1fr">
+    <div v-if="!board" class="card empty-state">
+      <h3>Not enough data yet</h3>
+      <p>This tenant has no materialized comparison insights to show yet.</p>
+    </div>
+
+    <div v-else class="row" style="grid-template-columns:1fr">
       <div class="card">
         <div class="chead">
           <div><h3>{{ board.title }}</h3><div class="sub">{{ board.subtitle }}</div></div>

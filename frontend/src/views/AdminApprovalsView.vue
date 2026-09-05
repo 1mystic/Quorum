@@ -2,7 +2,8 @@
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
-import { tenantBySlug } from '../fixtures/tenants'
+import TenantPending from '../components/layout/TenantPending.vue'
+import { useTenant } from '../composables/useTenant'
 import { membersFor } from '../fixtures/members'
 import { toast } from '../composables/useToast'
 
@@ -11,7 +12,7 @@ import { toast } from '../composables/useToast'
 // tenant-wide the way this page lists pending approvals; out of scope.
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 const pending = ref(membersFor(slug.value).filter((m) => m.status === 'pending'))
 
 function approve(m) {
@@ -25,6 +26,7 @@ function reject(m) {
 </script>
 
 <template>
+  <template v-if="tenant">
   <TenantShell title="Approvals" :subtitle="`${tenant.labels.member.toLowerCase()} join requests · ${pending.length} pending`">
     <div class="card">
       <div v-if="!pending.length" class="empty-state">
@@ -45,4 +47,6 @@ function reject(m) {
       </div>
     </div>
   </TenantShell>
+  </template>
+  <TenantPending v-else :loading="tenantLoading" :error="tenantError" />
 </template>

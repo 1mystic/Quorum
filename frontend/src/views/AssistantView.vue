@@ -3,7 +3,8 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Send, Sparkles, ShieldCheck, ShieldOff, Wifi } from 'lucide-vue-next'
 import TenantShell from '../components/layout/TenantShell.vue'
-import { tenantBySlug } from '../fixtures/tenants'
+import TenantPending from '../components/layout/TenantPending.vue'
+import { useTenant } from '../composables/useTenant'
 import { chat } from '../api/ai'
 import { ApiError, NetworkError } from '../api/client'
 import { toast } from '../composables/useToast'
@@ -19,7 +20,7 @@ import { toast } from '../composables/useToast'
 const route = useRoute()
 const router = useRouter()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 
 const suggestions = [
   'What groups match my interests?',
@@ -203,6 +204,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <template v-if="tenant">
   <TenantShell title="Assistant" :subtitle="`ask ${tenant.name} anything about groups and events`">
     <div class="row r-32 assistant-layout">
       <div class="card assistant-card">
@@ -306,4 +308,6 @@ onMounted(() => {
       </div>
     </div>
   </TenantShell>
+  </template>
+  <TenantPending v-else :loading="tenantLoading" :error="tenantError" />
 </template>

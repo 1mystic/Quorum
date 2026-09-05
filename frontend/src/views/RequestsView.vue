@@ -2,7 +2,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import TenantShell from '../components/layout/TenantShell.vue'
-import { tenantBySlug } from '../fixtures/tenants'
+import TenantPending from '../components/layout/TenantPending.vue'
+import { useTenant } from '../composables/useTenant'
 import { listMyRequests } from '../api/requests'
 import { useAsyncData } from '../composables/useAsyncData'
 
@@ -14,7 +15,7 @@ import { useAsyncData } from '../composables/useAsyncData'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug)
-const tenant = computed(() => tenantBySlug(slug.value))
+const { tenant, loading: tenantLoading, error: tenantError } = useTenant(slug)
 
 // Matches app/models/request.py's RequestStatus exactly, lowercased for
 // display; "closed" from the old fixture list is not a real backend status
@@ -53,6 +54,7 @@ function fmtDate(iso) {
 </script>
 
 <template>
+  <template v-if="tenant">
   <TenantShell :title="tenant.labels.request + 's'" :subtitle="`request_flow · ${requests.length} total`">
     <template #actions>
       <router-link class="btn btn-primary" :to="`/t/${slug}/requests/new`"><span>Raise a {{ tenant.labels.request.toLowerCase() }}</span></router-link>
@@ -98,4 +100,6 @@ function fmtDate(iso) {
       </div>
     </div>
   </TenantShell>
+  </template>
+  <TenantPending v-else :loading="tenantLoading" :error="tenantError" />
 </template>
